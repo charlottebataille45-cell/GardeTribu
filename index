@@ -38,7 +38,6 @@
 
     .event-card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; gap: 12px; position: relative; }
     .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15); }
-    .badge-upcoming { background: #3B82F6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
     .badge-encours { background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 
     .event-color-bar { width: 5px; border-radius: 4px; flex-shrink: 0; }
@@ -132,8 +131,8 @@
   <button class="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
 
   <!-- Modale Édition / Création -->
-  <div class="modal-overlay" id="modalEvt">
-    <div class="modal">
+  <div class="modal-overlay" id="modalEvt" onclick="fermerSiClickExterieur(event, 'modalEvt')">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-title" id="modalTitle">Nouvel Événement</div>
         <button class="close-btn" onclick="fermerModal()">×</button>
@@ -237,8 +236,8 @@
   </div>
 
   <!-- Modale Conflit -->
-  <div class="modal-overlay" id="modalConflit" style="z-index: 1100;">
-    <div class="modal" style="max-width: 420px;">
+  <div class="modal-overlay" id="modalConflit" style="z-index: 1100;" onclick="fermerSiClickExterieur(event, 'modalConflit')">
+    <div class="modal" style="max-width: 420px;" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-title" id="conflitTitle">Attention</div>
         <button class="close-btn" onclick="fermerModalConflit()">×</button>
@@ -250,8 +249,8 @@
   </div>
 
   <!-- Modale Suppression -->
-  <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;">
-    <div class="modal" style="max-width: 420px;">
+  <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;" onclick="fermerSiClickExterieur(event, 'modalSuppression')">
+    <div class="modal" style="max-width: 420px;" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-title">Confirmer la suppression</div>
         <button class="close-btn" onclick="fermerModalSuppression()">×</button>
@@ -267,7 +266,7 @@
   </div>
 
   <script>
-    // URL de ton application web Google Apps Script
+    // ⚠️ METS À JOUR CETTE URL avec l'URL de ton nouveau déploiement Web App ⚠️
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     let donneesBrutes = [];
@@ -290,19 +289,26 @@
     let enfantsListe = [];
     let enfantsInfo = {};
 
-    window.onload = () => {
-      chargerDonnees();
-      chargerReferences();
+    // Synchronisation forcée pour éviter l'écran blanc
+    window.onload = async () => {
+      try {
+        await chargerReferences();
+        await chargerDonnees();
+      } catch(err) {
+        document.getElementById('loader').innerText = "Erreur de connexion à la base de données. " + err;
+      }
     };
 
     async function apiFetchGet(action) {
       const response = await fetch(`${APPS_SCRIPT_URL}?action=${action}`);
+      if (!response.ok) throw new Error("Network response was not ok");
       return await response.json();
     }
 
     async function apiFetchPost(action, payload) {
       const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: action, payload: payload })
       });
       return await response.json();
@@ -331,39 +337,36 @@
         document.getElementById('loader').style.display = 'none';
         afficherTimeline();
       } catch (e) {
-        document.getElementById('loader').innerText = "Erreur de chargement des données.";
+        document.getElementById('loader').innerText = "Erreur lors de la lecture du planning.";
       }
     }
 
     async function chargerReferences() {
-      try {
-        const refs = await apiFetchGet('getRef');
-        refEnfants = refs.enfants || [];
-        refTypes = refs.types || [];
-        refResponsables = refs.responsables || [];
-        refIntervenantsObjets = refs.intervenantsObjets || [];
-        refPeriodes = refs.periodes || [];
+      const refs = await apiFetchGet('getRef');
+      refEnfants = refs.enfants || [];
+      refTypes = refs.types || [];
+      refResponsables = refs.responsables || [];
+      refIntervenantsObjets = refs.intervenantsObjets || [];
+      refPeriodes = refs.periodes || [];
 
-        enfantsInfo = {};
-        enfantsListe = [];
-        refEnfants.forEach(e => {
-          if (e.actif === 'Oui' || !e.actif) {
-            enfantsInfo[e.prenom] = { id: e.id, color: e.couleur || '#64748B', emoji: e.emoji || '👤' };
-            enfantsListe.push(e.prenom);
-          }
-        });
-
-        if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-          enfantsModalSelectionnes = [enfantsListe[0]];
+      enfantsInfo = {};
+      enfantsListe = [];
+      refEnfants.forEach(e => {
+        if (e.actif === 'Oui' || !e.actif) {
+          enfantsInfo[e.prenom] = { id: e.id, color: e.couleur || '#64748B', emoji: e.emoji || '👤' };
+          enfantsListe.push(e.prenom);
         }
+      });
 
-        genererFiltresEnfants();
-        genererSelectorEnfantsModal();
-        majSelectsModal();
-        genererFiltresIntervenants();
-        genererFiltresPeriodes();
-        afficherTimeline();
-      } catch (e) {}
+      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
+        enfantsModalSelectionnes = [enfantsListe[0]];
+      }
+
+      genererFiltresEnfants();
+      genererSelectorEnfantsModal();
+      majSelectsModal();
+      genererFiltresIntervenants();
+      genererFiltresPeriodes();
     }
 
     function genererFiltresEnfants() {
@@ -733,6 +736,7 @@
     }
 
     function fermerModal() { document.getElementById("modalEvt").style.display = "none"; }
+    function fermerSiClickExterieur(event, idModal) { if (event.target.id === idModal) document.getElementById(idModal).style.display = "none"; }
 
     function editerEvenement(id) {
       const evt = donneesBrutes.find(e => String(e.id).trim() === String(id).trim());
