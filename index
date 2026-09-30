@@ -123,7 +123,7 @@
   <header>
     <div class="header-top">
       <h1>🐢 La Tribu</h1>
-      <button class="btn-toggle-filters" onclick="toggleFilters()">
+      <butclass="btn-toggle-filters" onclick="toggleFilters()">
         <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
         <span>Filtres</span>
         <span class="material-symbols-outlined" id="arrowFilter" style="font-size:16px;">expand_more</span>
@@ -166,14 +166,14 @@
     <div id="timeline"></div>
   </div>
 
-  <button class="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
+  <butclass="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
 
   <!-- Modale Édition / Création -->
   <div class="modal-overlay" id="modalEvt">
     <div class="modal">
       <div class="modal-header">
         <div class="modal-title" id="modalTitle">Nouvel Événement</div>
-        <button class="close-btn" onclick="fermerModal()">×</button>
+        <butclass="close-btn" onclick="fermerModal()">×</button>
       </div>
 
       <input type="hidden" id="formId">
@@ -278,8 +278,8 @@
         </div>
       </div>
 
-      <button class="btn-submit" id="btnSubmit" onclick="soumettre()">Enregistrer</button>
-      <button class="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer cet événement</button>
+      <butclass="btn-submit" id="btnSubmit" onclick="soumettre()">Enregistrer</button>
+      <butclass="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer cet événement</button>
     </div>
   </div>
 
@@ -288,12 +288,12 @@
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="conflitTitle">Attention aux chevauchements</div>
-        <button class="close-btn" onclick="fermerModalConflit()">×</button>
+        <butclass="close-btn" onclick="fermerModalConflit()">×</button>
       </div>
       <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5;"></div>
       <div style="display: flex; gap: 10px; flex-direction: column;">
-        <button class="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
-        <button class="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
+        <butclass="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
+        <butclass="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
       </div>
     </div>
   </div>
@@ -303,7 +303,7 @@
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="supprModalTitle">Confirmer la suppression</div>
-        <button class="close-btn" onclick="fermerModalSuppression()">×</button>
+        <butclass="close-btn" onclick="fermerModalSuppression()">×</button>
       </div>
       <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;"></div>
       
@@ -317,15 +317,15 @@
       </div>
 
       <div style="display: flex; gap: 10px; flex-direction: column;">
-        <button class="btn-submit" style="background-color: #EF4444;" id="btnConfirmerSuppr" onclick="confirmerSuppressionEffective()">Supprimer</button>
-        <button class="btn-delete" onclick="fermerModalSuppression()" style="display: block; color: var(--text-muted);">Annuler</button>
+        <butclass="btn-submit" style="background-color: #EF4444;" id="btnConfirmerSuppr" onclick="confirmerSuppressionEffective()">Supprimer</button>
+        <butclass="btn-delete" onclick="fermerModalSuppression()" style="display: block; color: var(--text-muted);">Annuler</button>
       </div>
     </div>
   </div>
 
   <script>
-    // URL DE TON APPLICATION WEB GOOGLE APPS SCRIPT
-    const GAS_URL = "TON_URL_DE_APPLICATION_WEB_GOOGLE_APPS_SCRIPT";
+    // URL DE APPLICATION WEB GOOGLE APPS SCRIPT
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     let donneesBrutes = [];
     let refEnfants = [];
