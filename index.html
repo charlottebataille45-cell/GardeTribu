@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐢 La Tribu – Agenda familial</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <style>
     :root {
-      --bg: #F8FAFC; --card: #FFFFFF; --text-main: #1E293B; --text-muted: #64748B; --border: #E2E8F0;
+      --bg: #F8FAFC; 
+      --card: #FFFFFF; 
+      --text-main: #1E293B; 
+      --text-muted: #64748B; 
+      --border: #E2E8F0;
     }
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
     body { background-color: var(--bg); color: var(--text-main); padding-bottom: 80px; }
 
     header { background: var(--card); padding: 12px 16px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0; }
 
@@ -73,6 +75,15 @@
 
     .event-time-pill { font-size: 12px; font-weight: 700; color: #1E293B; background: #E2E8F0; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
     
+    .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 700; line-height: 1.2; }
+    .enfants-badges-container { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+
+    .sub-slot-item { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+    .sub-slot-item:hover { background: #F1F5F9; border-color: #CBD5E1; }
+    .sub-slot-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sub-slot-right { display: flex; align-items: center; gap: 6px; }
+    .sub-slot-details { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+
     .fab { position: fixed; bottom: 25px; right: 25px; background: var(--text-main); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
     .fab:hover { transform: scale(1.08); }
 
@@ -106,16 +117,8 @@
     .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; transition: color 0.2s; }
     .btn-delete:hover { color: #B91C1C; }
 
-    .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 700; line-height: 1.2; }
-    .enfants-badges-container { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
     .spin { animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    .sub-slot-item { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
-    .sub-slot-item:hover { background: #F1F5F9; border-color: #CBD5E1; }
-    .sub-slot-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .sub-slot-right { display: flex; align-items: center; gap: 6px; }
-    .sub-slot-details { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
   </style>
 </head>
 <body>
@@ -123,7 +126,7 @@
   <header>
     <div class="header-top">
       <h1>🐢 La Tribu</h1>
-      <butclass="btn-toggle-filters" onclick="toggleFilters()">
+      <button class="btn-toggle-filters" onclick="toggleFilters()">
         <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
         <span>Filtres</span>
         <span class="material-symbols-outlined" id="arrowFilter" style="font-size:16px;">expand_more</span>
@@ -166,14 +169,14 @@
     <div id="timeline"></div>
   </div>
 
-  <butclass="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
+  <button class="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
 
   <!-- Modale Édition / Création -->
   <div class="modal-overlay" id="modalEvt">
     <div class="modal">
       <div class="modal-header">
         <div class="modal-title" id="modalTitle">Nouvel Événement</div>
-        <butclass="close-btn" onclick="fermerModal()">×</button>
+        <button class="close-btn" onclick="fermerModal()">×</button>
       </div>
 
       <input type="hidden" id="formId">
@@ -278,8 +281,8 @@
         </div>
       </div>
 
-      <butclass="btn-submit" id="btnSubmit" onclick="soumettre()">Enregistrer</button>
-      <butclass="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer cet événement</button>
+      <button class="btn-submit" id="btnSubmit" onclick="soumettre()">Enregistrer</button>
+      <button class="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer cet événement</button>
     </div>
   </div>
 
@@ -288,12 +291,12 @@
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="conflitTitle">Attention aux chevauchements</div>
-        <butclass="close-btn" onclick="fermerModalConflit()">×</button>
+        <button class="close-btn" onclick="fermerModalConflit()">×</button>
       </div>
       <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5;"></div>
       <div style="display: flex; gap: 10px; flex-direction: column;">
-        <butclass="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
-        <butclass="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
+        <button class="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
+        <button class="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
       </div>
     </div>
   </div>
@@ -303,7 +306,7 @@
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="supprModalTitle">Confirmer la suppression</div>
-        <butclass="close-btn" onclick="fermerModalSuppression()">×</button>
+        <button class="close-btn" onclick="fermerModalSuppression()">×</button>
       </div>
       <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;"></div>
       
@@ -317,15 +320,15 @@
       </div>
 
       <div style="display: flex; gap: 10px; flex-direction: column;">
-        <butclass="btn-submit" style="background-color: #EF4444;" id="btnConfirmerSuppr" onclick="confirmerSuppressionEffective()">Supprimer</button>
-        <butclass="btn-delete" onclick="fermerModalSuppression()" style="display: block; color: var(--text-muted);">Annuler</button>
+        <button class="btn-submit" style="background-color: #EF4444;" id="btnConfirmerSuppr" onclick="confirmerSuppressionEffective()">Supprimer</button>
+        <button class="btn-delete" onclick="fermerModalSuppression()" style="display: block; color: var(--text-muted);">Annuler</button>
       </div>
     </div>
   </div>
 
   <script>
-    // URL DE APPLICATION WEB GOOGLE APPS SCRIPT
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
+    // COLLE ICI L'URL DE DÉPLOIEMENT DE TON WEB APP GOOGLE APPS SCRIPT :
+    const API_URL = "https://script.google.com/macros/s/VOTRE_ID_DEPLOIEMENT/exec";
 
     let donneesBrutes = [];
     let refEnfants = [];
@@ -353,27 +356,20 @@
       chargerReferences();
     };
 
-    // Fonctions de communication API (remplacement de google.script.run)
-    function apiGet(action, callback) {
-      fetch(`${GAS_URL}?action=${action}`)
-        .then(response => response.json())
-        .then(data => callback(data))
-        .catch(err => console.error("Erreur API GET (" + action + ") :", err));
+    async function apiGet(action) {
+      const resp = await fetch(`${API_URL}?action=${action}`);
+      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
+      return await resp.json();
     }
 
-    function apiPost(payloadData, callbackSuccess, callbackError) {
-      fetch(GAS_URL, {
+    async function apiPost(action, payload) {
+      const resp = await fetch(`${API_URL}?action=${action}`, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payloadData)
-      })
-      .then(response => response.json())
-      .then(res => {
-        if (callbackSuccess) callbackSuccess(res);
-      })
-      .catch(err => {
-        if (callbackError) callbackError(err);
+        body: JSON.stringify({ action: action, payload: payload })
       });
+      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
+      return await resp.json();
     }
 
     function sauvegarderFiltresLocal() {
@@ -391,24 +387,26 @@
       arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
     }
 
-    function chargerDonnees() {
+    async function chargerDonnees() {
       document.getElementById('loader').style.display = 'block';
       document.getElementById('timeline').innerHTML = '';
-      apiGet('getPlanningData', donnees => {
-        donneesBrutes = donnees || [];
+      try {
+        donneesBrutes = await apiGet('getPlanningData');
         document.getElementById('loader').style.display = 'none';
         afficherTimeline();
-      });
+      } catch(err) {
+        document.getElementById('loader').innerText = "Erreur de chargement : " + err;
+      }
     }
 
-    function chargerReferences() {
-      apiGet('getRefData', refs => {
-        const dataRefs = refs || {};
-        refEnfants = dataRefs.enfants || [];
-        refTypes = dataRefs.types || [];
-        refResponsables = dataRefs.responsables || dataRefs.intervenants || [];
-        refIntervenantsObjets = dataRefs.intervenantsObjets || [];
-        refPeriodes = dataRefs.periodes || [];
+    async function chargerReferences() {
+      try {
+        const refs = await apiGet('getRefData');
+        refEnfants = refs.enfants || [];
+        refTypes = refs.types || [];
+        refResponsables = refs.responsables || refs.intervenants || [];
+        refIntervenantsObjets = refs.intervenantsObjets || [];
+        refPeriodes = refs.periodes || [];
 
         enfantsInfo = {};
         enfantsListe = [];
@@ -433,7 +431,9 @@
         genererFiltresIntervenants();
         genererFiltresPeriodes();
         afficherTimeline();
-      });
+      } catch(err) {
+        console.error("Erreur réfs:", err);
+      }
     }
 
     function genererFiltresEnfants() {
@@ -559,7 +559,6 @@
 
     function toggleRecurrenceOpt(e) {
       if (e && e.target && e.target.id === 'chkRecurent') {
-        // check
       } else if (e) {
         const chk = document.getElementById('chkRecurent');
         chk.checked = !chk.checked;
@@ -755,7 +754,7 @@
       debutSemaine.setDate(maintenantDebutJour.getDate() - jourSemaine + 1 + (offsetSemaines * 7));
       
       const finSemaine = new Date(debutSemaine);
-      finSemaine.setDate(finSemaine.getDate() + 6);
+      finSemaine.setDate(debutSemaine.getDate() + 6);
       finSemaine.setHours(23,59,59,999);
 
       const optsNav = { day: 'numeric', month: 'short' };
@@ -1230,32 +1229,29 @@
       }
     }
 
-    function executerEnregistrement(payload) {
+    async function executerEnregistrement(payload) {
       const btn = document.getElementById("btnSubmit");
       btn.innerHTML = `<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Enregistrement...`;
       btn.disabled = true;
 
-      apiPost(
-        { action: 'sauvegarderEvenement', payload: payload },
-        res => {
-          btn.innerHTML = "Enregistrer";
-          btn.disabled = false;
+      try {
+        const res = await apiPost('sauvegarderEvenement', payload);
+        btn.innerHTML = "Enregistrer";
+        btn.disabled = false;
 
-          if (res && res.success === false) {
-            alert("Erreur d'enregistrement : " + res.message);
-            return;
-          }
-
-          fermerModal();
-          chargerDonnees();
-          chargerReferences();
-        },
-        err => {
-          btn.innerHTML = "Enregistrer";
-          btn.disabled = false;
-          alert("Erreur serveur : " + err);
+        if (res && res.success === false) {
+          alert("Erreur d'enregistrement : " + res.message);
+          return;
         }
-      );
+
+        fermerModal();
+        chargerDonnees();
+        chargerReferences();
+      } catch(err) {
+        btn.innerHTML = "Enregistrer";
+        btn.disabled = false;
+        alert("Erreur serveur : " + err);
+      }
     }
 
     function supprimer() {
@@ -1281,7 +1277,7 @@
       document.getElementById("modalSuppression").style.display = "none";
     }
 
-    function confirmerSuppressionEffective() {
+    async function confirmerSuppressionEffective() {
       const id = document.getElementById("formId").value;
       const idSerie = document.getElementById("formIdSerie").value;
 
@@ -1297,20 +1293,17 @@
       btn.innerText = "Suppression...";
       btn.disabled = true;
 
-      apiPost(
-        { action: 'supprimerLigne', id: id, modeSupprSerie: modeSuppr },
-        () => {
-          fermerModal();
-          btn.innerText = "Supprimer cet événement";
-          btn.disabled = false;
-          chargerDonnees();
-        },
-        err => {
-          alert("Erreur lors de la suppression : " + err);
-          btn.innerText = "Supprimer cet événement";
-          btn.disabled = false;
-        }
-      );
+      try {
+        await apiPost('supprimerLigne', { id: id, modeSupprSerie: modeSuppr });
+        fermerModal();
+        btn.innerText = "Supprimer cet événement";
+        btn.disabled = false;
+        chargerDonnees();
+      } catch(err) {
+        alert("Erreur lors de la suppression : " + err);
+        btn.innerText = "Supprimer cet événement";
+        btn.disabled = false;
+      }
     }
   </script>
 </body>
