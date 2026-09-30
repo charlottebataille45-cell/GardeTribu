@@ -1,0 +1,111 @@
+{
+  "types": [
+    "Garde",
+    "RDV",
+    "École",
+    "Activité",
+    "Autre",
+    "Médical/RDV"
+  ],
+  "intervenants": [
+    {
+      "nom": "Papy Michel & MamIsa",
+      "tel1": "0621213979",
+      "tel2": "0618035434",
+      "email": ""
+    },
+    {
+      "nom": "Charlotte",
+      "tel1": "0631456620",
+      "tel2": "",
+      "email": ""
+    },
+    {
+      "nom": "Mamie Colette",
+      "tel1": "0685360175",
+      "tel2": "",
+      "email": ""
+    },
+    {
+      "nom": "Mamie Sylvie",
+      "tel1": "0612173977",
+      "tel2": "",
+      "email": ""
+    },
+    {
+      "nom": "Mathieu",
+      "tel1": "0603194541",
+      "tel2": "",
+      "email": ""
+    },
+    {
+      "nom": "Maman (James)",
+      "tel1": "",
+      "tel2": "",
+      "email": ""
+    },
+    {
+      "nom": "Centre de loisirs / Domicile",
+      "tel1": "",
+      "tel2": "",
+      "email": ""
+    },
+    {
+      "nom": "Loisirs",
+      "tel1": "",
+      "tel2": "",
+      "email": ""
+    },
+    {
+      "nom": "Isabelle",
+      "tel1": "0603326111",
+      "tel2": "",
+      "email": ""
+    }
+  ],
+  "periodes": [
+    {
+      "id": "PER001",
+      "nom": "Toussaint",
+      "dateDebut": "2026-10-24",
+      "dateFin": "2026-11-01"
+    }
+  ],
+  "enfants": [
+    {
+      "id": "ENF01",
+      "prenom": "Enola",
+      "actif": "Oui",
+      "couleur": "#E91E63",
+      "emoji": "🍒"
+    },
+    {
+      "id": "ENF02",
+      "prenom": "James",
+      "actif": "Oui",
+      "couleur": "#2196F3",
+      "emoji": "🦖"
+    },
+    {
+      "id": "ENF03",
+      "prenom": "Andreas",
+      "actif": "Oui",
+      "couleur": "#4CAF50",
+      "emoji": "⚡"
+    },
+    {
+      "id": "ENF04",
+      "prenom": "Matys",
+      "actif": "Oui",
+      "couleur": "#FF9800",
+      "emoji": "🎮"
+    },
+    {
+      "id": "ENF05",
+      "prenom": "Nino",
+      "actif": "Oui",
+      "couleur": "#9C27B0",
+      "emoji": "🏀"
+    }
+  ]
+}
