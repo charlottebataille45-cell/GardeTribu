@@ -267,8 +267,8 @@
   </div>
 
   <script>
-    // ⚠️ REMPLACE PAR TON URL DE DÉPLOIEMENT APPS SCRIPT
-    const APPS_SCRIPT_URL = "HTTPS://SCRIPT.GOOGLE.COM/MACROS/S/TON_ID_DEPLOIEMENT_ICI/EXEC";
+    // URL de ton application web Google Apps Script
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     let donneesBrutes = [];
     let refEnfants = [];
