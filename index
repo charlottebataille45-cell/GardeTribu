@@ -1,56 +1,80 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Tribu</title>
+  <base target="_top">
+  <title>🐢 La Tribu – Agenda familial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <style>
-    :root { --bg: #F8FAFC; --card: #FFFFFF; --text-main: #1E293B; --text-muted: #64748B; --border: #E2E8F0; }
+    :root {
+      --bg: #F8FAFC; --card: #FFFFFF; --text-main: #1E293B; --text-muted: #64748B; --border: #E2E8F0;
+    }
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
     body { background-color: var(--bg); color: var(--text-main); padding-bottom: 80px; }
 
     header { background: var(--card); padding: 12px 16px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0; }
 
-    .btn-toggle-filters { background: #F1F5F9; border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .btn-toggle-filters { background: #F1F5F9; border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; cursor: pointer; transition: background 0.2s; }
+    .btn-toggle-filters:hover { background: #E2E8F0; }
+
     .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 6px 0 4px 2px; }
     .filters-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 6px; }
     .filters-row::-webkit-scrollbar { display: none; }
     
-    .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; user-select: none; }
+    .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; transition: all 0.2s ease; user-select: none; }
+    .chip:hover { border-color: var(--text-main); color: var(--text-main); }
     .chip.active { background: var(--text-main); color: white; border-color: var(--text-main); }
     .chip.time-filter { border-style: dashed; }
     .chip.time-filter.active { background: #E2E8F0; color: var(--text-main); border-style: solid; border-color: var(--text-muted); }
 
-    .filter-panel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: none; }
+    .filter-panel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
     .week-nav { display: none; align-items: center; justify-content: space-between; background: #F1F5F9; border-radius: 10px; padding: 6px 12px; margin-top: 6px; }
     .week-nav.active { display: flex; }
-    .week-nav-btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .week-nav-title { font-size: 12px; font-weight: 700; }
+    .week-nav-btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 2px; transition: 0.2s; color: var(--text-main); }
+    .week-nav-btn:hover { background: var(--text-main); color: white; border-color: var(--text-main); }
+    .week-nav-title { font-size: 12px; font-weight: 700; color: var(--text-main); }
 
     .timeline-container { padding: 16px; max-width: 600px; margin: 0 auto; }
+    
     .date-header-container { margin: 20px 0 10px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #E2E8F0; padding-bottom: 6px; }
-    .date-header { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .date-header { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
     .date-count-badge { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 
-    .event-card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; gap: 12px; position: relative; }
-    .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; }
-    .badge-encours { background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .event-card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; gap: 12px; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; position: relative; }
+    .event-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+    .event-card.highlight-upcoming { border: 2px solid #3B82F6; background: #EFF6FF; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15); }
+    .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15); }
+
+    .badge-upcoming { background: #3B82F6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .badge-encours { background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
 
     .event-color-bar { width: 5px; border-radius: 4px; flex-shrink: 0; }
     .event-content { flex: 1; }
     .event-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
     .event-type { font-size: 11px; padding: 3px 8px; background: #F1F5F9; border-radius: 12px; font-weight: 600; color: #475569; }
-    .event-resp { font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+    .event-resp { font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
     
-    .action-links-container { display: flex; gap: 6px; margin: 6px 0; flex-wrap: wrap; }
-    .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 4px; }
+    .action-links-container { display: flex; gap: 6px; margin-top: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+    .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 4px; transition: 0.15s; }
+    .action-btn-phone:hover { background: #DBEAFE; }
+
     .event-time-pill { font-size: 12px; font-weight: 700; color: #1E293B; background: #E2E8F0; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
     
-    .fab { position: fixed; bottom: 25px; right: 25px; background: var(--text-main); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; border: none; z-index: 100; }
+    .fab { position: fixed; bottom: 25px; right: 25px; background: var(--text-main); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
+    .fab:hover { transform: scale(1.08); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
     .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
@@ -60,19 +84,38 @@
 
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
-    .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; transition: border-color 0.2s; }
+    .form-control:focus { outline: none; border-color: var(--text-main); background: white; }
+    .form-control.is-invalid { border-color: #EF4444; background-color: #FEF2F2; }
+
     .child-selector { display: flex; flex-wrap: wrap; gap: 8px; }
-    .child-chip { padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-muted); cursor: pointer; user-select: none; }
+    .child-chip { padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-muted); cursor: pointer; transition: 0.2s; user-select: none; }
     .child-chip.selected { color: white; border-color: transparent; }
 
-    .btn-submit { width: 100%; padding: 14px; background: var(--text-main); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-    .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; }
+    .recurrence-box { background: #F1F5F9; border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .toggle-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 
-    .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .serie-options { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 12px; }
+    .error-msg { color: #EF4444; font-size: 12px; font-weight: 600; margin-top: 5px; display: none; align-items: center; gap: 4px; }
+
+    .btn-submit { width: 100%; padding: 14px; background: var(--text-main); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: background 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-submit:hover { background: #0F172A; }
+    .btn-submit:disabled { background: #94A3B8; cursor: not-allowed; }
+
+    .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; transition: color 0.2s; }
+    .btn-delete:hover { color: #B91C1C; }
+
+    .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 700; line-height: 1.2; }
     .enfants-badges-container { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-    .sub-slot-item { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; cursor: pointer; }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .sub-slot-item { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+    .sub-slot-item:hover { background: #F1F5F9; border-color: #CBD5E1; }
     .sub-slot-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .sub-slot-right { display: flex; align-items: center; gap: 6px; }
+    .sub-slot-details { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
   </style>
 </head>
 <body>
@@ -83,6 +126,7 @@
       <button class="btn-toggle-filters" onclick="toggleFilters()">
         <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
         <span>Filtres</span>
+        <span class="material-symbols-outlined" id="arrowFilter" style="font-size:16px;">expand_more</span>
       </button>
     </div>
 
@@ -93,33 +137,42 @@
     </div>
 
     <div class="week-nav active" id="weekNav">
-      <button class="week-nav-btn" onclick="naviguerSemaine(-1)">Préc.</button>
+      <button class="week-nav-btn" onclick="naviguerSemaine(-1)"><span class="material-symbols-outlined" style="font-size:14px;">chevron_left</span> Préc.</button>
       <span class="week-nav-title" id="weekNavTitle">Semaine courante</span>
-      <button class="week-nav-btn" onclick="naviguerSemaine(1)">Suiv.</button>
+      <button class="week-nav-btn" onclick="naviguerSemaine(1)">Suiv. <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span></button>
     </div>
 
-    <div id="filterPanel" class="filter-panel">
+    <div id="filterPanel" class="filter-panel" style="display: none;">
       <div class="filter-label">Enfants</div>
-      <div class="filters-row" id="childFilters"></div>
+      <div class="filters-row" id="childFilters">
+        <div class="chip active" onclick="setChildFilter('Tous')">Tous</div>
+      </div>
+
       <div class="filter-label">Périodes & Vacances</div>
-      <div class="filters-row" id="periodeFilters"></div>
+      <div class="filters-row" id="periodeFilters">
+        <div class="chip active" onclick="setPeriodeFilter('Tous')">Toutes</div>
+        <div class="chip" onclick="setPeriodeFilter('HORS_VACANCES')">Hors vacances</div>
+      </div>
+
       <div class="filter-label">Responsable</div>
-      <div class="filters-row" id="intervenantFilters"></div>
+      <div class="filters-row" id="intervenantFilters">
+        <div class="chip active" onclick="setIntervenantFilter('Tous')">Tous</div>
+      </div>
     </div>
   </header>
 
   <div class="timeline-container">
-    <div id="loader" style="text-align:center; padding: 40px; color: #64748B;">Initialisation de l'application...</div>
+    <div id="loader" style="text-align:center; padding: 40px; color: #64748B;">Chargement du planning...</div>
     <div id="timeline"></div>
   </div>
 
   <button class="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
 
-  <!-- Modale Édition -->
+  <!-- Modale Édition / Création -->
   <div class="modal-overlay" id="modalEvt">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title" id="modalTitle">Événement</div>
+        <div class="modal-title" id="modalTitle">Nouvel Événement</div>
         <button class="close-btn" onclick="fermerModal()">×</button>
       </div>
 
@@ -127,52 +180,152 @@
       <input type="hidden" id="formIdSerie">
 
       <div class="form-group">
-        <label>1. CONCERNE L'ENFANT</label>
+        <label>1. CONCERNE L'ENFANT / LES ENFANTS *</label>
         <div class="child-selector" id="formEnfantSelector"></div>
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label>2. TYPE</label>
-          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()"></select>
+          <label>2. TYPE *</label>
+          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
+            <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter un type...</option>
+          </select>
           <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type...">
         </div>
+
         <div class="form-group" style="flex: 1;">
-          <label>3. RESPONSABLE</label>
-          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()"></select>
+          <label>3. RESPONSABLE *</label>
+          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
+            <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter...</option>
+          </select>
           <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable...">
         </div>
       </div>
 
       <div class="form-group">
-        <label>4. TITRE</label>
-        <input type="text" id="formTitre" class="form-control">
+        <label>4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
+        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Oréliance...">
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label>5. DÉBUT</label>
+          <label>5. DÉBUT *</label>
           <input type="datetime-local" id="formDebut" class="form-control" onchange="surChangementDebut()">
         </div>
         <div class="form-group" style="flex: 1;">
-          <label>FIN</label>
-          <input type="datetime-local" id="formFin" class="form-control">
+          <label>FIN *</label>
+          <input type="datetime-local" id="formFin" class="form-control" onchange="validerControleDates()">
         </div>
       </div>
 
+      <div id="dateError" class="error-msg">
+        <span class="material-symbols-outlined" style="font-size: 16px;">error</span>
+        La fin de l'événement doit être postérieure au début.
+      </div>
+      <input type="hidden" id="formDate">
+
       <div class="form-group">
         <label>6. LIEU</label>
-        <input type="text" id="formLieu" class="form-control">
+        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
       </div>
 
-      <button class="btn-submit" onclick="soumettre()">Enregistrer</button>
-      <button class="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer</button>
+      <div class="form-group">
+        <label>7. DÉTAILS / NOTES</label>
+        <input type="text" id="formDetails" class="form-control" placeholder="Infos complémentaires...">
+      </div>
+
+      <div class="form-group">
+        <label>PÉRIODE / VACANCES</label>
+        <select id="formPeriodeSelect" class="form-control">
+          <option value="">-- Hors vacances --</option>
+        </select>
+      </div>
+
+      <div class="recurrence-box" id="secRecurrence">
+        <div class="toggle-row" onclick="toggleRecurrenceOpt()">
+          <div class="toggle-title">
+            <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
+            8. Répéter cet événement
+          </div>
+          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" style="cursor:pointer; width:16px; height:16px;">
+        </div>
+
+        <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 12px; font-weight: 600;">Toutes les :</span>
+            <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
+            <select id="formRecurUnite" class="form-control" style="flex: 1;">
+              <option value="Jours">Jours</option>
+              <option value="Semaines" selected>Semaines</option>
+              <option value="Mois">Mois</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <span style="font-size: 12px; font-weight: 600;">Jusqu'au :</span>
+            <input type="date" id="formRecurFin" class="form-control" style="flex: 1;">
+          </div>
+        </div>
+      </div>
+
+      <div id="secOptionSerie" class="serie-options" style="display: none;">
+        <strong>Cet événement appartient à une série récurrente.</strong>
+        <div style="margin-top: 6px;">
+          <label><input type="radio" name="optSerieAction" value="UNIQUE" checked> Modifier uniquement cette occurrence</label><br>
+          <label><input type="radio" name="optSerieAction" value="SERIE"> Modifier toute la série (horaires inclus)</label>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btnSubmit" onclick="soumettre()">Enregistrer</button>
+      <button class="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer cet événement</button>
+    </div>
+  </div>
+
+  <!-- Modale Conflit -->
+  <div class="modal-overlay" id="modalConflit" style="z-index: 1100;">
+    <div class="modal" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-title" id="conflitTitle">Attention aux chevauchements</div>
+        <button class="close-btn" onclick="fermerModalConflit()">×</button>
+      </div>
+      <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5;"></div>
+      <div style="display: flex; gap: 10px; flex-direction: column;">
+        <button class="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
+        <button class="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Suppression -->
+  <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;">
+    <div class="modal" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-title" id="supprModalTitle">Confirmer la suppression</div>
+        <button class="close-btn" onclick="fermerModalSuppression()">×</button>
+      </div>
+      <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;"></div>
+      
+      <div id="supprSerieOptions" style="display:none; margin-bottom: 15px; background: #F1F5F9; border-radius: 8px; padding: 10px; font-size: 12px;">
+        <label style="display:block; margin-bottom: 8px; cursor:pointer;">
+          <input type="radio" name="optSupprSerie" value="UNIQUE" checked> Supprimer uniquement cette occurrence
+        </label>
+        <label style="display:block; cursor:pointer;">
+          <input type="radio" name="optSupprSerie" value="SERIE"> Supprimer toute la série récurrente
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-direction: column;">
+        <button class="btn-submit" style="background-color: #EF4444;" id="btnConfirmerSuppr" onclick="confirmerSuppressionEffective()">Supprimer</button>
+        <button class="btn-delete" onclick="fermerModalSuppression()" style="display: block; color: var(--text-muted);">Annuler</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // ⚠️ ASSURE-TOI QUE CETTE URL EST BIEN CELLE DE TON DERNIER DÉPLOIEMENT WEB APP ⚠️
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
+    // URL DE TON APPLICATION WEB GOOGLE APPS SCRIPT
+    const GAS_URL = "TON_URL_DE_APPLICATION_WEB_GOOGLE_APPS_SCRIPT";
 
     let donneesBrutes = [];
     let refEnfants = [];
@@ -188,93 +341,122 @@
     let offsetSemaines = 0;
 
     let enfantsModalSelectionnes = [];
+    let payloadEnAttente = null;
+    let idsGardesARemplacer = [];
+    let ajustementsConflitEnfants = [];
+    
     let enfantsListe = [];
     let enfantsInfo = {};
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      const loader = document.getElementById('loader');
-      try {
-        loader.innerText = "Chargement des références...";
-        await chargerReferences();
-        
-        loader.innerText = "Chargement du planning...";
-        await chargerDonnees();
-      } catch (err) {
-        loader.innerHTML = `<span style="color: #EF4444; font-weight: bold;">Erreur de chargement :</span><br><code style="font-size:12px;">${err.message}</code><br><br>Vérifie l'URL Apps Script ou les autorisations de déploiement.`;
-        console.error(err);
-      }
-    });
+    window.onload = () => {
+      chargerDonnees();
+      chargerReferences();
+    };
 
-    async function apiFetchGet(action) {
-      const response = await fetch(`${APPS_SCRIPT_URL}?action=${action}`);
-      if (!response.ok) throw new Error(`Erreur HTTP ${response.status} sur l'action ${action}`);
-      return await response.json();
+    // Fonctions de communication API (remplacement de google.script.run)
+    function apiGet(action, callback) {
+      fetch(`${GAS_URL}?action=${action}`)
+        .then(response => response.json())
+        .then(data => callback(data))
+        .catch(err => console.error("Erreur API GET (" + action + ") :", err));
     }
 
-    async function apiFetchPost(action, payload) {
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: action, payload: payload })
+    function apiPost(payloadData, callbackSuccess, callbackError) {
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payloadData)
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (callbackSuccess) callbackSuccess(res);
+      })
+      .catch(err => {
+        if (callbackError) callbackError(err);
       });
-      return await response.json();
+    }
+
+    function sauvegarderFiltresLocal() {
+      localStorage.setItem('tribu_filtreEnfant', filtreEnfant);
+      localStorage.setItem('tribu_filtreIntervenant', filtreIntervenant);
+      localStorage.setItem('tribu_filtrePeriode', filtrePeriode);
+      localStorage.setItem('tribu_filtreTemps', filtreTemps);
     }
 
     function toggleFilters() {
       const panel = document.getElementById('filterPanel');
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+      const arrow = document.getElementById('arrowFilter');
+      const isHidden = panel.style.display === 'none';
+      panel.style.display = isHidden ? 'block' : 'none';
+      arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
     }
 
-    async function chargerReferences() {
-      const refs = await apiFetchGet('getRef');
-      refEnfants = refs.enfants || [];
-      refTypes = refs.types || [];
-      refResponsables = refs.responsables || [];
-      refIntervenantsObjets = refs.intervenantsObjets || [];
-      refPeriodes = refs.periodes || [];
-
-      enfantsInfo = {};
-      enfantsListe = [];
-      refEnfants.forEach(e => {
-        if (e.actif === 'Oui' || !e.actif) {
-          enfantsInfo[e.prenom] = { id: e.id, color: e.couleur || '#64748B', emoji: e.emoji || '👤' };
-          enfantsListe.push(e.prenom);
-        }
+    function chargerDonnees() {
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('timeline').innerHTML = '';
+      apiGet('getPlanningData', donnees => {
+        donneesBrutes = donnees || [];
+        document.getElementById('loader').style.display = 'none';
+        afficherTimeline();
       });
-
-      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-        enfantsModalSelectionnes = [enfantsListe[0]];
-      }
-
-      genererFiltresEnfants();
-      genererSelectorEnfantsModal();
-      majSelectsModal();
-      genererFiltresIntervenants();
-      genererFiltresPeriodes();
     }
 
-    async function chargerDonnees() {
-      donneesBrutes = await apiFetchGet('getPlanning');
-      document.getElementById('loader').style.display = 'none';
-      afficherTimeline();
+    function chargerReferences() {
+      apiGet('getRefData', refs => {
+        const dataRefs = refs || {};
+        refEnfants = dataRefs.enfants || [];
+        refTypes = dataRefs.types || [];
+        refResponsables = dataRefs.responsables || dataRefs.intervenants || [];
+        refIntervenantsObjets = dataRefs.intervenantsObjets || [];
+        refPeriodes = dataRefs.periodes || [];
+
+        enfantsInfo = {};
+        enfantsListe = [];
+        refEnfants.forEach(e => {
+          if (e.actif === 'Oui' || e.actif === '' || !e.actif) {
+            enfantsInfo[e.prenom] = {
+              id: e.id,
+              color: e.couleur || '#64748B',
+              emoji: e.emoji || '👤'
+            };
+            enfantsListe.push(e.prenom);
+          }
+        });
+
+        if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
+          enfantsModalSelectionnes = [enfantsListe[0]];
+        }
+
+        genererFiltresEnfants();
+        genererSelectorEnfantsModal();
+        majSelectsModal();
+        genererFiltresIntervenants();
+        genererFiltresPeriodes();
+        afficherTimeline();
+      });
     }
 
     function genererFiltresEnfants() {
       const container = document.getElementById('childFilters');
+      if (!container) return;
+      
       let html = `<div class="chip ${filtreEnfant === 'Tous' ? 'active' : ''}" onclick="setChildFilter('Tous')">Tous</div>`;
       enfantsListe.forEach(prenom => {
         const info = enfantsInfo[prenom] || { emoji: '👤' };
-        html += `<div class="chip ${filtreEnfant === prenom ? 'active' : ''}" onclick="setChildFilter('${prenom}')">${info.emoji} ${prenom}</div>`;
+        const activeClass = (filtreEnfant === prenom) ? 'active' : '';
+        html += `<div class="chip ${activeClass}" onclick="setChildFilter('${prenom.replace(/'/g, "\\'")}')">${info.emoji} ${prenom}</div>`;
       });
       container.innerHTML = html;
     }
 
     function genererSelectorEnfantsModal() {
       const container = document.getElementById('formEnfantSelector');
+      if (!container) return;
+
       let html = '';
       enfantsListe.forEach(prenom => {
         const info = enfantsInfo[prenom] || { emoji: '👤' };
-        html += `<div class="child-chip" data-enfant="${prenom}" onclick="toggleFormEnfant('${prenom}')">${info.emoji} ${prenom}</div>`;
+        html += `<div class="child-chip" data-enfant="${prenom}" onclick="toggleFormEnfant('${prenom.replace(/'/g, "\\'")}')">${info.emoji} ${prenom}</div>`;
       });
       html += `<div class="child-chip" data-enfant="Tous" onclick="toggleFormEnfant('Tous')">👥 Tous</div>`;
       container.innerHTML = html;
@@ -284,8 +466,10 @@
     function genererFiltresIntervenants() {
       const container = document.getElementById('intervenantFilters');
       container.innerHTML = `<div class="chip ${filtreIntervenant === 'Tous' ? 'active' : ''}" onclick="setIntervenantFilter('Tous')">Tous</div>`;
+      
       refResponsables.forEach(resp => {
-        container.innerHTML += `<div class="chip ${filtreIntervenant === resp ? 'active' : ''}" onclick="setIntervenantFilter('${resp}')">${resp}</div>`;
+        const activeClass = filtreIntervenant === resp ? 'active' : '';
+        container.innerHTML += `<div class="chip ${activeClass}" onclick="setIntervenantFilter('${resp.replace(/'/g, "\\'")}')">${resp}</div>`;
       });
     }
 
@@ -295,38 +479,62 @@
         <div class="chip ${filtrePeriode === 'Tous' ? 'active' : ''}" onclick="setPeriodeFilter('Tous')">Toutes</div>
         <div class="chip ${filtrePeriode === 'HORS_VACANCES' ? 'active' : ''}" onclick="setPeriodeFilter('HORS_VACANCES')">Hors vacances</div>
       `;
+      
       refPeriodes.forEach(p => {
-        container.innerHTML += `<div class="chip ${filtrePeriode === p.id ? 'active' : ''}" onclick="setPeriodeFilter('${p.id}')">${p.nom}</div>`;
+        const activeClass = filtrePeriode === p.id ? 'active' : '';
+        container.innerHTML += `<div class="chip ${activeClass}" onclick="setPeriodeFilter('${p.id}')">${p.nom}</div>`;
       });
     }
 
     function majSelectsModal() {
       const selectType = document.getElementById('formTypeSelect');
       selectType.innerHTML = '<option value="">-- Choisir --</option>';
-      refTypes.forEach(t => selectType.innerHTML += `<option value="${t}">${t}</option>`);
+      refTypes.forEach(t => {
+        selectType.innerHTML += `<option value="${t}">${t}</option>`;
+      });
       selectType.innerHTML += '<option value="NOUVEAU">+ Ajouter un type...</option>';
 
       const selectResp = document.getElementById('formResponsableSelect');
       selectResp.innerHTML = '<option value="">-- Choisir --</option>';
-      refResponsables.forEach(r => selectResp.innerHTML += `<option value="${r}">${r}</option>`);
+      refResponsables.forEach(r => {
+        selectResp.innerHTML += `<option value="${r}">${r}</option>`;
+      });
       selectResp.innerHTML += '<option value="NOUVEAU">+ Ajouter un responsable...</option>';
+
+      const selectPeriode = document.getElementById('formPeriodeSelect');
+      selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
+      refPeriodes.forEach(p => {
+        selectPeriode.innerHTML += `<option value="${p.id}">${p.nom}</option>`;
+      });
     }
 
     function formatForInput(dateObj) {
       if (!dateObj) return "";
       const d = new Date(dateObj);
       if (isNaN(d.getTime())) return "";
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
     function toggleFormEnfant(enfant) {
       if (enfant === 'Tous') {
         enfantsModalSelectionnes = [...enfantsListe];
       } else {
-        if (enfantsModalSelectionnes.length === enfantsListe.length) enfantsModalSelectionnes = [];
-        const idx = enfantsModalSelectionnes.indexOf(enfant);
-        if (idx > -1) enfantsModalSelectionnes.splice(idx, 1);
-        else enfantsModalSelectionnes.push(enfant);
+        if (enfantsModalSelectionnes.length === enfantsListe.length) {
+          enfantsModalSelectionnes = [];
+        }
+        const index = enfantsModalSelectionnes.indexOf(enfant);
+        if (index > -1) {
+          enfantsModalSelectionnes.splice(index, 1);
+        } else {
+          enfantsModalSelectionnes.push(enfant);
+        }
       }
       if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
         enfantsModalSelectionnes = [enfantsListe[0]];
@@ -338,58 +546,160 @@
       document.querySelectorAll('#formEnfantSelector .child-chip').forEach(chip => {
         const enf = chip.getAttribute('data-enfant');
         const estSelect = (enf === 'Tous' && enfantsModalSelectionnes.length === enfantsListe.length) || enfantsModalSelectionnes.includes(enf);
+        
         chip.classList.toggle('selected', estSelect);
-        chip.style.backgroundColor = estSelect ? (enfantsInfo[enf] ? enfantsInfo[enf].color : 'var(--text-main)') : '#F8FAFC';
+        if (estSelect) {
+          const couleur = enfantsInfo[enf] ? enfantsInfo[enf].color : 'var(--text-main)';
+          chip.style.backgroundColor = couleur;
+        } else {
+          chip.style.backgroundColor = '#F8FAFC';
+        }
       });
+    }
+
+    function toggleRecurrenceOpt(e) {
+      if (e && e.target && e.target.id === 'chkRecurent') {
+        // check
+      } else if (e) {
+        const chk = document.getElementById('chkRecurent');
+        chk.checked = !chk.checked;
+      }
+      
+      const chkVal = document.getElementById('chkRecurent').checked;
+      document.getElementById('recurrenceFields').style.display = chkVal ? 'block' : 'none';
+      
+      if (chkVal && !document.getElementById('formRecurFin').value) {
+        const dDeb = new Date(document.getElementById('formDebut').value || Date.now());
+        dDeb.setMonth(dDeb.getMonth() + 1);
+        document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
+      }
     }
 
     function surChangementDebut() {
       const debutStr = document.getElementById("formDebut").value;
       if (!debutStr) return;
+      
+      document.getElementById("formDate").value = debutStr.split('T')[0];
+      
       const d = new Date(debutStr);
       const finInput = document.getElementById("formFin");
-      if (!finInput.value || new Date(finInput.value) <= d) {
-        finInput.value = formatForInput(new Date(d.getTime() + (60 * 60 * 1000)));
+      const finStr = finInput.value;
+      
+      if (!finStr || new Date(finStr) <= d) {
+        const nouvelleFin = new Date(d.getTime() + (60 * 60 * 1000));
+        finInput.value = formatForInput(nouvelleFin);
       }
+      validerControleDates();
+    }
+
+    function validerControleDates() {
+      const debutVal = document.getElementById("formDebut").value;
+      const finVal = document.getElementById("formFin").value;
+      const errorMsg = document.getElementById("dateError");
+      const btnSubmit = document.getElementById("btnSubmit");
+
+      if (debutVal && finVal) {
+        const d = new Date(debutVal);
+        const f = new Date(finVal);
+        if (f <= d) {
+          errorMsg.style.display = "flex";
+          btnSubmit.disabled = true;
+          document.getElementById("formFin").classList.add("is-invalid");
+          return false;
+        }
+      }
+      
+      document.getElementById("formFin").classList.remove("is-invalid");
+      errorMsg.style.display = "none";
+      btnSubmit.disabled = false;
+      return true;
     }
 
     function gererTypeSelect() {
       const val = document.getElementById('formTypeSelect').value;
-      document.getElementById('formTypeInput').style.display = (val === 'NOUVEAU') ? 'block' : 'none';
+      const input = document.getElementById('formTypeInput');
+      if (val === 'NOUVEAU') {
+        input.style.display = 'block';
+        input.value = '';
+      } else {
+        input.style.display = 'none';
+        input.value = val;
+      }
     }
 
     function gererResponsableSelect() {
       const val = document.getElementById('formResponsableSelect').value;
-      document.getElementById('formResponsableInput').style.display = (val === 'NOUVEAU') ? 'block' : 'none';
+      const input = document.getElementById('formResponsableInput');
+      
+      if (val === 'NOUVEAU') {
+        input.style.display = 'block';
+        input.value = '';
+      } else {
+        input.style.display = 'none';
+        input.value = val;
+      }
     }
 
-    function setChildFilter(enfant) { filtreEnfant = enfant; localStorage.setItem('tribu_filtreEnfant', enfant); genererFiltresEnfants(); afficherTimeline(); }
-    function setIntervenantFilter(intervenant) { filtreIntervenant = intervenant; localStorage.setItem('tribu_filtreIntervenant', intervenant); genererFiltresIntervenants(); afficherTimeline(); }
-    function setPeriodeFilter(periodeId) { filtrePeriode = periodeId; localStorage.setItem('tribu_filtrePeriode', periodeId); genererFiltresPeriodes(); afficherTimeline(); }
+    function setChildFilter(enfant) {
+      filtreEnfant = enfant;
+      sauvegarderFiltresLocal();
+      genererFiltresEnfants();
+      afficherTimeline();
+    }
+
+    function setIntervenantFilter(intervenant) {
+      filtreIntervenant = intervenant;
+      sauvegarderFiltresLocal();
+      genererFiltresIntervenants();
+      afficherTimeline();
+    }
+
+    function setPeriodeFilter(periodeId) {
+      filtrePeriode = periodeId;
+      sauvegarderFiltresLocal();
+      genererFiltresPeriodes();
+      afficherTimeline();
+    }
 
     function setTimeFilter(temps) {
       filtreTemps = temps;
       offsetSemaines = 0;
-      localStorage.setItem('tribu_filtreTemps', temps);
+      sauvegarderFiltresLocal();
+      
       document.querySelectorAll('#timeFilters .chip').forEach(chip => {
         chip.classList.toggle('active', chip.innerText.includes(temps === 'Jour' ? "Aujourd'hui" : temps === 'Semaine' ? "semaine" : "Tout"));
       });
-      document.getElementById('weekNav').classList.toggle('active', temps === 'Semaine');
+
+      const weekNav = document.getElementById('weekNav');
+      if (temps === 'Semaine') {
+        weekNav.classList.add('active');
+      } else {
+        weekNav.classList.remove('active');
+      }
+
       afficherTimeline();
     }
 
-    function naviguerSemaine(direction) { offsetSemaines += direction; afficherTimeline(); }
+    function naviguerSemaine(direction) {
+      offsetSemaines += direction;
+      afficherTimeline();
+    }
 
     function genererOccurrences() {
       const occurrences = [];
+
       donneesBrutes.forEach(evt => {
         if (!evt.debut) return;
+
         const dStart = new Date(evt.debut);
         const dEnd = evt.fin ? new Date(evt.fin) : new Date(evt.debut);
+
         if (isNaN(dStart.getTime())) return;
 
         let dayCursor = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
-        const dayEnd = !isNaN(dEnd.getTime()) ? new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate()) : new Date(dayCursor);
+        const dayEnd = !isNaN(dEnd.getTime()) 
+          ? new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate())
+          : new Date(dayCursor);
 
         let count = 0;
         while (dayCursor <= dayEnd && count < 30) {
@@ -397,14 +707,40 @@
             ...evt,
             occurrenceDate: new Date(dayCursor),
             isMultiDay: dayEnd.getTime() > new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate()).getTime(),
-            dStart, dEnd,
+            dStart: dStart,
+            dEnd: dEnd,
             enfants: evt.enfantsPrenoms && evt.enfantsPrenoms.length > 0 ? evt.enfantsPrenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : [])
           });
           dayCursor.setDate(dayCursor.getDate() + 1);
           count++;
         }
       });
+
       return occurrences;
+    }
+
+    function genererGradientBarre(enfants) {
+      const cols = enfants.map(e => enfantsInfo[e] ? enfantsInfo[e].color : '#64748B');
+      if (cols.length === 0) return 'background-color: #64748B;';
+      if (cols.length === 1) return `background-color: ${cols[0]};`;
+      return `background: linear-gradient(to bottom, ${cols.join(', ')});`;
+    }
+
+    function genererBadgesEnfants(enfants) {
+      if (!enfants || enfants.length === 0) return '';
+      
+      return `<div class="enfants-badges-container">` + 
+        enfants.map(e => {
+          const info = enfantsInfo[e] || { color: '#64748B', emoji: '👤' };
+          return `<span class="badge-enfant" style="background-color: ${info.color}18; color: ${info.color}; border: 1px solid ${info.color}50;">
+            ${info.emoji} ${e}
+          </span>`;
+        }).join('') +
+        `</div>`;
+    }
+
+    function nettoyerNumero(tel) {
+      return tel ? tel.replace(/\s+/g, '') : '';
     }
 
     function afficherTimeline() {
@@ -413,6 +749,7 @@
       
       const maintenant = new Date();
       const maintenantDebutJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
+
       const jourSemaine = maintenantDebutJour.getDay() || 7; 
       const debutSemaine = new Date(maintenantDebutJour);
       debutSemaine.setDate(maintenantDebutJour.getDate() - jourSemaine + 1 + (offsetSemaines * 7));
@@ -421,21 +758,41 @@
       finSemaine.setDate(finSemaine.getDate() + 6);
       finSemaine.setHours(23,59,59,999);
 
+      const optsNav = { day: 'numeric', month: 'short' };
+      const labelSemaine = offsetSemaines === 0 ? "Cette semaine" : `${debutSemaine.toLocaleDateString('fr-FR', optsNav)} - ${finSemaine.toLocaleDateString('fr-FR', optsNav)}`;
+      document.getElementById('weekNavTitle').innerText = labelSemaine;
+
       const occurrences = genererOccurrences();
+
       const occurrencesFiltrees = occurrences.filter(occ => {
-        if (filtreEnfant !== 'Tous' && !occ.enfants.some(e => e.toLowerCase() === filtreEnfant.toLowerCase())) return false;
+        if (filtreEnfant !== 'Tous') {
+          const match = occ.enfants.some(e => e.toLowerCase() === filtreEnfant.toLowerCase());
+          if (!match) return false;
+        }
+        
         if (filtreIntervenant !== 'Tous' && occ.responsable !== filtreIntervenant) return false;
+
         if (filtrePeriode === 'HORS_VACANCES' && occ.idPeriode) return false;
         if (filtrePeriode !== 'Tous' && filtrePeriode !== 'HORS_VACANCES' && occ.idPeriode !== filtrePeriode) return false;
 
         const occTime = occ.occurrenceDate.getTime();
-        if (filtreTemps === 'Jour') return occTime === maintenantDebutJour.getTime();
-        if (filtreTemps === 'Semaine') return occTime >= debutSemaine.getTime() && occTime <= finSemaine.getTime();
+        if (filtreTemps === 'Jour') {
+          return occTime === maintenantDebutJour.getTime();
+        } else if (filtreTemps === 'Semaine') {
+          return occTime >= debutSemaine.getTime() && occTime <= finSemaine.getTime();
+        }
         return true;
       });
 
+      occurrencesFiltrees.sort((a, b) => {
+        if (a.occurrenceDate.getTime() !== b.occurrenceDate.getTime()) {
+          return a.occurrenceDate.getTime() - b.occurrenceDate.getTime();
+        }
+        return a.dStart.getTime() - b.dStart.getTime();
+      });
+
       if (occurrencesFiltrees.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 40px; color: #64748B;">Aucun événement trouvé.</div>';
+        container.innerHTML = '<div style="text-align:center; padding: 40px; color: #64748B;">Aucun événement ne correspond à vos filtres.</div>';
         return;
       }
 
@@ -446,52 +803,514 @@
         groupesParJour[keyJour].push(occ);
       });
 
+      let premierProchainElement = null;
+      let trouveProchain = false;
+      const joursAbrev = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
+
       Object.keys(groupesParJour).forEach(keyJour => {
         const listeJour = groupesParJour[keyJour];
-        const dateHeaderStr = listeJour[0].occurrenceDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        const nbEvtsJour = listeJour.length;
+
+        const dRef = listeJour[0].occurrenceDate;
+        const optionsDate = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        const dateHeaderStr = dRef.toLocaleDateString('fr-FR', optionsDate);
 
         const headerCont = document.createElement('div');
         headerCont.className = 'date-header-container';
-        headerCont.innerHTML = `<div class="date-header">${dateHeaderStr}</div><div class="date-count-badge">${listeJour.length}</div>`;
+        
+        const headerTitle = document.createElement('div');
+        headerTitle.className = 'date-header';
+        headerTitle.innerText = dateHeaderStr;
+
+        const headerCount = document.createElement('div');
+        headerCount.className = 'date-count-badge';
+        headerCount.innerText = `${nbEvtsJour} créneau${nbEvtsJour > 1 ? 'x' : ''}`;
+
+        headerCont.appendChild(headerTitle);
+        headerCont.appendChild(headerCount);
         container.appendChild(headerCont);
 
+        const groupesResp = [];
+        const respMap = new Map();
+
         listeJour.forEach(occ => {
+          const keyGroup = `${(occ.responsable || '').toLowerCase()}_${(occ.type || '').toLowerCase()}`;
+          if (!respMap.has(keyGroup)) {
+            const item = {
+              responsable: occ.responsable,
+              type: occ.type,
+              creneaux: []
+            };
+            respMap.set(keyGroup, item);
+            groupesResp.push(item);
+          }
+          respMap.get(keyGroup).creneaux.push(occ);
+        });
+
+        groupesResp.forEach(groupe => {
+          const tousEnfants = [];
+          groupe.creneaux.forEach(c => {
+            c.enfants.forEach(e => {
+              if (!tousEnfants.includes(e)) tousEnfants.push(e);
+            });
+          });
+
+          const styleBarre = genererGradientBarre(tousEnfants);
+
           const card = document.createElement('div');
           card.className = 'event-card';
+
+          const objResp = refIntervenantsObjets.find(i => i.nom.toLowerCase() === (groupe.responsable || '').toLowerCase());
+          let actionsTelHtml = '';
+          if (objResp) {
+            const num1 = nettoyerNumero(objResp.tel1);
+            const num2 = nettoyerNumero(objResp.tel2);
+
+            if (num1 || num2) {
+              actionsTelHtml += `<div class="action-links-container" onclick="event.stopPropagation();">`;
+              if (num1) {
+                actionsTelHtml += `<a href="tel:${num1}" class="action-btn-phone">📞 Appel</a>`;
+                actionsTelHtml += `<a href="sms:${num1}" class="action-btn-phone">💬 SMS</a>`;
+              }
+              if (num2) {
+                actionsTelHtml += `<a href="tel:${num2}" class="action-btn-phone">📞 Appel 2</a>`;
+                actionsTelHtml += `<a href="sms:${num2}" class="action-btn-phone">💬 SMS 2</a>`;
+              }
+              actionsTelHtml += `</div>`;
+            }
+          }
+
+          let subSlotsHtml = '';
+          let hasEncoursGroup = false;
+
+          groupe.creneaux.forEach(occ => {
+            let heureTexte = "";
+            if (occ.isMultiDay) {
+              const jourDeb = joursAbrev[occ.dStart.getDay()];
+              const hDeb = occ.dStart.getHours().toString().padStart(2,'0') + 'h' + occ.dStart.getMinutes().toString().padStart(2,'0');
+              const jourFin = joursAbrev[occ.dEnd.getDay()];
+              const hFin = occ.dEnd.getHours().toString().padStart(2,'0') + 'h' + occ.dEnd.getMinutes().toString().padStart(2,'0');
+              heureTexte = `${jourDeb} ${hDeb} ➔ ${jourFin} ${hFin}`;
+            } else {
+              const hDeb = occ.dStart.getHours().toString().padStart(2,'0') + 'h' + occ.dStart.getMinutes().toString().padStart(2,'0');
+              const hFin = occ.dEnd.getHours().toString().padStart(2,'0') + 'h' + occ.dEnd.getMinutes().toString().padStart(2,'0');
+              heureTexte = `${hDeb} - ${hFin}`;
+            }
+
+            const estEnCours = (maintenant >= occ.dStart && maintenant <= occ.dEnd);
+            const estFutur = occ.dStart > maintenant;
+
+            if (estEnCours) hasEncoursGroup = true;
+
+            let badgeSub = '';
+            if (estEnCours) {
+              badgeSub = '<span class="badge-encours">En cours</span>';
+            } else if (filtreTemps !== 'Jour' && !trouveProchain && estFutur) {
+              trouveProchain = true;
+              premierProchainElement = card;
+              badgeSub = '<span class="badge-upcoming">Prochain</span>';
+            }
+
+            const subBadgesEnfants = genererBadgesEnfants(occ.enfants);
+            const subTitre = occ.titre ? `<div style="font-weight: 700; font-size: 13px; color: var(--text-main);">${occ.titre}</div>` : '';
+            const subLieu = occ.lieu ? `<div class="sub-slot-details"><span class="material-symbols-outlined" style="font-size:13px;">location_on</span> ${occ.lieu}</div>` : '';
+
+            subSlotsHtml += `
+              <div class="sub-slot-item" onclick="event.stopPropagation(); editerEvenement('${occ.id}')">
+                <div class="sub-slot-left">
+                  <span class="event-time-pill"><span class="material-symbols-outlined" style="font-size:13px;">schedule</span> ${heureTexte}</span>
+                  ${subBadgesEnfants}
+                  ${subTitre}
+                  ${subLieu}
+                </div>
+                <div class="sub-slot-right">
+                  ${badgeSub}
+                  <span class="material-symbols-outlined" style="font-size:16px; color: var(--text-muted);">edit</span>
+                </div>
+              </div>
+            `;
+          });
+
+          if (hasEncoursGroup) {
+            card.classList.add('highlight-encours');
+          }
+
           card.innerHTML = `
-            <div class="event-color-bar" style="background-color: #3B82F6;"></div>
+            <div class="event-color-bar" style="${styleBarre}"></div>
             <div class="event-content">
               <div class="event-header">
-                <div class="event-resp"><strong>${occ.responsable || 'Intervenant'}</strong></div>
-                <span class="event-type">${occ.type || ''}</span>
+                <div class="event-resp" style="margin-bottom: 0;">
+                  <span class="material-symbols-outlined" style="font-size:18px;">person</span> 
+                  <strong style="font-size: 15px;">${groupe.responsable}</strong>
+                </div>
+                <span class="event-type">${groupe.type}</span>
               </div>
-              <div>${occ.titre || 'Événement'}</div>
+              ${actionsTelHtml}
+              <div style="margin-top: 8px;">
+                ${subSlotsHtml}
+              </div>
             </div>
           `;
+
           container.appendChild(card);
         });
       });
+
+      if (filtreTemps === 'Tous' && premierProchainElement) {
+        setTimeout(() => {
+          premierProchainElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
     }
 
     function ouvrirModal() {
+      document.getElementById("modalTitle").innerText = "Nouvel Événement";
+      document.getElementById("formId").value = "";
+      document.getElementById("formIdSerie").value = "";
+      
+      if (filtreEnfant !== 'Tous' && enfantsListe.includes(filtreEnfant)) {
+        enfantsModalSelectionnes = [filtreEnfant];
+      } else if (enfantsListe.length > 0) {
+        enfantsModalSelectionnes = [enfantsListe[0]];
+      } else {
+        enfantsModalSelectionnes = [];
+      }
+      majRenduPucesModal();
+
+      document.getElementById("chkRecurent").checked = false;
+      document.getElementById("recurrenceFields").style.display = "none";
+      document.getElementById("secRecurrence").style.display = "block";
+      document.getElementById("secOptionSerie").style.display = "none";
+
+      const selectType = document.getElementById("formTypeSelect");
+      const defaultType = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
+      selectType.value = defaultType;
+      document.getElementById("formTypeInput").value = defaultType;
+      document.getElementById("formTypeInput").style.display = "none";
+      
+      const selectResp = document.getElementById("formResponsableSelect");
+      selectResp.value = "";
+      document.getElementById("formResponsableInput").value = "";
+      document.getElementById("formResponsableInput").style.display = "none";
+      
+      document.getElementById("formTitre").value = "";
+      document.getElementById("formLieu").value = "";
+      document.getElementById("formDetails").value = "";
+      document.getElementById("formPeriodeSelect").value = "";
+      
+      const now = new Date();
+      document.getElementById("formDebut").value = formatForInput(now);
+      now.setHours(now.getHours() + 1);
+      document.getElementById("formFin").value = formatForInput(now);
+      
+      surChangementDebut();
+      
+      document.getElementById("btnDelete").style.display = "none";
       document.getElementById("modalEvt").style.display = "flex";
     }
+
     function fermerModal() {
       document.getElementById("modalEvt").style.display = "none";
     }
 
-    async function soumettre() {
+    function editerEvenement(id) {
+      const evt = donneesBrutes.find(e => String(e.id).trim() === String(id).trim());
+      if (!evt) return;
+
+      document.getElementById("modalTitle").innerText = "Modifier l'événement";
+      document.getElementById("formId").value = evt.id;
+      document.getElementById("formIdSerie").value = evt.idSerie || "";
+      
+      enfantsModalSelectionnes = evt.enfantsPrenoms && evt.enfantsPrenoms.length > 0 ? evt.enfantsPrenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
+      majRenduPucesModal();
+
+      document.getElementById("secRecurrence").style.display = "none";
+      if (evt.idSerie) {
+        document.getElementById("secOptionSerie").style.display = "block";
+      } else {
+        document.getElementById("secOptionSerie").style.display = "none";
+      }
+
+      const selectType = document.getElementById("formTypeSelect");
+      const inputType = document.getElementById("formTypeInput");
+      const typeVal = (evt.type || "").trim();
+      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
+      if (matchType) {
+        selectType.value = matchType;
+        inputType.style.display = "none";
+        inputType.value = matchType;
+      } else {
+        selectType.value = "NOUVEAU";
+        inputType.style.display = "block";
+        inputType.value = typeVal;
+      }
+
+      const selectResp = document.getElementById("formResponsableSelect");
+      const inputResp = document.getElementById("formResponsableInput");
+      const respVal = (evt.responsable || "").trim();
+      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
+      if (matchResp) {
+        selectResp.value = matchResp;
+        inputResp.style.display = "none";
+        inputResp.value = matchResp;
+      } else {
+        selectResp.value = "NOUVEAU";
+        inputResp.style.display = "block";
+        inputResp.value = respVal;
+      }
+
+      document.getElementById("formTitre").value = evt.titre || "";
+      document.getElementById("formDebut").value = formatForInput(evt.debut);
+      document.getElementById("formFin").value = formatForInput(evt.fin);
+      document.getElementById("formDate").value = evt.date ? evt.date.split('T')[0] : (evt.debut ? evt.debut.split('T')[0] : "");
+      document.getElementById("formLieu").value = evt.lieu || "";
+      document.getElementById("formDetails").value = evt.details || "";
+      document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
+      
+      validerControleDates();
+
+      document.getElementById("btnDelete").style.display = "block";
+      document.getElementById("modalEvt").style.display = "flex";
+    }
+
+    function soumettre() {
+      if (!validerControleDates()) return;
+
+      let typeFinal = document.getElementById("formTypeSelect").value;
+      if (typeFinal === 'NOUVEAU' || typeFinal === '') {
+        typeFinal = document.getElementById("formTypeInput").value;
+      }
+
+      let responsableFinal = document.getElementById("formResponsableSelect").value;
+      if (responsableFinal === 'NOUVEAU' || responsableFinal === '') {
+        responsableFinal = document.getElementById("formResponsableInput").value;
+      }
+
+      if (!typeFinal.trim() || !responsableFinal.trim()) {
+        alert("Merci de renseigner le type et le responsable.");
+        return;
+      }
+
+      const modeModif = document.querySelector('input[name="optSerieAction"]:checked') 
+        ? document.querySelector('input[name="optSerieAction"]:checked').value 
+        : 'UNIQUE';
+
+      const targetIds = enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
+
       const payload = {
-        type: document.getElementById("formTypeSelect").value === 'NOUVEAU' ? document.getElementById("formTypeInput").value : document.getElementById("formTypeSelect").value,
-        responsable: document.getElementById("formResponsableSelect").value === 'NOUVEAU' ? document.getElementById("formResponsableInput").value : document.getElementById("formResponsableSelect").value,
+        id: document.getElementById("formId").value,
+        idSerie: document.getElementById("formIdSerie").value,
+        modeModifSerie: modeModif,
+        date: document.getElementById("formDate").value,
+        enfantsIds: targetIds,
+        type: typeFinal,
+        responsable: responsableFinal,
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
-        enfantsIds: enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean)
+        lieu: document.getElementById("formLieu").value,
+        details: document.getElementById("formDetails").value,
+        idPeriode: document.getElementById("formPeriodeSelect").value,
+        statut: "Confirmé",
+        isRecurent: document.getElementById("chkRecurent").checked,
+        intervalleRecurrence: document.getElementById("formRecurIntervalle").value,
+        uniteRecurrence: document.getElementById("formRecurUnite").value,
+        dateFinRecurrence: document.getElementById("formRecurFin").value,
+        idsGardesASupprimer: [],
+        ajustementsConflitEnfants: []
       };
-      await apiFetchPost('sauvegarder', payload);
-      fermerModal();
-      await chargerDonnees();
+
+      analyserConflitsEtValider(payload);
+    }
+
+    function analyserConflitsEtValider(payload) {
+      payloadEnAttente = payload;
+      idsGardesARemplacer = [];
+      ajustementsConflitEnfants = [];
+
+      if (payload.type.toLowerCase() !== "garde") {
+        executerEnregistrement(payload);
+        return;
+      }
+
+      const startNouveau = new Date(payload.debut);
+      const endNouveau = new Date(payload.fin);
+
+      let conflitsEnfants = [];
+      let conflitsResponsable = [];
+
+      donneesBrutes.forEach(evt => {
+        if (String(evt.id).trim() === String(payload.id).trim()) return;
+        if ((evt.type || "").toLowerCase() !== "garde") return;
+
+        const startExistant = new Date(evt.debut);
+        const endExistant = new Date(evt.fin);
+
+        if (startNouveau < endExistant && endNouveau > startExistant) {
+          const enfantsEnConflit = (evt.enfantsPrenoms || []).filter(prenom => {
+            const info = enfantsInfo[prenom];
+            return info && payload.enfantsIds.includes(info.id);
+          });
+
+          if (enfantsEnConflit.length > 0) {
+            const tousLesEnfantsDeLEvt = evt.enfantsPrenoms || [];
+            const enfantsRestants = tousLesEnfantsDeLEvt.filter(p => !enfantsEnConflit.includes(p));
+
+            conflitsEnfants.push({
+              id: evt.id,
+              enfantsTouchés: enfantsEnConflit,
+              enfantsRestants: enfantsRestants,
+              responsable: evt.responsable
+            });
+          }
+
+          if (evt.responsable && evt.responsable.toLowerCase() === payload.responsable.toLowerCase()) {
+            conflitsResponsable.push(evt);
+          }
+        }
+      });
+
+      if (conflitsEnfants.length > 0) {
+        conflitsEnfants.forEach(c => {
+          if (c.enfantsRestants.length === 0) {
+            idsGardesARemplacer.push(c.id);
+          } else {
+            const restantsIds = c.enfantsRestants.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
+            ajustementsConflitEnfants.push({
+              id: c.id,
+              nouveauxEnfantsIds: restantsIds
+            });
+          }
+        });
+
+        const detailsText = conflitsEnfants.map(c => {
+          if (c.enfantsRestants.length > 0) {
+            return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. <strong>${c.enfantsRestants.join(', ')}</strong> reste géré(e) par ${c.responsable}.`;
+          }
+          return `• <strong>${c.enfantsTouchés.join(', ')}</strong> est transféré(e) depuis la garde de ${c.responsable}.`;
+        }).join('<br>');
+        
+        ouvrirModalConflit(
+          "Ajustement des gardes",
+          `Créneau déjà occupé détecté :<br><br>${detailsText}<br><br>Voulez-vous valider cette réorganisation ?`,
+          "Valider et Réorganiser"
+        );
+        return;
+      }
+
+      if (conflitsResponsable.length > 0) {
+        ouvrirModalConflit(
+          "Superposition de garde",
+          `<strong>${payload.responsable}</strong> a déjà une garde enregistrée sur ce créneau horaire.<br><br>Souhaitez-vous confirmer l'enregistrement ?`,
+          "Confirmer et Enregistrer"
+        );
+        return;
+      }
+
+      executerEnregistrement(payload);
+    }
+
+    function ouvrirModalConflit(titre, message, libelleBouton) {
+      document.getElementById("conflitTitle").innerText = titre;
+      document.getElementById("conflitMessage").innerHTML = message;
+      document.getElementById("btnConflitAction").innerText = libelleBouton;
+      document.getElementById("modalConflit").style.display = "flex";
+    }
+
+    function fermerModalConflit() {
+      document.getElementById("modalConflit").style.display = "none";
+    }
+
+    function confirmerConflitEtEnregistrer() {
+      if (payloadEnAttente) {
+        payloadEnAttente.idsGardesASupprimer = idsGardesARemplacer;
+        payloadEnAttente.ajustementsConflitEnfants = ajustementsConflitEnfants;
+        fermerModalConflit();
+        executerEnregistrement(payloadEnAttente);
+      }
+    }
+
+    function executerEnregistrement(payload) {
+      const btn = document.getElementById("btnSubmit");
+      btn.innerHTML = `<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Enregistrement...`;
+      btn.disabled = true;
+
+      apiPost(
+        { action: 'sauvegarderEvenement', payload: payload },
+        res => {
+          btn.innerHTML = "Enregistrer";
+          btn.disabled = false;
+
+          if (res && res.success === false) {
+            alert("Erreur d'enregistrement : " + res.message);
+            return;
+          }
+
+          fermerModal();
+          chargerDonnees();
+          chargerReferences();
+        },
+        err => {
+          btn.innerHTML = "Enregistrer";
+          btn.disabled = false;
+          alert("Erreur serveur : " + err);
+        }
+      );
+    }
+
+    function supprimer() {
+      const id = document.getElementById("formId").value;
+      const idSerie = document.getElementById("formIdSerie").value;
+      if (!id) return;
+
+      const msg = document.getElementById("supprModalMessage");
+      const serieOpts = document.getElementById("supprSerieOptions");
+
+      if (idSerie) {
+        msg.innerHTML = "Cet événement fait partie d'une série récurrente.<br>Que souhaitez-vous supprimer ?";
+        serieOpts.style.display = "block";
+      } else {
+        msg.innerHTML = "Voulez-vous vraiment supprimer cet événement ?";
+        serieOpts.style.display = "none";
+      }
+
+      document.getElementById("modalSuppression").style.display = "flex";
+    }
+
+    function fermerModalSuppression() {
+      document.getElementById("modalSuppression").style.display = "none";
+    }
+
+    function confirmerSuppressionEffective() {
+      const id = document.getElementById("formId").value;
+      const idSerie = document.getElementById("formIdSerie").value;
+
+      let modeSuppr = 'UNIQUE';
+      if (idSerie) {
+        const optionCoquee = document.querySelector('input[name="optSupprSerie"]:checked');
+        if (optionCoquee) modeSuppr = optionCoquee.value;
+      }
+
+      fermerModalSuppression();
+
+      const btn = document.getElementById("btnDelete");
+      btn.innerText = "Suppression...";
+      btn.disabled = true;
+
+      apiPost(
+        { action: 'supprimerLigne', id: id, modeSupprSerie: modeSuppr },
+        () => {
+          fermerModal();
+          btn.innerText = "Supprimer cet événement";
+          btn.disabled = false;
+          chargerDonnees();
+        },
+        err => {
+          alert("Erreur lors de la suppression : " + err);
+          btn.innerText = "Supprimer cet événement";
+          btn.disabled = false;
+        }
+      );
     }
   </script>
 </body>
