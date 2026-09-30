@@ -400,11 +400,14 @@
 
     async function chargerReferences() {
       try {
-        const refs = await apiGet('getRefData');
+        const resp = await fetch('./referentiels.json');
+        if (!resp.ok) throw new Error("Impossible de charger referentiels.json");
+        const refs = await resp.json();
+
         refEnfants = refs.enfants || [];
         refTypes = refs.types || [];
-        refResponsables = refs.responsables || refs.intervenants || [];
-        refIntervenantsObjets = refs.intervenantsObjets || [];
+        refIntervenantsObjets = refs.intervenants || [];
+        refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
         refPeriodes = refs.periodes || [];
 
         enfantsInfo = {};
