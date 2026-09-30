@@ -15,29 +15,29 @@
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0; }
 
-    .btn-toggle-filters { background: #F1F5F9; border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; cursor: pointer; transition: background 0.2s; }
+    .btn-toggle-filters { background: #F1F5F9; border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; cursor: pointer; }
     .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 6px 0 4px 2px; }
     .filters-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 6px; }
     .filters-row::-webkit-scrollbar { display: none; }
     
-    .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; transition: all 0.2s ease; user-select: none; }
+    .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; user-select: none; }
     .chip.active { background: var(--text-main); color: white; border-color: var(--text-main); }
     .chip.time-filter { border-style: dashed; }
     .chip.time-filter.active { background: #E2E8F0; color: var(--text-main); border-style: solid; border-color: var(--text-muted); }
 
-    .filter-panel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .filter-panel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: none; }
     .week-nav { display: none; align-items: center; justify-content: space-between; background: #F1F5F9; border-radius: 10px; padding: 6px 12px; margin-top: 6px; }
     .week-nav.active { display: flex; }
-    .week-nav-btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 2px; color: var(--text-main); }
-    .week-nav-title { font-size: 12px; font-weight: 700; color: var(--text-main); }
+    .week-nav-btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .week-nav-title { font-size: 12px; font-weight: 700; }
 
     .timeline-container { padding: 16px; max-width: 600px; margin: 0 auto; }
     .date-header-container { margin: 20px 0 10px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #E2E8F0; padding-bottom: 6px; }
-    .date-header { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    .date-header { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     .date-count-badge { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 
     .event-card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; gap: 12px; position: relative; }
-    .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15); }
+    .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; }
     .badge-encours { background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 
     .event-color-bar { width: 5px; border-radius: 4px; flex-shrink: 0; }
@@ -61,32 +61,18 @@
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
     .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; }
-    .form-control.is-invalid { border-color: #EF4444; background-color: #FEF2F2; }
-
     .child-selector { display: flex; flex-wrap: wrap; gap: 8px; }
     .child-chip { padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-muted); cursor: pointer; user-select: none; }
     .child-chip.selected { color: white; border-color: transparent; }
 
-    .recurrence-box { background: #F1F5F9; border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-    .toggle-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-
-    .serie-options { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 12px; }
-    .error-msg { color: #EF4444; font-size: 12px; font-weight: 600; margin-top: 5px; display: none; align-items: center; gap: 4px; }
-
-    .btn-submit { width: 100%; padding: 14px; background: var(--text-main); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
-    .btn-submit:disabled { background: #94A3B8; cursor: not-allowed; }
+    .btn-submit { width: 100%; padding: 14px; background: var(--text-main); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
     .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; }
 
     .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 700; }
     .enfants-badges-container { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-    
     .sub-slot-item { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; cursor: pointer; }
     .sub-slot-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .sub-slot-right { display: flex; align-items: center; gap: 6px; }
-    .sub-slot-details { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
-    .spin { animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -97,7 +83,6 @@
       <button class="btn-toggle-filters" onclick="toggleFilters()">
         <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
         <span>Filtres</span>
-        <span class="material-symbols-outlined" id="arrowFilter" style="font-size:16px;">expand_more</span>
       </button>
     </div>
 
@@ -108,33 +93,33 @@
     </div>
 
     <div class="week-nav active" id="weekNav">
-      <button class="week-nav-btn" onclick="naviguerSemaine(-1)"><span class="material-symbols-outlined" style="font-size:14px;">chevron_left</span> Préc.</button>
+      <button class="week-nav-btn" onclick="naviguerSemaine(-1)">Préc.</button>
       <span class="week-nav-title" id="weekNavTitle">Semaine courante</span>
-      <button class="week-nav-btn" onclick="naviguerSemaine(1)">Suiv. <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span></button>
+      <button class="week-nav-btn" onclick="naviguerSemaine(1)">Suiv.</button>
     </div>
 
-    <div id="filterPanel" class="filter-panel" style="display: none;">
+    <div id="filterPanel" class="filter-panel">
       <div class="filter-label">Enfants</div>
-      <div class="filters-row" id="childFilters"><div class="chip active" onclick="setChildFilter('Tous')">Tous</div></div>
+      <div class="filters-row" id="childFilters"></div>
       <div class="filter-label">Périodes & Vacances</div>
-      <div class="filters-row" id="periodeFilters"><div class="chip active" onclick="setPeriodeFilter('Tous')">Toutes</div></div>
+      <div class="filters-row" id="periodeFilters"></div>
       <div class="filter-label">Responsable</div>
-      <div class="filters-row" id="intervenantFilters"><div class="chip active" onclick="setIntervenantFilter('Tous')">Tous</div></div>
+      <div class="filters-row" id="intervenantFilters"></div>
     </div>
   </header>
 
   <div class="timeline-container">
-    <div id="loader" style="text-align:center; padding: 40px; color: #64748B;">Chargement du planning...</div>
+    <div id="loader" style="text-align:center; padding: 40px; color: #64748B;">Initialisation de l'application...</div>
     <div id="timeline"></div>
   </div>
 
   <button class="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
 
-  <!-- Modale Édition / Création -->
-  <div class="modal-overlay" id="modalEvt" onclick="fermerSiClickExterieur(event, 'modalEvt')">
-    <div class="modal" onclick="event.stopPropagation()">
+  <!-- Modale Édition -->
+  <div class="modal-overlay" id="modalEvt">
+    <div class="modal">
       <div class="modal-header">
-        <div class="modal-title" id="modalTitle">Nouvel Événement</div>
+        <div class="modal-title" id="modalTitle">Événement</div>
         <button class="close-btn" onclick="fermerModal()">×</button>
       </div>
 
@@ -142,131 +127,51 @@
       <input type="hidden" id="formIdSerie">
 
       <div class="form-group">
-        <label>1. CONCERNE L'ENFANT / LES ENFANTS *</label>
+        <label>1. CONCERNE L'ENFANT</label>
         <div class="child-selector" id="formEnfantSelector"></div>
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label>2. TYPE *</label>
+          <label>2. TYPE</label>
           <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()"></select>
           <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type...">
         </div>
         <div class="form-group" style="flex: 1;">
-          <label>3. RESPONSABLE *</label>
+          <label>3. RESPONSABLE</label>
           <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()"></select>
           <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable...">
         </div>
       </div>
 
       <div class="form-group">
-        <label>4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
-        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket...">
+        <label>4. TITRE</label>
+        <input type="text" id="formTitre" class="form-control">
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label>5. DÉBUT *</label>
+          <label>5. DÉBUT</label>
           <input type="datetime-local" id="formDebut" class="form-control" onchange="surChangementDebut()">
         </div>
         <div class="form-group" style="flex: 1;">
-          <label>FIN *</label>
-          <input type="datetime-local" id="formFin" class="form-control" onchange="validerControleDates()">
+          <label>FIN</label>
+          <input type="datetime-local" id="formFin" class="form-control">
         </div>
       </div>
-
-      <div id="dateError" class="error-msg">
-        <span class="material-symbols-outlined" style="font-size: 16px;">error</span>
-        La fin de l'événement doit être postérieure au début.
-      </div>
-      <input type="hidden" id="formDate">
 
       <div class="form-group">
         <label>6. LIEU</label>
         <input type="text" id="formLieu" class="form-control">
       </div>
 
-      <div class="form-group">
-        <label>7. DÉTAILS / NOTES</label>
-        <input type="text" id="formDetails" class="form-control">
-      </div>
-
-      <div class="form-group">
-        <label>PÉRIODE / VACANCES</label>
-        <select id="formPeriodeSelect" class="form-control"></select>
-      </div>
-
-      <div class="recurrence-box" id="secRecurrence">
-        <div class="toggle-row" onclick="toggleRecurrenceOpt()">
-          <div class="toggle-title">
-            <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
-            8. Répéter cet événement
-          </div>
-          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)">
-        </div>
-
-        <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-            <span style="font-size: 12px; font-weight: 600;">Toutes les :</span>
-            <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
-            <select id="formRecurUnite" class="form-control" style="flex: 1;">
-              <option value="Jours">Jours</option>
-              <option value="Semaines" selected>Semaines</option>
-              <option value="Mois">Mois</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <span style="font-size: 12px; font-weight: 600;">Jusqu'au :</span>
-            <input type="date" id="formRecurFin" class="form-control" style="flex: 1;">
-          </div>
-        </div>
-      </div>
-
-      <div id="secOptionSerie" class="serie-options" style="display: none;">
-        <strong>Série récurrente :</strong>
-        <div style="margin-top: 6px;">
-          <label><input type="radio" name="optSerieAction" value="UNIQUE" checked> Uniquement cette occurrence</label><br>
-          <label><input type="radio" name="optSerieAction" value="SERIE"> Toute la série</label>
-        </div>
-      </div>
-
-      <button class="btn-submit" id="btnSubmit" onclick="soumettre()">Enregistrer</button>
-      <button class="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer cet événement</button>
-    </div>
-  </div>
-
-  <!-- Modale Conflit -->
-  <div class="modal-overlay" id="modalConflit" style="z-index: 1100;" onclick="fermerSiClickExterieur(event, 'modalConflit')">
-    <div class="modal" style="max-width: 420px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title" id="conflitTitle">Attention</div>
-        <button class="close-btn" onclick="fermerModalConflit()">×</button>
-      </div>
-      <div id="conflitMessage" style="font-size: 13px; margin-bottom: 20px; line-height: 1.5;"></div>
-      <button class="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
-      <button class="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
-    </div>
-  </div>
-
-  <!-- Modale Suppression -->
-  <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;" onclick="fermerSiClickExterieur(event, 'modalSuppression')">
-    <div class="modal" style="max-width: 420px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">Confirmer la suppression</div>
-        <button class="close-btn" onclick="fermerModalSuppression()">×</button>
-      </div>
-      <div id="supprModalMessage" style="font-size: 13px; margin-bottom: 15px; line-height: 1.5;"></div>
-      <div id="supprSerieOptions" style="display:none; margin-bottom: 15px; background: #F1F5F9; padding: 10px; border-radius: 8px; font-size: 12px;">
-        <label><input type="radio" name="optSupprSerie" value="UNIQUE" checked> Uniquement cette occurrence</label><br>
-        <label><input type="radio" name="optSupprSerie" value="SERIE"> Toute la série</label>
-      </div>
-      <button class="btn-submit" style="background-color: #EF4444;" id="btnConfirmerSuppr" onclick="confirmerSuppressionEffective()">Supprimer</button>
-      <button class="btn-delete" onclick="fermerModalSuppression()" style="display: block; color: var(--text-muted);">Annuler</button>
+      <button class="btn-submit" onclick="soumettre()">Enregistrer</button>
+      <button class="btn-delete" id="btnDelete" onclick="supprimer()">Supprimer</button>
     </div>
   </div>
 
   <script>
-    // ⚠️ METS À JOUR CETTE URL avec l'URL de ton nouveau déploiement Web App ⚠️
+    // ⚠️ ASSURE-TOI QUE CETTE URL EST BIEN CELLE DE TON DERNIER DÉPLOIEMENT WEB APP ⚠️
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     let donneesBrutes = [];
@@ -283,25 +188,26 @@
     let offsetSemaines = 0;
 
     let enfantsModalSelectionnes = [];
-    let payloadEnAttente = null;
-    let idsGardesARemplacer = [];
-    let ajustementsConflitEnfants = [];
     let enfantsListe = [];
     let enfantsInfo = {};
 
-    // Synchronisation forcée pour éviter l'écran blanc
-    window.onload = async () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      const loader = document.getElementById('loader');
       try {
+        loader.innerText = "Chargement des références...";
         await chargerReferences();
+        
+        loader.innerText = "Chargement du planning...";
         await chargerDonnees();
-      } catch(err) {
-        document.getElementById('loader').innerText = "Erreur de connexion à la base de données. " + err;
+      } catch (err) {
+        loader.innerHTML = `<span style="color: #EF4444; font-weight: bold;">Erreur de chargement :</span><br><code style="font-size:12px;">${err.message}</code><br><br>Vérifie l'URL Apps Script ou les autorisations de déploiement.`;
+        console.error(err);
       }
-    };
+    });
 
     async function apiFetchGet(action) {
       const response = await fetch(`${APPS_SCRIPT_URL}?action=${action}`);
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) throw new Error(`Erreur HTTP ${response.status} sur l'action ${action}`);
       return await response.json();
     }
 
@@ -314,31 +220,9 @@
       return await response.json();
     }
 
-    function sauvegarderFiltresLocal() {
-      localStorage.setItem('tribu_filtreEnfant', filtreEnfant);
-      localStorage.setItem('tribu_filtreIntervenant', filtreIntervenant);
-      localStorage.setItem('tribu_filtrePeriode', filtrePeriode);
-      localStorage.setItem('tribu_filtreTemps', filtreTemps);
-    }
-
     function toggleFilters() {
       const panel = document.getElementById('filterPanel');
-      const arrow = document.getElementById('arrowFilter');
-      const isHidden = panel.style.display === 'none';
-      panel.style.display = isHidden ? 'block' : 'none';
-      arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
-    }
-
-    async function chargerDonnees() {
-      document.getElementById('loader').style.display = 'block';
-      document.getElementById('timeline').innerHTML = '';
-      try {
-        donneesBrutes = await apiFetchGet('getPlanning');
-        document.getElementById('loader').style.display = 'none';
-        afficherTimeline();
-      } catch (e) {
-        document.getElementById('loader').innerText = "Erreur lors de la lecture du planning.";
-      }
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     }
 
     async function chargerReferences() {
@@ -369,12 +253,18 @@
       genererFiltresPeriodes();
     }
 
+    async function chargerDonnees() {
+      donneesBrutes = await apiFetchGet('getPlanning');
+      document.getElementById('loader').style.display = 'none';
+      afficherTimeline();
+    }
+
     function genererFiltresEnfants() {
       const container = document.getElementById('childFilters');
       let html = `<div class="chip ${filtreEnfant === 'Tous' ? 'active' : ''}" onclick="setChildFilter('Tous')">Tous</div>`;
       enfantsListe.forEach(prenom => {
         const info = enfantsInfo[prenom] || { emoji: '👤' };
-        html += `<div class="chip ${filtreEnfant === prenom ? 'active' : ''}" onclick="setChildFilter('${prenom.replace(/'/g, "\\'")}')">${info.emoji} ${prenom}</div>`;
+        html += `<div class="chip ${filtreEnfant === prenom ? 'active' : ''}" onclick="setChildFilter('${prenom}')">${info.emoji} ${prenom}</div>`;
       });
       container.innerHTML = html;
     }
@@ -384,7 +274,7 @@
       let html = '';
       enfantsListe.forEach(prenom => {
         const info = enfantsInfo[prenom] || { emoji: '👤' };
-        html += `<div class="child-chip" data-enfant="${prenom}" onclick="toggleFormEnfant('${prenom.replace(/'/g, "\\'")}')">${info.emoji} ${prenom}</div>`;
+        html += `<div class="child-chip" data-enfant="${prenom}" onclick="toggleFormEnfant('${prenom}')">${info.emoji} ${prenom}</div>`;
       });
       html += `<div class="child-chip" data-enfant="Tous" onclick="toggleFormEnfant('Tous')">👥 Tous</div>`;
       container.innerHTML = html;
@@ -395,7 +285,7 @@
       const container = document.getElementById('intervenantFilters');
       container.innerHTML = `<div class="chip ${filtreIntervenant === 'Tous' ? 'active' : ''}" onclick="setIntervenantFilter('Tous')">Tous</div>`;
       refResponsables.forEach(resp => {
-        container.innerHTML += `<div class="chip ${filtreIntervenant === resp ? 'active' : ''}" onclick="setIntervenantFilter('${resp.replace(/'/g, "\\'")}')">${resp}</div>`;
+        container.innerHTML += `<div class="chip ${filtreIntervenant === resp ? 'active' : ''}" onclick="setIntervenantFilter('${resp}')">${resp}</div>`;
       });
     }
 
@@ -420,10 +310,6 @@
       selectResp.innerHTML = '<option value="">-- Choisir --</option>';
       refResponsables.forEach(r => selectResp.innerHTML += `<option value="${r}">${r}</option>`);
       selectResp.innerHTML += '<option value="NOUVEAU">+ Ajouter un responsable...</option>';
-
-      const selectPeriode = document.getElementById('formPeriodeSelect');
-      selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
-      refPeriodes.forEach(p => selectPeriode.innerHTML += `<option value="${p.id}">${p.nom}</option>`);
     }
 
     function formatForInput(dateObj) {
@@ -457,72 +343,34 @@
       });
     }
 
-    function toggleRecurrenceOpt(e) {
-      if (!e || e.target.id !== 'chkRecurent') {
-        const chk = document.getElementById('chkRecurent');
-        chk.checked = !chk.checked;
-      }
-      const chkVal = document.getElementById('chkRecurent').checked;
-      document.getElementById('recurrenceFields').style.display = chkVal ? 'block' : 'none';
-      if (chkVal && !document.getElementById('formRecurFin').value) {
-        const dDeb = new Date(document.getElementById('formDebut').value || Date.now());
-        dDeb.setMonth(dDeb.getMonth() + 1);
-        document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
-      }
-    }
-
     function surChangementDebut() {
       const debutStr = document.getElementById("formDebut").value;
       if (!debutStr) return;
-      document.getElementById("formDate").value = debutStr.split('T')[0];
       const d = new Date(debutStr);
       const finInput = document.getElementById("formFin");
       if (!finInput.value || new Date(finInput.value) <= d) {
         finInput.value = formatForInput(new Date(d.getTime() + (60 * 60 * 1000)));
       }
-      validerControleDates();
-    }
-
-    function validerControleDates() {
-      const d = new Date(document.getElementById("formDebut").value);
-      const f = new Date(document.getElementById("formFin").value);
-      const errorMsg = document.getElementById("dateError");
-      const btnSubmit = document.getElementById("btnSubmit");
-
-      if (d && f && f <= d) {
-        errorMsg.style.display = "flex";
-        btnSubmit.disabled = true;
-        document.getElementById("formFin").classList.add("is-invalid");
-        return false;
-      }
-      document.getElementById("formFin").classList.remove("is-invalid");
-      errorMsg.style.display = "none";
-      btnSubmit.disabled = false;
-      return true;
     }
 
     function gererTypeSelect() {
       const val = document.getElementById('formTypeSelect').value;
-      const input = document.getElementById('formTypeInput');
-      input.style.display = (val === 'NOUVEAU') ? 'block' : 'none';
-      if (val !== 'NOUVEAU') input.value = val;
+      document.getElementById('formTypeInput').style.display = (val === 'NOUVEAU') ? 'block' : 'none';
     }
 
     function gererResponsableSelect() {
       const val = document.getElementById('formResponsableSelect').value;
-      const input = document.getElementById('formResponsableInput');
-      input.style.display = (val === 'NOUVEAU') ? 'block' : 'none';
-      if (val !== 'NOUVEAU') input.value = val;
+      document.getElementById('formResponsableInput').style.display = (val === 'NOUVEAU') ? 'block' : 'none';
     }
 
-    function setChildFilter(enfant) { filtreEnfant = enfant; sauvegarderFiltresLocal(); genererFiltresEnfants(); afficherTimeline(); }
-    function setIntervenantFilter(intervenant) { filtreIntervenant = intervenant; sauvegarderFiltresLocal(); genererFiltresIntervenants(); afficherTimeline(); }
-    function setPeriodeFilter(periodeId) { filtrePeriode = periodeId; sauvegarderFiltresLocal(); genererFiltresPeriodes(); afficherTimeline(); }
+    function setChildFilter(enfant) { filtreEnfant = enfant; localStorage.setItem('tribu_filtreEnfant', enfant); genererFiltresEnfants(); afficherTimeline(); }
+    function setIntervenantFilter(intervenant) { filtreIntervenant = intervenant; localStorage.setItem('tribu_filtreIntervenant', intervenant); genererFiltresIntervenants(); afficherTimeline(); }
+    function setPeriodeFilter(periodeId) { filtrePeriode = periodeId; localStorage.setItem('tribu_filtrePeriode', periodeId); genererFiltresPeriodes(); afficherTimeline(); }
 
     function setTimeFilter(temps) {
       filtreTemps = temps;
       offsetSemaines = 0;
-      sauvegarderFiltresLocal();
+      localStorage.setItem('tribu_filtreTemps', temps);
       document.querySelectorAll('#timeFilters .chip').forEach(chip => {
         chip.classList.toggle('active', chip.innerText.includes(temps === 'Jour' ? "Aujourd'hui" : temps === 'Semaine' ? "semaine" : "Tout"));
       });
@@ -559,23 +407,6 @@
       return occurrences;
     }
 
-    function genererGradientBarre(enfants) {
-      const cols = enfants.map(e => enfantsInfo[e] ? enfantsInfo[e].color : '#64748B');
-      if (cols.length === 0) return 'background-color: #64748B;';
-      if (cols.length === 1) return `background-color: ${cols[0]};`;
-      return `background: linear-gradient(to bottom, ${cols.join(', ')});`;
-    }
-
-    function genererBadgesEnfants(enfants) {
-      if (!enfants || enfants.length === 0) return '';
-      return `<div class="enfants-badges-container">` + enfants.map(e => {
-        const info = enfantsInfo[e] || { color: '#64748B', emoji: '👤' };
-        return `<span class="badge-enfant" style="background-color: ${info.color}18; color: ${info.color}; border: 1px solid ${info.color}50;">${info.emoji} ${e}</span>`;
-      }).join('') + `</div>`;
-    }
-
-    function nettoyerNumero(tel) { return tel ? tel.replace(/\s+/g, '') : ''; }
-
     function afficherTimeline() {
       const container = document.getElementById('timeline');
       container.innerHTML = '';
@@ -587,11 +418,8 @@
       debutSemaine.setDate(maintenantDebutJour.getDate() - jourSemaine + 1 + (offsetSemaines * 7));
       
       const finSemaine = new Date(debutSemaine);
-      finSemaine.setDate(debutSemaine.getDate() + 6);
+      finSemaine.setDate(finSemaine.getDate() + 6);
       finSemaine.setHours(23,59,59,999);
-
-      const optsNav = { day: 'numeric', month: 'short' };
-      document.getElementById('weekNavTitle').innerText = offsetSemaines === 0 ? "Cette semaine" : `${debutSemaine.toLocaleDateString('fr-FR', optsNav)} - ${finSemaine.toLocaleDateString('fr-FR', optsNav)}`;
 
       const occurrences = genererOccurrences();
       const occurrencesFiltrees = occurrences.filter(occ => {
@@ -606,10 +434,8 @@
         return true;
       });
 
-      occurrencesFiltrees.sort((a, b) => a.occurrenceDate.getTime() - b.occurrenceDate.getTime() || a.dStart.getTime() - b.dStart.getTime());
-
       if (occurrencesFiltrees.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 40px; color: #64748B;">Aucun événement ne correspond à vos filtres.</div>';
+        container.innerHTML = '<div style="text-align:center; padding: 40px; color: #64748B;">Aucun événement trouvé.</div>';
         return;
       }
 
@@ -620,82 +446,26 @@
         groupesParJour[keyJour].push(occ);
       });
 
-      const joursAbrev = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
-
       Object.keys(groupesParJour).forEach(keyJour => {
         const listeJour = groupesParJour[keyJour];
-        const dateHeaderStr = listeJour[0].occurrenceDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const dateHeaderStr = listeJour[0].occurrenceDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
         const headerCont = document.createElement('div');
         headerCont.className = 'date-header-container';
-        headerCont.innerHTML = `<div class="date-header">${dateHeaderStr}</div><div class="date-count-badge">${listeJour.length} créneau${listeJour.length > 1 ? 'x' : ''}</div>`;
+        headerCont.innerHTML = `<div class="date-header">${dateHeaderStr}</div><div class="date-count-badge">${listeJour.length}</div>`;
         container.appendChild(headerCont);
 
-        const respMap = new Map();
         listeJour.forEach(occ => {
-          const keyGroup = `${(occ.responsable || '').toLowerCase()}_${(occ.type || '').toLowerCase()}`;
-          if (!respMap.has(keyGroup)) {
-            respMap.set(keyGroup, { responsable: occ.responsable, type: occ.type, creneaux: [] });
-          }
-          respMap.get(keyGroup).creneaux.push(occ);
-        });
-
-        respMap.forEach(groupe => {
-          const tousEnfants = [...new Set(groupe.creneaux.flatMap(c => c.enfants))];
           const card = document.createElement('div');
           card.className = 'event-card';
-
-          const objResp = refIntervenantsObjets.find(i => i.nom.toLowerCase() === (groupe.responsable || '').toLowerCase());
-          let actionsTelHtml = '';
-          if (objResp) {
-            const num1 = nettoyerNumero(objResp.tel1);
-            const num2 = nettoyerNumero(objResp.tel2);
-            if (num1 || num2) {
-              actionsTelHtml += `<div class="action-links-container" onclick="event.stopPropagation();">`;
-              if (num1) actionsTelHtml += `<a href="tel:${num1}" class="action-btn-phone">📞 Appel</a><a href="sms:${num1}" class="action-btn-phone">💬 SMS</a>`;
-              if (num2) actionsTelHtml += `<a href="tel:${num2}" class="action-btn-phone">📞 Appel 2</a><a href="sms:${num2}" class="action-btn-phone">💬 SMS 2</a>`;
-              actionsTelHtml += `</div>`;
-            }
-          }
-
-          let subSlotsHtml = '';
-          let hasEncoursGroup = false;
-
-          groupe.creneaux.forEach(occ => {
-            let heureTexte = occ.isMultiDay 
-              ? `${joursAbrev[occ.dStart.getDay()]} ${String(occ.dStart.getHours()).padStart(2,'0')}h${String(occ.dStart.getMinutes()).padStart(2,'0')} ➔ ${joursAbrev[occ.dEnd.getDay()]} ${String(occ.dEnd.getHours()).padStart(2,'0')}h${String(occ.dEnd.getMinutes()).padStart(2,'0')}`
-              : `${String(occ.dStart.getHours()).padStart(2,'0')}h${String(occ.dStart.getMinutes()).padStart(2,'0')} - ${String(occ.dEnd.getHours()).padStart(2,'0')}h${String(occ.dEnd.getMinutes()).padStart(2,'0')}`;
-
-            const estEnCours = (maintenant >= occ.dStart && maintenant <= occ.dEnd);
-            if (estEnCours) hasEncoursGroup = true;
-
-            subSlotsHtml += `
-              <div class="sub-slot-item" onclick="event.stopPropagation(); editerEvenement('${occ.id}')">
-                <div class="sub-slot-left">
-                  <span class="event-time-pill"><span class="material-symbols-outlined" style="font-size:13px;">schedule</span> ${heureTexte}</span>
-                  ${genererBadgesEnfants(occ.enfants)}
-                  ${occ.titre ? `<div style="font-weight:700; font-size:13px;">${occ.titre}</div>` : ''}
-                  ${occ.lieu ? `<div class="sub-slot-details"><span class="material-symbols-outlined" style="font-size:13px;">location_on</span> ${occ.lieu}</div>` : ''}
-                </div>
-                <div class="sub-slot-right">
-                  ${estEnCours ? '<span class="badge-encours">En cours</span>' : ''}
-                  <span class="material-symbols-outlined" style="font-size:16px; color: var(--text-muted);">edit</span>
-                </div>
-              </div>
-            `;
-          });
-
-          if (hasEncoursGroup) card.classList.add('highlight-encours');
-
           card.innerHTML = `
-            <div class="event-color-bar" style="${genererGradientBarre(tousEnfants)}"></div>
+            <div class="event-color-bar" style="background-color: #3B82F6;"></div>
             <div class="event-content">
               <div class="event-header">
-                <div class="event-resp"><span class="material-symbols-outlined" style="font-size:18px;">person</span> <strong>${groupe.responsable}</strong></div>
-                <span class="event-type">${groupe.type}</span>
+                <div class="event-resp"><strong>${occ.responsable || 'Intervenant'}</strong></div>
+                <span class="event-type">${occ.type || ''}</span>
               </div>
-              ${actionsTelHtml}
-              <div style="margin-top: 8px;">${subSlotsHtml}</div>
+              <div>${occ.titre || 'Événement'}</div>
             </div>
           `;
           container.appendChild(card);
@@ -704,250 +474,24 @@
     }
 
     function ouvrirModal() {
-      document.getElementById("modalTitle").innerText = "Nouvel Événement";
-      document.getElementById("formId").value = "";
-      document.getElementById("formIdSerie").value = "";
-      
-      enfantsModalSelectionnes = (filtreEnfant !== 'Tous' && enfantsListe.includes(filtreEnfant)) ? [filtreEnfant] : [enfantsListe[0] || ''];
-      majRenduPucesModal();
-
-      document.getElementById("chkRecurent").checked = false;
-      document.getElementById("recurrenceFields").style.display = "none";
-      document.getElementById("secRecurrence").style.display = "block";
-      document.getElementById("secOptionSerie").style.display = "none";
-
-      document.getElementById("formTypeSelect").value = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
-      document.getElementById("formTypeInput").style.display = "none";
-      document.getElementById("formResponsableSelect").value = "";
-      document.getElementById("formResponsableInput").style.display = "none";
-      document.getElementById("formTitre").value = "";
-      document.getElementById("formLieu").value = "";
-      document.getElementById("formDetails").value = "";
-      document.getElementById("formPeriodeSelect").value = "";
-      
-      const now = new Date();
-      document.getElementById("formDebut").value = formatForInput(now);
-      now.setHours(now.getHours() + 1);
-      document.getElementById("formFin").value = formatForInput(now);
-      surChangementDebut();
-      
-      document.getElementById("btnDelete").style.display = "none";
       document.getElementById("modalEvt").style.display = "flex";
     }
-
-    function fermerModal() { document.getElementById("modalEvt").style.display = "none"; }
-    function fermerSiClickExterieur(event, idModal) { if (event.target.id === idModal) document.getElementById(idModal).style.display = "none"; }
-
-    function editerEvenement(id) {
-      const evt = donneesBrutes.find(e => String(e.id).trim() === String(id).trim());
-      if (!evt) return;
-
-      document.getElementById("modalTitle").innerText = "Modifier l'événement";
-      document.getElementById("formId").value = evt.id;
-      document.getElementById("formIdSerie").value = evt.idSerie || "";
-      
-      enfantsModalSelectionnes = evt.enfantsPrenoms && evt.enfantsPrenoms.length > 0 ? evt.enfantsPrenoms : [enfantsListe[0] || ''];
-      majRenduPucesModal();
-
-      document.getElementById("secRecurrence").style.display = "none";
-      document.getElementById("secOptionSerie").style.display = evt.idSerie ? "block" : "none";
-
-      const typeVal = (evt.type || "").trim();
-      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
-      document.getElementById("formTypeSelect").value = matchType || "NOUVEAU";
-      document.getElementById("formTypeInput").style.display = matchType ? "none" : "block";
-      document.getElementById("formTypeInput").value = typeVal;
-
-      const respVal = (evt.responsable || "").trim();
-      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
-      document.getElementById("formResponsableSelect").value = matchResp || "NOUVEAU";
-      document.getElementById("formResponsableInput").style.display = matchResp ? "none" : "block";
-      document.getElementById("formResponsableInput").value = respVal;
-
-      document.getElementById("formTitre").value = evt.titre || "";
-      document.getElementById("formDebut").value = formatForInput(evt.debut);
-      document.getElementById("formFin").value = formatForInput(evt.fin);
-      document.getElementById("formDate").value = evt.date ? evt.date.split('T')[0] : (evt.debut ? evt.debut.split('T')[0] : "");
-      document.getElementById("formLieu").value = evt.lieu || "";
-      document.getElementById("formDetails").value = evt.details || "";
-      document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
-      
-      validerControleDates();
-      document.getElementById("btnDelete").style.display = "block";
-      document.getElementById("modalEvt").style.display = "flex";
+    function fermerModal() {
+      document.getElementById("modalEvt").style.display = "none";
     }
 
-    function soumettre() {
-      if (!validerControleDates()) return;
-
-      let typeFinal = document.getElementById("formTypeSelect").value;
-      if (typeFinal === 'NOUVEAU' || !typeFinal) typeFinal = document.getElementById("formTypeInput").value;
-
-      let responsableFinal = document.getElementById("formResponsableSelect").value;
-      if (responsableFinal === 'NOUVEAU' || !responsableFinal) responsableFinal = document.getElementById("formResponsableInput").value;
-
-      if (!typeFinal.trim() || !responsableFinal.trim()) {
-        alert("Merci de renseigner le type et le responsable.");
-        return;
-      }
-
-      const modeModif = document.querySelector('input[name="optSerieAction"]:checked') ? document.querySelector('input[name="optSerieAction"]:checked').value : 'UNIQUE';
-      const targetIds = enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
-
+    async function soumettre() {
       const payload = {
-        id: document.getElementById("formId").value,
-        idSerie: document.getElementById("formIdSerie").value,
-        modeModifSerie: modeModif,
-        date: document.getElementById("formDate").value,
-        enfantsIds: targetIds,
-        type: typeFinal,
-        responsable: responsableFinal,
+        type: document.getElementById("formTypeSelect").value === 'NOUVEAU' ? document.getElementById("formTypeInput").value : document.getElementById("formTypeSelect").value,
+        responsable: document.getElementById("formResponsableSelect").value === 'NOUVEAU' ? document.getElementById("formResponsableInput").value : document.getElementById("formResponsableSelect").value,
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
-        lieu: document.getElementById("formLieu").value,
-        details: document.getElementById("formDetails").value,
-        idPeriode: document.getElementById("formPeriodeSelect").value,
-        statut: "Confirmé",
-        isRecurent: document.getElementById("chkRecurent").checked,
-        intervalleRecurrence: document.getElementById("formRecurIntervalle").value,
-        uniteRecurrence: document.getElementById("formRecurUnite").value,
-        dateFinRecurrence: document.getElementById("formRecurFin").value,
-        idsGardesASupprimer: [],
-        ajustementsConflitEnfants: []
+        enfantsIds: enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean)
       };
-
-      analyserConflitsEtValider(payload);
-    }
-
-    function analyserConflitsEtValider(payload) {
-      payloadEnAttente = payload;
-      idsGardesARemplacer = [];
-      ajustementsConflitEnfants = [];
-
-      if (payload.type.toLowerCase() !== "garde") {
-        executerEnregistrement(payload);
-        return;
-      }
-
-      const startNouveau = new Date(payload.debut);
-      const endNouveau = new Date(payload.fin);
-      let conflitsEnfants = [];
-      let conflitsResponsable = [];
-
-      donneesBrutes.forEach(evt => {
-        if (String(evt.id).trim() === String(payload.id).trim() || (evt.type || "").toLowerCase() !== "garde") return;
-        const startExistant = new Date(evt.debut);
-        const endExistant = new Date(evt.fin);
-
-        if (startNouveau < endExistant && endNouveau > startExistant) {
-          const enfantsEnConflit = (evt.enfantsPrenoms || []).filter(prenom => enfantsInfo[prenom] && payload.enfantsIds.includes(enfantsInfo[prenom].id));
-          if (enfantsEnConflit.length > 0) {
-            const enfantsRestants = (evt.enfantsPrenoms || []).filter(p => !enfantsEnConflit.includes(p));
-            conflitsEnfants.push({ id: evt.id, enfantsTouchés: enfantsEnConflit, enfantsRestants, responsable: evt.responsable });
-          }
-          if (evt.responsable && evt.responsable.toLowerCase() === payload.responsable.toLowerCase()) {
-            conflitsResponsable.push(evt);
-          }
-        }
-      });
-
-      if (conflitsEnfants.length > 0) {
-        conflitsEnfants.forEach(c => {
-          if (c.enfantsRestants.length === 0) idsGardesARemplacer.push(c.id);
-          else ajustementsConflitEnfants.push({ id: c.id, nouveauxEnfantsIds: c.enfantsRestants.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean) });
-        });
-        ouvrirModalConflit("Ajustement des gardes", "Créneau déjà occupé détecté. Voulez-vous valider cette réorganisation ?", "Valider et Réorganiser");
-        return;
-      }
-
-      if (conflitsResponsable.length > 0) {
-        ouvrirModalConflit("Superposition de garde", `<strong>${payload.responsable}</strong> a déjà une garde enregistrée sur ce créneau.`, "Confirmer");
-        return;
-      }
-
-      executerEnregistrement(payload);
-    }
-
-    function ouvrirModalConflit(titre, message, libelleBouton) {
-      document.getElementById("conflitTitle").innerText = titre;
-      document.getElementById("conflitMessage").innerHTML = message;
-      document.getElementById("btnConflitAction").innerText = libelleBouton;
-      document.getElementById("modalConflit").style.display = "flex";
-    }
-    function fermerModalConflit() { document.getElementById("modalConflit").style.display = "none"; }
-
-    function confirmerConflitEtEnregistrer() {
-      if (payloadEnAttente) {
-        payloadEnAttente.idsGardesASupprimer = idsGardesARemplacer;
-        payloadEnAttente.ajustementsConflitEnfants = ajustementsConflitEnfants;
-        fermerModalConflit();
-        executerEnregistrement(payloadEnAttente);
-      }
-    }
-
-    async function executerEnregistrement(payload) {
-      const btn = document.getElementById("btnSubmit");
-      btn.innerHTML = `<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Enregistrement...`;
-      btn.disabled = true;
-
-      try {
-        const res = await apiFetchPost('sauvegarder', payload);
-        btn.innerHTML = "Enregistrer";
-        btn.disabled = false;
-
-        if (res && res.success === false) {
-          alert("Erreur : " + res.message);
-          return;
-        }
-
-        fermerModal();
-        chargerDonnees();
-        chargerReferences();
-      } catch (err) {
-        btn.innerHTML = "Enregistrer";
-        btn.disabled = false;
-        alert("Erreur serveur : " + err);
-      }
-    }
-
-    function supprimer() {
-      const id = document.getElementById("formId").value;
-      const idSerie = document.getElementById("formIdSerie").value;
-      if (!id) return;
-
-      document.getElementById("supprModalMessage").innerHTML = idSerie ? "Cet événement fait partie d'une série récurrente.<br>Que souhaitez-vous supprimer ?" : "Voulez-vous vraiment supprimer cet événement ?";
-      document.getElementById("supprSerieOptions").style.display = idSerie ? "block" : "none";
-      document.getElementById("modalSuppression").style.display = "flex";
-    }
-
-    function fermerModalSuppression() { document.getElementById("modalSuppression").style.display = "none"; }
-
-    async function confirmerSuppressionEffective() {
-      const id = document.getElementById("formId").value;
-      const idSerie = document.getElementById("formIdSerie").value;
-      let modeSuppr = 'UNIQUE';
-      if (idSerie) {
-        const opt = document.querySelector('input[name="optSupprSerie"]:checked');
-        if (opt) modeSuppr = opt.value;
-      }
-
-      fermerModalSuppression();
-      const btn = document.getElementById("btnDelete");
-      btn.innerText = "Suppression...";
-      btn.disabled = true;
-
-      try {
-        await apiFetchPost('supprimer', { id: id, mode: modeSuppr });
-        fermerModal();
-        btn.innerText = "Supprimer cet événement";
-        btn.disabled = false;
-        chargerDonnees();
-      } catch (err) {
-        alert("Erreur lors de la suppression : " + err);
-        btn.innerText = "Supprimer cet événement";
-        btn.disabled = false;
-      }
+      await apiFetchPost('sauvegarder', payload);
+      fermerModal();
+      await chargerDonnees();
     }
   </script>
 </body>
