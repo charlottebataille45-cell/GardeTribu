@@ -349,6 +349,7 @@
     
     let enfantsListe = [];
     let enfantsInfo = {};
+    let mapIdToPrenom = {};
 
     window.onload = () => {
       chargerDonnees();
@@ -412,6 +413,8 @@
 
         enfantsInfo = {};
         enfantsListe = [];
+        mapIdToPrenom = {};
+
         refEnfants.forEach(e => {
           if (e.actif === 'Oui' || e.actif === '' || !e.actif) {
             enfantsInfo[e.prenom] = {
@@ -420,6 +423,7 @@
               emoji: e.emoji || '👤'
             };
             enfantsListe.push(e.prenom);
+            mapIdToPrenom[e.id] = e.prenom;
           }
         });
 
@@ -697,6 +701,8 @@
 
         if (isNaN(dStart.getTime())) return;
 
+        const prenoms = (evt.enfantsIds || []).map(id => mapIdToPrenom[id]).filter(Boolean);
+
         let dayCursor = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
         const dayEnd = !isNaN(dEnd.getTime()) 
           ? new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate())
@@ -706,11 +712,12 @@
         while (dayCursor <= dayEnd && count < 30) {
           occurrences.push({
             ...evt,
+            enfantsPrenoms: prenoms,
             occurrenceDate: new Date(dayCursor),
             isMultiDay: dayEnd.getTime() > new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate()).getTime(),
             dStart: dStart,
             dEnd: dEnd,
-            enfants: evt.enfantsPrenoms && evt.enfantsPrenoms.length > 0 ? evt.enfantsPrenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : [])
+            enfants: prenoms.length > 0 ? prenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : [])
           });
           dayCursor.setDate(dayCursor.getDate() + 1);
           count++;
@@ -1022,7 +1029,8 @@
       document.getElementById("formId").value = evt.id;
       document.getElementById("formIdSerie").value = evt.idSerie || "";
       
-      enfantsModalSelectionnes = evt.enfantsPrenoms && evt.enfantsPrenoms.length > 0 ? evt.enfantsPrenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
+      const prenomsEvt = (evt.enfantsIds || []).map(idEnf => mapIdToPrenom[idEnf]).filter(Boolean);
+      enfantsModalSelectionnes = prenomsEvt.length > 0 ? prenomsEvt : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
       majRenduPucesModal();
 
       document.getElementById("secRecurrence").style.display = "none";
@@ -1148,19 +1156,18 @@
         const endExistant = new Date(evt.fin);
 
         if (startNouveau < endExistant && endNouveau > startExistant) {
-          const enfantsEnConflit = (evt.enfantsPrenoms || []).filter(prenom => {
-            const info = enfantsInfo[prenom];
-            return info && payload.enfantsIds.includes(info.id);
-          });
+          const evtEnfantsIds = evt.enfantsIds || [];
+          const enfantsEnConflitIds = evtEnfantsIds.filter(id => payload.enfantsIds.includes(id));
 
-          if (enfantsEnConflit.length > 0) {
-            const tousLesEnfantsDeLEvt = evt.enfantsPrenoms || [];
-            const enfantsRestants = tousLesEnfantsDeLEvt.filter(p => !enfantsEnConflit.includes(p));
+          if (enfantsEnConflitIds.length > 0) {
+            const enfantsEnConflitPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
+            const enfantsRestantsIds = evtEnfantsIds.filter(id => !payload.enfantsIds.includes(id));
+            const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
 
             conflitsEnfants.push({
               id: evt.id,
-              enfantsTouchés: enfantsEnConflit,
-              enfantsRestants: enfantsRestants,
+              enfantsTouchés: enfantsEnConflitPrenoms,
+              enfantsRestants: enfantsRestantsPrenoms,
               responsable: evt.responsable
             });
           }
