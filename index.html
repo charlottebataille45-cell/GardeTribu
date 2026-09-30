@@ -126,7 +126,7 @@
   <header>
     <div class="header-top">
       <h1>🐢 La Tribu</h1>
-      <button class="btn-toggle-filters" onclick="toggleFilters()">
+      <button class="btn-toggle-filters" onclick="toggleFilters()" aria-label="Afficher ou masquer les filtres">
         <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
         <span>Filtres</span>
         <span class="material-symbols-outlined" id="arrowFilter" style="font-size:16px;">expand_more</span>
@@ -169,56 +169,56 @@
     <div id="timeline"></div>
   </div>
 
-  <button class="fab" onclick="ouvrirModal()"><span class="material-symbols-outlined">add</span></button>
+  <button class="fab" onclick="ouvrirModal()" aria-label="Ajouter un événement"><span class="material-symbols-outlined">add</span></button>
 
   <!-- Modale Édition / Création -->
   <div class="modal-overlay" id="modalEvt">
     <div class="modal">
       <div class="modal-header">
         <div class="modal-title" id="modalTitle">Nouvel Événement</div>
-        <button class="close-btn" onclick="fermerModal()">×</button>
+        <button class="close-btn" onclick="fermerModal()" aria-label="Fermer la fenêtre">×</button>
       </div>
 
       <input type="hidden" id="formId">
       <input type="hidden" id="formIdSerie">
 
       <div class="form-group">
-        <label>1. CONCERNE L'ENFANT / LES ENFANTS *</label>
+        <span class="filter-label" style="display:block; margin-bottom:6px;">1. CONCERNE L'ENFANT / LES ENFANTS *</span>
         <div class="child-selector" id="formEnfantSelector"></div>
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label>2. TYPE *</label>
+          <label for="formTypeSelect">2. TYPE *</label>
           <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
             <option value="">-- Choisir --</option>
             <option value="NOUVEAU">+ Ajouter un type...</option>
           </select>
-          <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type...">
+          <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type..." aria-label="Saisir un autre type">
         </div>
 
         <div class="form-group" style="flex: 1;">
-          <label>3. RESPONSABLE *</label>
+          <label for="formResponsableSelect">3. RESPONSABLE *</label>
           <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
             <option value="">-- Choisir --</option>
             <option value="NOUVEAU">+ Ajouter...</option>
           </select>
-          <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable...">
+          <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable..." aria-label="Saisir un autre responsable">
         </div>
       </div>
 
       <div class="form-group">
-        <label>4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
+        <label for="formTitre">4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
         <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Oréliance...">
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label>5. DÉBUT *</label>
+          <label for="formDebut">5. DÉBUT *</label>
           <input type="datetime-local" id="formDebut" class="form-control" onchange="surChangementDebut()">
         </div>
         <div class="form-group" style="flex: 1;">
-          <label>FIN *</label>
+          <label for="formFin">FIN *</label>
           <input type="datetime-local" id="formFin" class="form-control" onchange="validerControleDates()">
         </div>
       </div>
@@ -230,17 +230,17 @@
       <input type="hidden" id="formDate">
 
       <div class="form-group">
-        <label>6. LIEU</label>
+        <label for="formLieu">6. LIEU</label>
         <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
       </div>
 
       <div class="form-group">
-        <label>7. DÉTAILS / NOTES</label>
+        <label for="formDetails">7. DÉTAILS / NOTES</label>
         <input type="text" id="formDetails" class="form-control" placeholder="Infos complémentaires...">
       </div>
 
       <div class="form-group">
-        <label>PÉRIODE / VACANCES</label>
+        <label for="formPeriodeSelect">PÉRIODE / VACANCES</label>
         <select id="formPeriodeSelect" class="form-control">
           <option value="">-- Hors vacances --</option>
         </select>
@@ -252,14 +252,14 @@
             <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
             8. Répéter cet événement
           </div>
-          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" style="cursor:pointer; width:16px; height:16px;">
+          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence de l'événement" style="cursor:pointer; width:16px; height:16px;">
         </div>
 
         <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
           <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-            <span style="font-size: 12px; font-weight: 600;">Toutes les :</span>
+            <label for="formRecurIntervalle" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Toutes les :</label>
             <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
-            <select id="formRecurUnite" class="form-control" style="flex: 1;">
+            <select id="formRecurUnite" class="form-control" style="flex: 1;" aria-label="Unité de fréquence de récurrence">
               <option value="Jours">Jours</option>
               <option value="Semaines" selected>Semaines</option>
               <option value="Mois">Mois</option>
@@ -267,7 +267,7 @@
           </div>
 
           <div style="display: flex; gap: 10px; align-items: center;">
-            <span style="font-size: 12px; font-weight: 600;">Jusqu'au :</span>
+            <label for="formRecurFin" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Jusqu'au :</label>
             <input type="date" id="formRecurFin" class="form-control" style="flex: 1;">
           </div>
         </div>
@@ -291,7 +291,7 @@
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="conflitTitle">Attention aux chevauchements</div>
-        <button class="close-btn" onclick="fermerModalConflit()">×</button>
+        <button class="close-btn" onclick="fermerModalConflit()" aria-label="Fermer la fenêtre de conflit">×</button>
       </div>
       <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5;"></div>
       <div style="display: flex; gap: 10px; flex-direction: column;">
@@ -306,7 +306,7 @@
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="supprModalTitle">Confirmer la suppression</div>
-        <button class="close-btn" onclick="fermerModalSuppression()">×</button>
+        <button class="close-btn" onclick="fermerModalSuppression()" aria-label="Fermer la fenêtre de suppression">×</button>
       </div>
       <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;"></div>
       
@@ -327,7 +327,6 @@
   </div>
 
   <script>
-    // COLLE ICI L'URL DE DÉPLOIEMENT DE TON WEB APP GOOGLE APPS SCRIPT :
     const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     let donneesBrutes = [];
