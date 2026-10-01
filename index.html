@@ -1318,7 +1318,7 @@
       if (payloadEnAttente) {
         payloadEnAttente.idsGardesASupprimer = idsGardesARemplacer;
         payloadEnAttente.ajustementsConflitEnfants = ajustementsConflitEnfants;
-        payloadEnAttente.forcerMalgreConflit = true; // <-- Indique au backend de forcer l'enregistrement
+        payloadEnAttente.forcerMalgreConflit = true; // <-- Indique au backend de forcer l'enregistrement malgré le chevauchement
         fermerModalConflit();
         executerEnregistrement(payloadEnAttente);
       }
