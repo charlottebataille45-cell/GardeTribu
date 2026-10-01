@@ -9,11 +9,12 @@
     "Événement",
     "Autre"
   ],
+
   "intervenants": [
     {
       "id": "INT001",
       "nom": "Papy Michel & MamIsa",
-      "type": "grand-parent",
+      "type": "famille",
       "tel1": "0621213979",
       "tel2": "0618035434",
       "email": "",
@@ -67,13 +68,23 @@
     {
       "id": "INT007",
       "nom": "Isabelle",
-      "type": "famille",
+      "type": "grand-parent",
       "tel1": "0603326111",
+      "tel2": "",
+      "email": "",
+      "actif": true
+    },
+    {
+      "id": "INT008",
+      "nom": "Renaud",
+      "type": "parent",
+      "tel1": "",
       "tel2": "",
       "email": "",
       "actif": true
     }
   ],
+
   "lieux": [
     {
       "id": "LIEU001",
@@ -135,8 +146,8 @@
       "type": "structure",
       "adresse": ""
     }
-    
   ],
+
   "periodes": [
     {
       "id": "PER001",
@@ -175,41 +186,165 @@
       "dateFin": "2027-08-31"
     }
   ],
+
   "enfants": [
     {
       "id": "ENF01",
       "prenom": "Enola",
-      "actif": "Oui",
+      "actif": true,
       "couleur": "#E91E63",
       "emoji": "🍒"
     },
     {
       "id": "ENF02",
       "prenom": "James",
-      "actif": "Oui",
+      "actif": true,
       "couleur": "#2196F3",
       "emoji": "🦖"
     },
     {
       "id": "ENF03",
       "prenom": "Andreas",
-      "actif": "Oui",
+      "actif": true,
       "couleur": "#4CAF50",
       "emoji": "⚡"
     },
     {
       "id": "ENF04",
       "prenom": "Matys",
-      "actif": "Oui",
+      "actif": true,
       "couleur": "#FF9800",
       "emoji": "🎮"
     },
     {
       "id": "ENF05",
       "prenom": "Nino",
-      "actif": "Oui",
+      "actif": true,
       "couleur": "#9C27B0",
       "emoji": "🏀"
+    }
+  ],
+
+  "relationsFamiliales": [
+    {
+      "intervenantId": "INT002",
+      "enfantId": "ENF01",
+      "relation": "mère",
+      "cote": "Charlotte"
+    },
+    {
+      "intervenantId": "INT002",
+      "enfantId": "ENF03",
+      "relation": "mère",
+      "cote": "Charlotte"
+    },
+    {
+      "intervenantId": "INT002",
+      "enfantId": "ENF04",
+      "relation": "mère",
+      "cote": "Charlotte"
+    },
+
+    {
+      "intervenantId": "INT005",
+      "enfantId": "ENF01",
+      "relation": "père",
+      "cote": "Mathieu"
+    },
+    {
+      "intervenantId": "INT005",
+      "enfantId": "ENF02",
+      "relation": "père",
+      "cote": "Mathieu"
+    },
+    {
+      "intervenantId": "INT005",
+      "enfantId": "ENF05",
+      "relation": "père",
+      "cote": "Mathieu"
+    },
+
+    {
+      "intervenantId": "INT008",
+      "enfantId": "ENF03",
+      "relation": "père",
+      "cote": "Renaud"
+    },
+    {
+      "intervenantId": "INT008",
+      "enfantId": "ENF04",
+      "relation": "père",
+      "cote": "Renaud"
+    },
+
+    {
+      "intervenantId": "INT006",
+      "enfantId": "ENF02",
+      "relation": "mère",
+      "cote": "Sarah"
+    },
+    {
+      "intervenantId": "INT006",
+      "enfantId": "ENF05",
+      "relation": "mère",
+      "cote": "Sarah"
+    },
+
+    {
+      "intervenantId": "INT001",
+      "enfantId": "ENF01",
+      "relation": "grands-parents",
+      "cote": "Mathieu"
+    },
+    {
+      "intervenantId": "INT001",
+      "enfantId": "ENF02",
+      "relation": "grands-parents",
+      "cote": "Mathieu"
+    },
+    {
+      "intervenantId": "INT001",
+      "enfantId": "ENF05",
+      "relation": "grands-parents",
+      "cote": "Mathieu"
+    },
+
+    {
+      "intervenantId": "INT004",
+      "enfantId": "ENF01",
+      "relation": "grand-mère",
+      "cote": "Mathieu"
+    },
+    {
+      "intervenantId": "INT004",
+      "enfantId": "ENF02",
+      "relation": "grand-mère",
+      "cote": "Mathieu"
+    },
+    {
+      "intervenantId": "INT005",
+      "enfantId": "ENF05",
+      "relation": "grand-mère",
+      "cote": "Mathieu"
+    },
+
+    {
+      "intervenantId": "INT007",
+      "enfantId": "ENF01",
+      "relation": "grand-mère",
+      "cote": "Charlotte"
+    },
+    {
+      "intervenantId": "INT007",
+      "enfantId": "ENF03",
+      "relation": "grand-mère",
+      "cote": "Charlotte"
+    },
+    {
+      "intervenantId": "INT007",
+      "enfantId": "ENF04",
+      "relation": "grand-mère",
+      "cote": "Charlotte"
     }
   ]
 }
