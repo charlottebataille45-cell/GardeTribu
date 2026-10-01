@@ -402,7 +402,6 @@
 
     async function chargerReferences() {
       try {
-        // Chargement des référentiels via l'API Backend (qui lit referentiels.json sur GitHub)
         const refs = await apiGet('getRefData');
 
         refEnfants = refs.enfants || [];
@@ -1287,14 +1286,14 @@
       document.getElementById("modalSuppression").style.display = "none";
     }
 
-async function confirmerSuppressionEffective() {
+    async function confirmerSuppressionEffective() {
       const id = document.getElementById("formId").value;
       const idSerie = document.getElementById("formIdSerie").value;
 
       let modeSuppr = 'UNIQUE';
       if (idSerie) {
-        const optionCoquee = document.querySelector('input[name="optSupprSerie"]:checked');
-        if (optionCoquee) modeSuppr = optionCoquee.value;
+        const optionCochee = document.querySelector('input[name="optSupprSerie"]:checked');
+        if (optionCochee) modeSuppr = optionCochee.value;
       }
 
       fermerModalSuppression();
@@ -1309,26 +1308,7 @@ async function confirmerSuppressionEffective() {
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
         chargerDonnees();
-      } catch (err) { // 👈 Corrigé ici
-        alert("Erreur lors de la suppression : " + err);
-        btn.innerText = "Supprimer cet événement";
-        btn.disabled = false;
-      }
-    }
-
-      fermerModalSuppression();
-
-      const btn = document.getElementById("btnDelete");
-      btn.innerText = "Suppression...";
-      btn.disabled = true;
-
-      try {
-        await apiPost('supprimerLigne', { id: id, modeSupprSerie: modeSuppr });
-        fermerModal();
-        btn.innerText = "Supprimer cet événement";
-        btn.disabled = false;
-        chargerDonnees();
-      } taxa(err) {
+      } catch (err) {
         alert("Erreur lors de la suppression : " + err);
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
