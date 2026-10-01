@@ -35,6 +35,8 @@
     .chip.time-filter.active { background: #E2E8F0; color: var(--text-main); border-style: solid; border-color: var(--text-muted); }
 
     .filter-panel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .btn-reset-filters { margin-top: 8px; width: 100%; padding: 6px 12px; background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .btn-reset-filters:hover { background: #FEE2E2; }
 
     .week-nav { display: none; align-items: center; justify-content: space-between; background: #F1F5F9; border-radius: 10px; padding: 6px 12px; margin-top: 6px; }
     .week-nav.active { display: flex; }
@@ -66,7 +68,7 @@
     .event-color-bar { width: 5px; border-radius: 4px; flex-shrink: 0; }
     .event-content { flex: 1; }
     .event-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
-    .event-type { font-size: 11px; padding: 3px 8px; background: #F1F5F9; border-radius: 12px; font-weight: 600; color: #475569; }
+    .event-type { font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 700; display: inline-flex; align-items: center; }
     .event-resp { font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
     
     .action-links-container { display: flex; gap: 6px; margin-top: 6px; margin-bottom: 6px; flex-wrap: wrap; }
@@ -161,6 +163,10 @@
       <div class="filters-row" id="intervenantFilters">
         <div class="chip active" onclick="setIntervenantFilter('Tous')">Tous</div>
       </div>
+
+      <button class="btn-reset-filters" onclick="reinitialiserFiltres()">
+        <span class="material-symbols-outlined" style="font-size:14px;">restart_alt</span> Réinitialiser tous les filtres
+      </button>
     </div>
   </header>
 
@@ -327,7 +333,6 @@
   </div>
 
   <script>
-    // ⚠️ Remplacez par votre URL Web App Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     let donneesBrutes = [];
@@ -380,6 +385,16 @@
       localStorage.setItem('tribu_filtreTemps', filtreTemps);
     }
 
+    function getTypeBadgeStyle(type) {
+      const t = (type || '').toLowerCase();
+      if (t.includes('garde')) return 'background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;';
+      if (t.includes('médical') || t.includes('medical')) return 'background: #FCE7F3; color: #9D174D; border: 1px solid #FBCFE8;';
+      if (t.includes('école') || t.includes('ecole')) return 'background: #E0F2FE; color: #075985; border: 1px solid #BAE6FD;';
+      if (t.includes('activité') || t.includes('activite')) return 'background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;';
+      if (t.includes('rdv')) return 'background: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE;';
+      return 'background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0;';
+    }
+
     function toggleFilters() {
       const panel = document.getElementById('filterPanel');
       const arrow = document.getElementById('arrowFilter');
@@ -402,12 +417,14 @@
 
     async function chargerReferences() {
       try {
-        const refs = await apiGet('getRefData');
+        const resp = await fetch('./referentiels.json');
+        if (!resp.ok) throw new Error("Impossible de charger referentiels.json");
+        const refs = await resp.json();
 
         refEnfants = refs.enfants || [];
         refTypes = refs.types || [];
-        refIntervenantsObjets = refs.intervenantsObjets || [];
-        refResponsables = refs.responsables || [];
+        refIntervenantsObjets = refs.intervenants || [];
+        refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
         refPeriodes = refs.periodes || [];
 
         enfantsInfo = {};
@@ -437,7 +454,7 @@
         genererFiltresPeriodes();
         afficherTimeline();
       } catch(err) {
-        console.error("Erreur chargement références:", err);
+        console.error("Erreur réfs:", err);
       }
     }
 
@@ -489,6 +506,19 @@
         const activeClass = filtrePeriode === p.id ? 'active' : '';
         container.innerHTML += `<div class="chip ${activeClass}" onclick="setPeriodeFilter('${p.id}')">${p.nom}</div>`;
       });
+    }
+
+    function reinitialiserFiltres() {
+      filtreEnfant = 'Tous';
+      filtreIntervenant = 'Tous';
+      filtrePeriode = 'Tous';
+      filtreTemps = 'Semaine';
+      offsetSemaines = 0;
+      sauvegarderFiltresLocal();
+      genererFiltresEnfants();
+      genererFiltresIntervenants();
+      genererFiltresPeriodes();
+      setTimeFilter('Semaine');
     }
 
     function majSelectsModal() {
@@ -863,6 +893,7 @@
           });
 
           const styleBarre = genererGradientBarre(tousEnfants);
+          const typeStyle = getTypeBadgeStyle(groupe.type);
 
           const card = document.createElement('div');
           card.className = 'event-card';
@@ -950,7 +981,7 @@
                   <span class="material-symbols-outlined" style="font-size:18px;">person</span> 
                   <strong style="font-size: 15px;">${groupe.responsable}</strong>
                 </div>
-                <span class="event-type">${groupe.type}</span>
+                <span class="event-type" style="${typeStyle}">${groupe.type}</span>
               </div>
               ${actionsTelHtml}
               <div style="margin-top: 8px;">
@@ -1232,7 +1263,6 @@
       if (payloadEnAttente) {
         payloadEnAttente.idsGardesASupprimer = idsGardesARemplacer;
         payloadEnAttente.ajustementsConflitEnfants = ajustementsConflitEnfants;
-        payloadEnAttente.forcerMalgreConflit = true;
         fermerModalConflit();
         executerEnregistrement(payloadEnAttente);
       }
@@ -1249,7 +1279,7 @@
         btn.disabled = false;
 
         if (res && res.success === false) {
-          alert("Erreur d'enregistrement : " + (res.message || "Conflit ou données invalides"));
+          alert("Erreur d'enregistrement : " + res.message);
           return;
         }
 
@@ -1292,8 +1322,8 @@
 
       let modeSuppr = 'UNIQUE';
       if (idSerie) {
-        const optionCochee = document.querySelector('input[name="optSupprSerie"]:checked');
-        if (optionCochee) modeSuppr = optionCochee.value;
+        const optionCoquee = document.querySelector('input[name="optSupprSerie"]:checked');
+        if (optionCoquee) modeSuppr = optionCoquee.value;
       }
 
       fermerModalSuppression();
@@ -1308,7 +1338,7 @@
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
         chargerDonnees();
-      } catch (err) {
+      } catch(err) {
         alert("Erreur lors de la suppression : " + err);
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
