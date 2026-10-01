@@ -326,7 +326,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
+    const API_URL = "VOTRE_URL_WEB_APP_GOOGLE_APPS_SCRIPT";
 
     let donneesBrutes = [];
     let refEnfants = [];
@@ -683,31 +683,6 @@
       errorMsg.style.display = "none";
       btnSubmit.disabled = false;
       return true;
-    }
-
-    function gererTypeSelect() {
-      const val = document.getElementById('formTypeSelect').value;
-      const input = document.getElementById('formTypeInput');
-      if (val === 'NOUVEAU') {
-        input.style.display = 'block';
-        input.value = '';
-      } else {
-        input.style.display = 'none';
-        input.value = val;
-      }
-    }
-
-    function gererResponsableSelect() {
-      const val = document.getElementById('formResponsableSelect').value;
-      const input = document.getElementById('formResponsableInput');
-      
-      if (val === 'NOUVEAU') {
-        input.style.display = 'block';
-        input.value = '';
-      } else {
-        input.style.display = 'none';
-        input.value = val;
-      }
     }
 
     function setChildFilter(enfant) {
