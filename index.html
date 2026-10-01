@@ -190,17 +190,20 @@
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
           <label for="formTypeSelect">2. TYPE *</label>
-          <select id="formTypeSelect" class="form-control">
+          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
             <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter un type...</option>
           </select>
+          <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type..." aria-label="Saisir un autre type">
         </div>
 
         <div class="form-group" style="flex: 1;">
-          <label for="formResponsableSelect">3. QUI S'EN OCCUPE ? *</label>
-          <select id="formResponsableSelect" class="form-control">
-            <option value="">-- Choisir un intervenant --</option>
+          <label for="formResponsableSelect">3. RESPONSABLE *</label>
+          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
+            <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter...</option>
           </select>
-          <div id="responsableHint" style="font-size:11px;color:var(--text-muted);margin-top:5px;"></div>
+          <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable..." aria-label="Saisir un autre responsable">
         </div>
       </div>
 
@@ -227,10 +230,8 @@
       <input type="hidden" id="formDate">
 
       <div class="form-group">
-        <label for="formLieu">6. OÙ ? (ARRIVÉE)</label>
-        <select id="formLieu" class="form-control">
-          <option value="">-- Aucun lieu --</option>
-        </select>
+        <label for="formLieu">6. LIEU</label>
+        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
       </div>
 
       <div class="form-group">
@@ -245,48 +246,16 @@
         </select>
       </div>
 
-      <!-- SECTION RÉCURRENCE / ROUTINE AVANCÉE (Adossée à BDD_Series) -->
       <div class="recurrence-box" id="secRecurrence">
         <div class="toggle-row" onclick="toggleRecurrenceOpt()">
           <div class="toggle-title">
             <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
-            8. Répéter / Configurer comme Routine (Série)
+            8. Répéter cet événement
           </div>
           <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence de l'événement" style="cursor:pointer; width:16px; height:16px;">
         </div>
 
         <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-          
-          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <div style="flex: 1;">
-              <label for="formOrdre" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Ordre (Étape)</label>
-              <input type="number" id="formOrdre" class="form-control" value="1" min="1" max="10">
-            </div>
-            <div style="flex: 1;">
-              <label for="formHeureDebut" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Heure (ex: 17:20)</label>
-              <input type="text" id="formHeureDebut" class="form-control" placeholder="17:20">
-            </div>
-            <div style="flex: 1;">
-              <label for="formDureeMinutes" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Durée (min)</label>
-              <input type="number" id="formDureeMinutes" class="form-control" value="10" min="1">
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <div style="flex: 1;">
-              <label for="formLieuDepart" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Lieu départ</label>
-              <select id="formLieuDepart" class="form-control">
-                <option value="">-- Aucun --</option>
-              </select>
-            </div>
-            <div style="flex: 1;">
-              <label for="formLieuArrivee" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Lieu arrivée</label>
-              <select id="formLieuArrivee" class="form-control">
-                <option value="">-- Aucun --</option>
-              </select>
-            </div>
-          </div>
-
           <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
             <label for="formRecurIntervalle" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Toutes les :</label>
             <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
@@ -358,6 +327,7 @@
   </div>
 
   <script>
+    // ⚠️ Remplacez par votre URL Web App Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     let donneesBrutes = [];
@@ -366,11 +336,6 @@
     let refResponsables = [];
     let refIntervenantsObjets = [];
     let refPeriodes = [];
-    let refLieux = [];
-    let refRelationsFamiliales = [];
-    let relationsParEnfant = {};
-    let mapIntervenantIdToNom = {};
-    let mapLieuIdToNom = {};
     
     let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
     let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
@@ -390,7 +355,6 @@
     window.onload = () => {
       chargerDonnees();
       chargerReferences();
-      document.getElementById('formResponsableSelect')?.addEventListener('change', afficherHintResponsable);
     };
 
     async function apiGet(action) {
@@ -438,35 +402,21 @@
 
     async function chargerReferences() {
       try {
-        const resp = await fetch('./referentiels.json');
-        if (!resp.ok) throw new Error("Impossible de charger referentiels.json");
-        const refs = await resp.json();
+        // Chargement des référentiels via l'API Backend (qui lit referentiels.json sur GitHub)
+        const refs = await apiGet('getRefData');
 
         refEnfants = refs.enfants || [];
         refTypes = refs.types || [];
-        refIntervenantsObjets = refs.intervenants || [];
-        refLieux = refs.lieux || [];
+        refIntervenantsObjets = refs.intervenantsObjets || [];
+        refResponsables = refs.responsables || [];
         refPeriodes = refs.periodes || [];
-        refRelationsFamiliales = refs.relationsFamiliales || [];
-
-        refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
-        mapIntervenantIdToNom = {};
-        refIntervenantsObjets.forEach(i => { if (i.id) mapIntervenantIdToNom[i.id] = i.nom; });
-        mapLieuIdToNom = {};
-        refLieux.forEach(l => { if (l.id) mapLieuIdToNom[l.id] = l.nom; });
-
-        relationsParEnfant = {};
-        refRelationsFamiliales.forEach(r => {
-          if (!relationsParEnfant[r.enfantId]) relationsParEnfant[r.enfantId] = [];
-          relationsParEnfant[r.enfantId].push(r);
-        });
 
         enfantsInfo = {};
         enfantsListe = [];
         mapIdToPrenom = {};
 
         refEnfants.forEach(e => {
-          if (e.actif !== false && e.actif !== 'Non') {
+          if (e.actif === 'Oui' || e.actif === '' || !e.actif) {
             enfantsInfo[e.prenom] = {
               id: e.id,
               color: e.couleur || '#64748B',
@@ -488,7 +438,7 @@
         genererFiltresPeriodes();
         afficherTimeline();
       } catch(err) {
-        console.error("Erreur réfs:", err);
+        console.error("Erreur chargement références:", err);
       }
     }
 
@@ -546,72 +496,22 @@
       const selectType = document.getElementById('formTypeSelect');
       selectType.innerHTML = '<option value="">-- Choisir --</option>';
       refTypes.forEach(t => {
-        selectType.innerHTML += `<option value="${echapper(t)}">${echapper(t)}</option>`;
+        selectType.innerHTML += `<option value="${t}">${t}</option>`;
       });
+      selectType.innerHTML += '<option value="NOUVEAU">+ Ajouter un type...</option>';
 
       const selectResp = document.getElementById('formResponsableSelect');
-      selectResp.innerHTML = '<option value="">-- Choisir un intervenant --</option>';
-      refIntervenantsObjets.filter(i => i.actif !== false).forEach(i => {
-        const relationLabel = relationLabelPourIntervenant(i.id);
-        selectResp.innerHTML += `<option value="${echapper(i.id)}">${echapper(i.nom)}${relationLabel ? ' · ' + echapper(relationLabel) : ''}</option>`;
+      selectResp.innerHTML = '<option value="">-- Choisir --</option>';
+      refResponsables.forEach(r => {
+        selectResp.innerHTML += `<option value="${r}">${r}</option>`;
       });
-
-      const selectLieu = document.getElementById('formLieu');
-      const selectLieuDepart = document.getElementById('formLieuDepart');
-      const selectLieuArrivee = document.getElementById('formLieuArrivee');
-      
-      const optionsLieuxHtml = refLieux.map(l => `<option value="${echapper(l.id)}">${echapper(l.nom)}</option>`).join('');
-      
-      selectLieu.innerHTML = '<option value="">-- Aucun lieu --</option>' + optionsLieuxHtml;
-      if (selectLieuDepart) selectLieuDepart.innerHTML = '<option value="">-- Aucun --</option>' + optionsLieuxHtml;
-      if (selectLieuArrivee) selectLieuArrivee.innerHTML = '<option value="">-- Aucun --</option>' + optionsLieuxHtml;
+      selectResp.innerHTML += '<option value="NOUVEAU">+ Ajouter un responsable...</option>';
 
       const selectPeriode = document.getElementById('formPeriodeSelect');
       selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
       refPeriodes.forEach(p => {
-        selectPeriode.innerHTML += `<option value="${echapper(p.id)}">${echapper(p.nom)}</option>`;
+        selectPeriode.innerHTML += `<option value="${p.id}">${p.nom}</option>`;
       });
-    }
-
-    function echapper(value) {
-      return String(value == null ? '' : value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function relationLabelPourIntervenant(intervenantId) {
-      const noms = [];
-      const ids = enfantsModalSelectionnes.map(n => enfantsInfo[n]?.id).filter(Boolean);
-      ids.forEach(enfantId => {
-        (relationsParEnfant[enfantId] || []).forEach(r => {
-          if (r.intervenantId === intervenantId && r.relation && !noms.includes(r.relation)) noms.push(r.relation);
-        });
-      });
-      return noms.join(', ');
-    }
-
-    function rafraichirLibellesIntervenants() {
-      const selectResp = document.getElementById('formResponsableSelect');
-      if (!selectResp) return;
-      const valeur = selectResp.value;
-      selectResp.innerHTML = '<option value="">-- Choisir un intervenant --</option>';
-      refIntervenantsObjets.filter(i => i.actif !== false).forEach(i => {
-        const relationLabel = relationLabelPourIntervenant(i.id);
-        selectResp.innerHTML += `<option value="${echapper(i.id)}">${echapper(i.nom)}${relationLabel ? ' · ' + echapper(relationLabel) : ''}</option>`;
-      });
-      if (refIntervenantsObjets.some(i => i.id === valeur)) selectResp.value = valeur;
-      afficherHintResponsable();
-    }
-
-    function afficherHintResponsable() {
-      const id = document.getElementById('formResponsableSelect')?.value;
-      const hint = document.getElementById('responsableHint');
-      if (!hint) return;
-      const obj = refIntervenantsObjets.find(i => i.id === id);
-      hint.textContent = obj ? (obj.tel1 || obj.tel2 ? '📞 Coordonnées disponibles' : '') : '';
     }
 
     function formatForInput(dateObj) {
@@ -646,7 +546,6 @@
         enfantsModalSelectionnes = [enfantsListe[0]];
       }
       majRenduPucesModal();
-      if (refIntervenantsObjets.length) rafraichirLibellesIntervenants();
     }
 
     function majRenduPucesModal() {
@@ -678,12 +577,6 @@
         const dDeb = new Date(document.getElementById('formDebut').value || Date.now());
         dDeb.setMonth(dDeb.getMonth() + 1);
         document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
-      }
-      if (chkVal && !document.getElementById('formHeureDebut').value) {
-        const debutStr = document.getElementById('formDebut').value;
-        if (debutStr && debutStr.includes('T')) {
-          document.getElementById('formHeureDebut').value = debutStr.split('T')[1];
-        }
       }
     }
 
@@ -725,6 +618,31 @@
       errorMsg.style.display = "none";
       btnSubmit.disabled = false;
       return true;
+    }
+
+    function gererTypeSelect() {
+      const val = document.getElementById('formTypeSelect').value;
+      const input = document.getElementById('formTypeInput');
+      if (val === 'NOUVEAU') {
+        input.style.display = 'block';
+        input.value = '';
+      } else {
+        input.style.display = 'none';
+        input.value = val;
+      }
+    }
+
+    function gererResponsableSelect() {
+      const val = document.getElementById('formResponsableSelect').value;
+      const input = document.getElementById('formResponsableInput');
+      
+      if (val === 'NOUVEAU') {
+        input.style.display = 'block';
+        input.value = '';
+      } else {
+        input.style.display = 'none';
+        input.value = val;
+      }
     }
 
     function setChildFilter(enfant) {
@@ -1073,20 +991,18 @@
       document.getElementById("secOptionSerie").style.display = "none";
 
       const selectType = document.getElementById("formTypeSelect");
-      selectType.value = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
-
+      const defaultType = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
+      selectType.value = defaultType;
+      document.getElementById("formTypeInput").value = defaultType;
+      document.getElementById("formTypeInput").style.display = "none";
+      
       const selectResp = document.getElementById("formResponsableSelect");
       selectResp.value = "";
-      rafraichirLibellesIntervenants();
+      document.getElementById("formResponsableInput").value = "";
+      document.getElementById("formResponsableInput").style.display = "none";
       
       document.getElementById("formTitre").value = "";
       document.getElementById("formLieu").value = "";
-      if(document.getElementById("formLieuDepart")) document.getElementById("formLieuDepart").value = "";
-      if(document.getElementById("formLieuArrivee")) document.getElementById("formLieuArrivee").value = "";
-      if(document.getElementById("formOrdre")) document.getElementById("formOrdre").value = "1";
-      if(document.getElementById("formHeureDebut")) document.getElementById("formHeureDebut").value = "";
-      if(document.getElementById("formDureeMinutes")) document.getElementById("formDureeMinutes").value = "60";
-      
       document.getElementById("formDetails").value = "";
       document.getElementById("formPeriodeSelect").value = "";
       
@@ -1125,33 +1041,38 @@
       }
 
       const selectType = document.getElementById("formTypeSelect");
+      const inputType = document.getElementById("formTypeInput");
       const typeVal = (evt.type || "").trim();
-      selectType.value = refTypes.find(t => t.toLowerCase() === typeVal.toLowerCase()) || typeVal;
+      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
+      if (matchType) {
+        selectType.value = matchType;
+        inputType.style.display = "none";
+        inputType.value = matchType;
+      } else {
+        selectType.value = "NOUVEAU";
+        inputType.style.display = "block";
+        inputType.value = typeVal;
+      }
 
       const selectResp = document.getElementById("formResponsableSelect");
-      const respObj = refIntervenantsObjets.find(i => i.nom.toLowerCase() === String(evt.responsable || '').trim().toLowerCase());
-      selectResp.value = respObj ? respObj.id : '';
-      rafraichirLibellesIntervenants();
-      if (respObj) selectResp.value = respObj.id;
-      afficherHintResponsable();
+      const inputResp = document.getElementById("formResponsableInput");
+      const respVal = (evt.responsable || "").trim();
+      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
+      if (matchResp) {
+        selectResp.value = matchResp;
+        inputResp.style.display = "none";
+        inputResp.value = matchResp;
+      } else {
+        selectResp.value = "NOUVEAU";
+        inputResp.style.display = "block";
+        inputResp.value = respVal;
+      }
 
       document.getElementById("formTitre").value = evt.titre || "";
       document.getElementById("formDebut").value = formatForInput(evt.debut);
       document.getElementById("formFin").value = formatForInput(evt.fin);
       document.getElementById("formDate").value = evt.date ? evt.date.split('T')[0] : (evt.debut ? evt.debut.split('T')[0] : "");
-      
-      const selectLieu = document.getElementById("formLieu");
-      const lieuObj = refLieux.find(l => l.nom.toLowerCase() === String(evt.lieu || '').trim().toLowerCase());
-      if (!lieuObj && evt.lieu) {
-        const opt = document.createElement('option');
-        opt.value = '__LEGACY__';
-        opt.textContent = evt.lieu;
-        selectLieu.appendChild(opt);
-        selectLieu.value = '__LEGACY__';
-      } else {
-        selectLieu.value = lieuObj ? lieuObj.id : (evt.lieuId || "");
-      }
-      
+      document.getElementById("formLieu").value = evt.lieu || "";
       document.getElementById("formDetails").value = evt.details || "";
       document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
       
@@ -1164,16 +1085,18 @@
     function soumettre() {
       if (!validerControleDates()) return;
 
-      const typeFinal = document.getElementById("formTypeSelect").value;
-      const intervenantId = document.getElementById("formResponsableSelect").value;
-      const intervenantObj = refIntervenantsObjets.find(i => i.id === intervenantId);
-      const responsableFinal = intervenantObj ? intervenantObj.nom : '';
-      const lieuId = document.getElementById("formLieu").value;
-      const lieuObj = refLieux.find(l => l.id === lieuId);
-      const lieuFinal = lieuObj ? lieuObj.nom : '';
+      let typeFinal = document.getElementById("formTypeSelect").value;
+      if (typeFinal === 'NOUVEAU' || typeFinal === '') {
+        typeFinal = document.getElementById("formTypeInput").value;
+      }
 
-      if (!typeFinal.trim() || !intervenantId) {
-        alert("Merci de renseigner le type et l'intervenant.");
+      let responsableFinal = document.getElementById("formResponsableSelect").value;
+      if (responsableFinal === 'NOUVEAU' || responsableFinal === '') {
+        responsableFinal = document.getElementById("formResponsableInput").value;
+      }
+
+      if (!typeFinal.trim() || !responsableFinal.trim()) {
+        alert("Merci de renseigner le type et le responsable.");
         return;
       }
 
@@ -1190,19 +1113,11 @@
         date: document.getElementById("formDate").value,
         enfantsIds: targetIds,
         type: typeFinal,
-        intervenantId: intervenantId,
-        idsIntervenants: JSON.stringify(intervenantId ? [intervenantId] : []),
         responsable: responsableFinal,
-        lieuId: lieuId,
-        lieu: lieuFinal,
-        lieuIdDepart: document.getElementById("formLieuDepart") ? document.getElementById("formLieuDepart").value : "",
-        lieuIdArrivee: lieuId,
-        ordre: document.getElementById("formOrdre") ? parseInt(document.getElementById("formOrdre").value) || 1 : 1,
-        heureDebut: document.getElementById("formHeureDebut") ? document.getElementById("formHeureDebut").value : "",
-        dureeMinutes: document.getElementById("formDureeMinutes") ? parseInt(document.getElementById("formDureeMinutes").value) || 60 : 60,
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
+        lieu: document.getElementById("formLieu").value,
         details: document.getElementById("formDetails").value,
         idPeriode: document.getElementById("formPeriodeSelect").value,
         statut: "Confirmé",
@@ -1318,7 +1233,7 @@
       if (payloadEnAttente) {
         payloadEnAttente.idsGardesASupprimer = idsGardesARemplacer;
         payloadEnAttente.ajustementsConflitEnfants = ajustementsConflitEnfants;
-        payloadEnAttente.forcerMalgreConflit = true; // <-- Indique au backend de forcer l'enregistrement malgré le chevauchement
+        payloadEnAttente.forcerMalgreConflit = true;
         fermerModalConflit();
         executerEnregistrement(payloadEnAttente);
       }
@@ -1328,17 +1243,17 @@
       const btn = document.getElementById("btnSubmit");
       btn.innerHTML = `<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Enregistrement...`;
       btn.disabled = true;
-    
+
       try {
         const res = await apiPost('sauvegarderEvenement', payload);
         btn.innerHTML = "Enregistrer";
         btn.disabled = false;
-    
+
         if (res && res.success === false) {
           alert("Erreur d'enregistrement : " + (res.message || "Conflit ou données invalides"));
           return;
         }
-    
+
         fermerModal();
         chargerDonnees();
         chargerReferences();
@@ -1394,7 +1309,7 @@
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
         chargerDonnees();
-      } catch(err) {
+      } taxa(err) {
         alert("Erreur lors de la suppression : " + err);
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
