@@ -1318,6 +1318,7 @@
       if (payloadEnAttente) {
         payloadEnAttente.idsGardesASupprimer = idsGardesARemplacer;
         payloadEnAttente.ajustementsConflitEnfants = ajustementsConflitEnfants;
+        payloadEnAttente.forcerMalgreConflit = true; // <-- Indique au backend de forcer l'enregistrement
         fermerModalConflit();
         executerEnregistrement(payloadEnAttente);
       }
@@ -1327,17 +1328,17 @@
       const btn = document.getElementById("btnSubmit");
       btn.innerHTML = `<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Enregistrement...`;
       btn.disabled = true;
-
+    
       try {
         const res = await apiPost('sauvegarderEvenement', payload);
         btn.innerHTML = "Enregistrer";
         btn.disabled = false;
-
+    
         if (res && res.success === false) {
-          alert("Erreur d'enregistrement : " + res.message);
+          alert("Erreur d'enregistrement : " + (res.message || "Conflit ou données invalides"));
           return;
         }
-
+    
         fermerModal();
         chargerDonnees();
         chargerReferences();
