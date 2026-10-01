@@ -1287,7 +1287,7 @@
       document.getElementById("modalSuppression").style.display = "none";
     }
 
-    async function confirmerSuppressionEffective() {
+async function confirmerSuppressionEffective() {
       const id = document.getElementById("formId").value;
       const idSerie = document.getElementById("formIdSerie").value;
 
@@ -1296,6 +1296,25 @@
         const optionCoquee = document.querySelector('input[name="optSupprSerie"]:checked');
         if (optionCoquee) modeSuppr = optionCoquee.value;
       }
+
+      fermerModalSuppression();
+
+      const btn = document.getElementById("btnDelete");
+      btn.innerText = "Suppression...";
+      btn.disabled = true;
+
+      try {
+        await apiPost('supprimerLigne', { id: id, modeSupprSerie: modeSuppr });
+        fermerModal();
+        btn.innerText = "Supprimer cet événement";
+        btn.disabled = false;
+        chargerDonnees();
+      } catch (err) { // 👈 Corrigé ici
+        alert("Erreur lors de la suppression : " + err);
+        btn.innerText = "Supprimer cet événement";
+        btn.disabled = false;
+      }
+    }
 
       fermerModalSuppression();
 
