@@ -190,20 +190,17 @@
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
           <label for="formTypeSelect">2. TYPE *</label>
-          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
+          <select id="formTypeSelect" class="form-control">
             <option value="">-- Choisir --</option>
-            <option value="NOUVEAU">+ Ajouter un type...</option>
           </select>
-          <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type..." aria-label="Saisir un autre type">
         </div>
 
         <div class="form-group" style="flex: 1;">
-          <label for="formResponsableSelect">3. RESPONSABLE *</label>
-          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
-            <option value="">-- Choisir --</option>
-            <option value="NOUVEAU">+ Ajouter...</option>
+          <label for="formResponsableSelect">3. QUI S'EN OCCUPE ? *</label>
+          <select id="formResponsableSelect" class="form-control">
+            <option value="">-- Choisir un intervenant --</option>
           </select>
-          <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable..." aria-label="Saisir un autre responsable">
+          <div id="responsableHint" style="font-size:11px;color:var(--text-muted);margin-top:5px;"></div>
         </div>
       </div>
 
@@ -230,8 +227,10 @@
       <input type="hidden" id="formDate">
 
       <div class="form-group">
-        <label for="formLieu">6. LIEU</label>
-        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
+        <label for="formLieu">6. OÙ ?</label>
+        <select id="formLieu" class="form-control">
+          <option value="">-- Aucun lieu --</option>
+        </select>
       </div>
 
       <div class="form-group">
@@ -335,6 +334,11 @@
     let refResponsables = [];
     let refIntervenantsObjets = [];
     let refPeriodes = [];
+    let refLieux = [];
+    let refRelationsFamiliales = [];
+    let relationsParEnfant = {};
+    let mapIntervenantIdToNom = {};
+    let mapLieuIdToNom = {};
     
     let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
     let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
@@ -354,6 +358,7 @@
     window.onload = () => {
       chargerDonnees();
       chargerReferences();
+      document.getElementById('formResponsableSelect')?.addEventListener('change', afficherHintResponsable);
     };
 
     async function apiGet(action) {
@@ -408,15 +413,28 @@
         refEnfants = refs.enfants || [];
         refTypes = refs.types || [];
         refIntervenantsObjets = refs.intervenants || [];
-        refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
+        refLieux = refs.lieux || [];
         refPeriodes = refs.periodes || [];
+        refRelationsFamiliales = refs.relationsFamiliales || [];
+
+        refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
+        mapIntervenantIdToNom = {};
+        refIntervenantsObjets.forEach(i => { if (i.id) mapIntervenantIdToNom[i.id] = i.nom; });
+        mapLieuIdToNom = {};
+        refLieux.forEach(l => { if (l.id) mapLieuIdToNom[l.id] = l.nom; });
+
+        relationsParEnfant = {};
+        refRelationsFamiliales.forEach(r => {
+          if (!relationsParEnfant[r.enfantId]) relationsParEnfant[r.enfantId] = [];
+          relationsParEnfant[r.enfantId].push(r);
+        });
 
         enfantsInfo = {};
         enfantsListe = [];
         mapIdToPrenom = {};
 
         refEnfants.forEach(e => {
-          if (e.actif === 'Oui' || e.actif === '' || !e.actif) {
+          if (e.actif !== false && e.actif !== 'Non') {
             enfantsInfo[e.prenom] = {
               id: e.id,
               color: e.couleur || '#64748B',
@@ -496,22 +514,68 @@
       const selectType = document.getElementById('formTypeSelect');
       selectType.innerHTML = '<option value="">-- Choisir --</option>';
       refTypes.forEach(t => {
-        selectType.innerHTML += `<option value="${t}">${t}</option>`;
+        selectType.innerHTML += `<option value="${echapper(t)}">${echapper(t)}</option>`;
       });
-      selectType.innerHTML += '<option value="NOUVEAU">+ Ajouter un type...</option>';
 
       const selectResp = document.getElementById('formResponsableSelect');
-      selectResp.innerHTML = '<option value="">-- Choisir --</option>';
-      refResponsables.forEach(r => {
-        selectResp.innerHTML += `<option value="${r}">${r}</option>`;
+      selectResp.innerHTML = '<option value="">-- Choisir un intervenant --</option>';
+      refIntervenantsObjets.filter(i => i.actif !== false).forEach(i => {
+        const relationLabel = relationLabelPourIntervenant(i.id);
+        selectResp.innerHTML += `<option value="${echapper(i.id)}">${echapper(i.nom)}${relationLabel ? ' · ' + echapper(relationLabel) : ''}</option>`;
       });
-      selectResp.innerHTML += '<option value="NOUVEAU">+ Ajouter un responsable...</option>';
+
+      const selectLieu = document.getElementById('formLieu');
+      selectLieu.innerHTML = '<option value="">-- Aucun lieu --</option>';
+      refLieux.forEach(l => {
+        selectLieu.innerHTML += `<option value="${echapper(l.id)}">${echapper(l.nom)}</option>`;
+      });
 
       const selectPeriode = document.getElementById('formPeriodeSelect');
       selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
       refPeriodes.forEach(p => {
-        selectPeriode.innerHTML += `<option value="${p.id}">${p.nom}</option>`;
+        selectPeriode.innerHTML += `<option value="${echapper(p.id)}">${echapper(p.nom)}</option>`;
       });
+    }
+
+    function echapper(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function relationLabelPourIntervenant(intervenantId) {
+      const noms = [];
+      const ids = enfantsModalSelectionnes.map(n => enfantsInfo[n]?.id).filter(Boolean);
+      ids.forEach(enfantId => {
+        (relationsParEnfant[enfantId] || []).forEach(r => {
+          if (r.intervenantId === intervenantId && r.relation && !noms.includes(r.relation)) noms.push(r.relation);
+        });
+      });
+      return noms.join(', ');
+    }
+
+    function rafraichirLibellesIntervenants() {
+      const selectResp = document.getElementById('formResponsableSelect');
+      if (!selectResp) return;
+      const valeur = selectResp.value;
+      selectResp.innerHTML = '<option value="">-- Choisir un intervenant --</option>';
+      refIntervenantsObjets.filter(i => i.actif !== false).forEach(i => {
+        const relationLabel = relationLabelPourIntervenant(i.id);
+        selectResp.innerHTML += `<option value="${echapper(i.id)}">${echapper(i.nom)}${relationLabel ? ' · ' + echapper(relationLabel) : ''}</option>`;
+      });
+      if (refIntervenantsObjets.some(i => i.id === valeur)) selectResp.value = valeur;
+      afficherHintResponsable();
+    }
+
+    function afficherHintResponsable() {
+      const id = document.getElementById('formResponsableSelect')?.value;
+      const hint = document.getElementById('responsableHint');
+      if (!hint) return;
+      const obj = refIntervenantsObjets.find(i => i.id === id);
+      hint.textContent = obj ? (obj.tel1 || obj.tel2 ? '📞 Coordonnées disponibles' : '') : '';
     }
 
     function formatForInput(dateObj) {
@@ -546,6 +610,7 @@
         enfantsModalSelectionnes = [enfantsListe[0]];
       }
       majRenduPucesModal();
+      if (refIntervenantsObjets.length) rafraichirLibellesIntervenants();
     }
 
     function majRenduPucesModal() {
@@ -991,15 +1056,11 @@
       document.getElementById("secOptionSerie").style.display = "none";
 
       const selectType = document.getElementById("formTypeSelect");
-      const defaultType = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
-      selectType.value = defaultType;
-      document.getElementById("formTypeInput").value = defaultType;
-      document.getElementById("formTypeInput").style.display = "none";
-      
+      selectType.value = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
+
       const selectResp = document.getElementById("formResponsableSelect");
       selectResp.value = "";
-      document.getElementById("formResponsableInput").value = "";
-      document.getElementById("formResponsableInput").style.display = "none";
+      rafraichirLibellesIntervenants();
       
       document.getElementById("formTitre").value = "";
       document.getElementById("formLieu").value = "";
@@ -1041,38 +1102,31 @@
       }
 
       const selectType = document.getElementById("formTypeSelect");
-      const inputType = document.getElementById("formTypeInput");
       const typeVal = (evt.type || "").trim();
-      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
-      if (matchType) {
-        selectType.value = matchType;
-        inputType.style.display = "none";
-        inputType.value = matchType;
-      } else {
-        selectType.value = "NOUVEAU";
-        inputType.style.display = "block";
-        inputType.value = typeVal;
-      }
+      selectType.value = refTypes.find(t => t.toLowerCase() === typeVal.toLowerCase()) || typeVal;
 
       const selectResp = document.getElementById("formResponsableSelect");
-      const inputResp = document.getElementById("formResponsableInput");
-      const respVal = (evt.responsable || "").trim();
-      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
-      if (matchResp) {
-        selectResp.value = matchResp;
-        inputResp.style.display = "none";
-        inputResp.value = matchResp;
-      } else {
-        selectResp.value = "NOUVEAU";
-        inputResp.style.display = "block";
-        inputResp.value = respVal;
-      }
+      const respObj = refIntervenantsObjets.find(i => i.nom.toLowerCase() === String(evt.responsable || '').trim().toLowerCase());
+      selectResp.value = respObj ? respObj.id : '';
+      rafraichirLibellesIntervenants();
+      if (respObj) selectResp.value = respObj.id;
+      afficherHintResponsable();
 
       document.getElementById("formTitre").value = evt.titre || "";
       document.getElementById("formDebut").value = formatForInput(evt.debut);
       document.getElementById("formFin").value = formatForInput(evt.fin);
       document.getElementById("formDate").value = evt.date ? evt.date.split('T')[0] : (evt.debut ? evt.debut.split('T')[0] : "");
-      document.getElementById("formLieu").value = evt.lieu || "";
+      const selectLieu = document.getElementById("formLieu");
+      const lieuObj = refLieux.find(l => l.nom.toLowerCase() === String(evt.lieu || '').trim().toLowerCase());
+      if (!lieuObj && evt.lieu) {
+        const opt = document.createElement('option');
+        opt.value = '__LEGACY__';
+        opt.textContent = evt.lieu;
+        selectLieu.appendChild(opt);
+        selectLieu.value = '__LEGACY__';
+      } else {
+        selectLieu.value = lieuObj ? lieuObj.id : "";
+      }
       document.getElementById("formDetails").value = evt.details || "";
       document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
       
@@ -1085,18 +1139,16 @@
     function soumettre() {
       if (!validerControleDates()) return;
 
-      let typeFinal = document.getElementById("formTypeSelect").value;
-      if (typeFinal === 'NOUVEAU' || typeFinal === '') {
-        typeFinal = document.getElementById("formTypeInput").value;
-      }
+      const typeFinal = document.getElementById("formTypeSelect").value;
+      const intervenantId = document.getElementById("formResponsableSelect").value;
+      const intervenantObj = refIntervenantsObjets.find(i => i.id === intervenantId);
+      const responsableFinal = intervenantObj ? intervenantObj.nom : '';
+      const lieuId = document.getElementById("formLieu").value;
+      const lieuObj = refLieux.find(l => l.id === lieuId);
+      const lieuFinal = lieuObj ? lieuObj.nom : '';
 
-      let responsableFinal = document.getElementById("formResponsableSelect").value;
-      if (responsableFinal === 'NOUVEAU' || responsableFinal === '') {
-        responsableFinal = document.getElementById("formResponsableInput").value;
-      }
-
-      if (!typeFinal.trim() || !responsableFinal.trim()) {
-        alert("Merci de renseigner le type et le responsable.");
+      if (!typeFinal.trim() || !intervenantId) {
+        alert("Merci de renseigner le type et l'intervenant.");
         return;
       }
 
@@ -1113,11 +1165,13 @@
         date: document.getElementById("formDate").value,
         enfantsIds: targetIds,
         type: typeFinal,
+        intervenantId: intervenantId,
         responsable: responsableFinal,
+        lieuId: lieuId,
+        lieu: lieuFinal,
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
-        lieu: document.getElementById("formLieu").value,
         details: document.getElementById("formDetails").value,
         idPeriode: document.getElementById("formPeriodeSelect").value,
         statut: "Confirmé",
