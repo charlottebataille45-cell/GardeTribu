@@ -763,7 +763,7 @@
       debutSemaine.setDate(maintenantDebutJour.getDate() - jourSemaine + 1 + (offsetSemaines * 7));
       
       const finSemaine = new Date(debutSemaine);
-      finSemaine.setDate(debutSemaine.getDate() + 6);
+      finSemaine.setDate(finSemaine.getDate() + 6);
       finSemaine.setHours(23,59,59,999);
 
       const optsNav = { day: 'numeric', month: 'short' };
