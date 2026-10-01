@@ -227,7 +227,7 @@
       <input type="hidden" id="formDate">
 
       <div class="form-group">
-        <label for="formLieu">6. OÙ ?</label>
+        <label for="formLieu">6. OÙ ? (ARRIVÉE)</label>
         <select id="formLieu" class="form-control">
           <option value="">-- Aucun lieu --</option>
         </select>
@@ -245,16 +245,48 @@
         </select>
       </div>
 
+      <!-- SECTION RÉCURRENCE / ROUTINE AVANCÉE (Adossée à BDD_Series) -->
       <div class="recurrence-box" id="secRecurrence">
         <div class="toggle-row" onclick="toggleRecurrenceOpt()">
           <div class="toggle-title">
             <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
-            8. Répéter cet événement
+            8. Répéter / Configurer comme Routine (Série)
           </div>
           <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence de l'événement" style="cursor:pointer; width:16px; height:16px;">
         </div>
 
         <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+          
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <div style="flex: 1;">
+              <label for="formOrdre" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Ordre (Étape)</label>
+              <input type="number" id="formOrdre" class="form-control" value="1" min="1" max="10">
+            </div>
+            <div style="flex: 1;">
+              <label for="formHeureDebut" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Heure (ex: 17:20)</label>
+              <input type="text" id="formHeureDebut" class="form-control" placeholder="17:20">
+            </div>
+            <div style="flex: 1;">
+              <label for="formDureeMinutes" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Durée (min)</label>
+              <input type="number" id="formDureeMinutes" class="form-control" value="10" min="1">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <div style="flex: 1;">
+              <label for="formLieuDepart" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Lieu départ</label>
+              <select id="formLieuDepart" class="form-control">
+                <option value="">-- Aucun --</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label for="formLieuArrivee" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Lieu arrivée</label>
+              <select id="formLieuArrivee" class="form-control">
+                <option value="">-- Aucun --</option>
+              </select>
+            </div>
+          </div>
+
           <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
             <label for="formRecurIntervalle" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Toutes les :</label>
             <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
@@ -525,10 +557,14 @@
       });
 
       const selectLieu = document.getElementById('formLieu');
-      selectLieu.innerHTML = '<option value="">-- Aucun lieu --</option>';
-      refLieux.forEach(l => {
-        selectLieu.innerHTML += `<option value="${echapper(l.id)}">${echapper(l.nom)}</option>`;
-      });
+      const selectLieuDepart = document.getElementById('formLieuDepart');
+      const selectLieuArrivee = document.getElementById('formLieuArrivee');
+      
+      const optionsLieuxHtml = refLieux.map(l => `<option value="${echapper(l.id)}">${echapper(l.nom)}</option>`).join('');
+      
+      selectLieu.innerHTML = '<option value="">-- Aucun lieu --</option>' + optionsLieuxHtml;
+      if (selectLieuDepart) selectLieuDepart.innerHTML = '<option value="">-- Aucun --</option>' + optionsLieuxHtml;
+      if (selectLieuArrivee) selectLieuArrivee.innerHTML = '<option value="">-- Aucun --</option>' + optionsLieuxHtml;
 
       const selectPeriode = document.getElementById('formPeriodeSelect');
       selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
@@ -642,6 +678,12 @@
         const dDeb = new Date(document.getElementById('formDebut').value || Date.now());
         dDeb.setMonth(dDeb.getMonth() + 1);
         document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
+      }
+      if (chkVal && !document.getElementById('formHeureDebut').value) {
+        const debutStr = document.getElementById('formDebut').value;
+        if (debutStr && debutStr.includes('T')) {
+          document.getElementById('formHeureDebut').value = debutStr.split('T')[1];
+        }
       }
     }
 
@@ -1039,6 +1081,12 @@
       
       document.getElementById("formTitre").value = "";
       document.getElementById("formLieu").value = "";
+      if(document.getElementById("formLieuDepart")) document.getElementById("formLieuDepart").value = "";
+      if(document.getElementById("formLieuArrivee")) document.getElementById("formLieuArrivee").value = "";
+      if(document.getElementById("formOrdre")) document.getElementById("formOrdre").value = "1";
+      if(document.getElementById("formHeureDebut")) document.getElementById("formHeureDebut").value = "";
+      if(document.getElementById("formDureeMinutes")) document.getElementById("formDureeMinutes").value = "60";
+      
       document.getElementById("formDetails").value = "";
       document.getElementById("formPeriodeSelect").value = "";
       
@@ -1091,6 +1139,7 @@
       document.getElementById("formDebut").value = formatForInput(evt.debut);
       document.getElementById("formFin").value = formatForInput(evt.fin);
       document.getElementById("formDate").value = evt.date ? evt.date.split('T')[0] : (evt.debut ? evt.debut.split('T')[0] : "");
+      
       const selectLieu = document.getElementById("formLieu");
       const lieuObj = refLieux.find(l => l.nom.toLowerCase() === String(evt.lieu || '').trim().toLowerCase());
       if (!lieuObj && evt.lieu) {
@@ -1100,8 +1149,9 @@
         selectLieu.appendChild(opt);
         selectLieu.value = '__LEGACY__';
       } else {
-        selectLieu.value = lieuObj ? lieuObj.id : "";
+        selectLieu.value = lieuObj ? lieuObj.id : (evt.lieuId || "");
       }
+      
       document.getElementById("formDetails").value = evt.details || "";
       document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
       
@@ -1141,9 +1191,15 @@
         enfantsIds: targetIds,
         type: typeFinal,
         intervenantId: intervenantId,
+        idsIntervenants: JSON.stringify(intervenantId ? [intervenantId] : []),
         responsable: responsableFinal,
         lieuId: lieuId,
         lieu: lieuFinal,
+        lieuIdDepart: document.getElementById("formLieuDepart") ? document.getElementById("formLieuDepart").value : "",
+        lieuIdArrivee: lieuId,
+        ordre: document.getElementById("formOrdre") ? parseInt(document.getElementById("formOrdre").value) || 1 : 1,
+        heureDebut: document.getElementById("formHeureDebut") ? document.getElementById("formHeureDebut").value : "",
+        dureeMinutes: document.getElementById("formDureeMinutes") ? parseInt(document.getElementById("formDureeMinutes").value) || 60 : 60,
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
