@@ -405,49 +405,59 @@
       }
     }
 
-    async function chargerReferences() {
-      try {
-        const resp = await fetch('./referentiels.json');
-        if (!resp.ok) throw new Error("Impossible de charger referentiels.json");
-        const refs = await resp.json();
-
-        refEnfants = refs.enfants || [];
-        refTypes = refs.types || [];
-        refIntervenantsObjets = refs.intervenants || [];
-        refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
-        refPeriodes = refs.periodes || [];
-
-        enfantsInfo = {};
-        enfantsListe = [];
-        mapIdToPrenom = {};
-
-        refEnfants.forEach(e => {
-          if (e.actif === 'Oui' || e.actif === '' || !e.actif) {
-            enfantsInfo[e.prenom] = {
-              id: e.id,
-              color: e.couleur || '#64748B',
-              emoji: e.emoji || '👤'
-            };
-            enfantsListe.push(e.prenom);
-            mapIdToPrenom[e.id] = e.prenom;
-          }
-        });
-
-        if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-          enfantsModalSelectionnes = [enfantsListe[0]];
-        }
-
-        genererFiltresEnfants();
-        genererSelectorEnfantsModal();
-        majSelectsModal();
-        genererFiltresIntervenants();
-        genererFiltresPeriodes();
-        afficherTimeline();
-      } catch(err) {
-        console.error("Erreur réfs:", err);
-      }
+async function chargerReferences() {
+  try {
+    let refs;
+    try {
+      // 1. Essai de chargement du fichier local / relatif
+      const resp = await fetch('./referentiels.json');
+      if (!resp.ok) throw new Error("Fichier local introuvable");
+      refs = await resp.json();
+    } catch (eLocal) {
+      console.warn("Échec du chargement local, tentative via GitHub Raw...", eLocal);
+      // 2. Fallback automatique sur l'URL Raw de ton dépôt GitHub
+      const respRaw = await fetch('https://raw.githubusercontent.com/charlottebataille45-cell/GardeTribu/refs/heads/main/referentiels.json');
+      if (!respRaw.ok) throw new Error("Impossible de charger referentiels.json depuis GitHub");
+      refs = await respRaw.json();
     }
 
+    refEnfants = refs.enfants || [];
+    refTypes = refs.types || [];
+    refIntervenantsObjets = refs.intervenants || [];
+    refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
+    refPeriodes = refs.periodes || [];
+
+    enfantsInfo = {};
+    enfantsListe = [];
+    mapIdToPrenom = {};
+
+    refEnfants.forEach(e => {
+      // Correction : prise en compte du booléen true présent dans le JSON
+      if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
+        enfantsInfo[e.prenom] = {
+          id: e.id,
+          color: e.couleur || '#64748B',
+          emoji: e.emoji || '👤'
+        };
+        enfantsListe.push(e.prenom);
+        mapIdToPrenom[e.id] = e.prenom;
+      }
+    });
+
+    if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
+      enfantsModalSelectionnes = [enfantsListe[0]];
+    }
+
+    genererFiltresEnfants();
+    genererSelectorEnfantsModal();
+    majSelectsModal();
+    genererFiltresIntervenants();
+    genererFiltresPeriodes();
+    afficherTimeline();
+  } catch(err) {
+    console.error("Erreur de chargement des référentiels :", err);
+  }
+}
     function genererFiltresEnfants() {
       const container = document.getElementById('childFilters');
       if (!container) return;
