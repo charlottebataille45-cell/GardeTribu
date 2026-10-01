@@ -49,7 +49,6 @@
     .date-header { font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
     .date-count-badge { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 
-    /* CARTE ÉVÉNEMENT */
     .event-card { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); position: relative; }
     .event-card.highlight-upcoming { border: 2px solid #3B82F6; background: #EFF6FF; }
     .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; }
@@ -69,7 +68,6 @@
     .action-links-container { display: flex; gap: 6px; margin-bottom: 8px; }
     .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 4px; }
 
-    /* CRÉNEAU INTERNE (SUB-SLOT) */
     .sub-slot-item { background: var(--subslot-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 8px; cursor: pointer; transition: background 0.15s ease; position: relative; }
     .sub-slot-item:hover { background: #F1F5F9; }
 
@@ -86,11 +84,9 @@
     .sub-slot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
     .edit-icon-btn { font-size: 16px; color: #94A3B8; display: flex; align-items: center; }
 
-    /* FAB BUTTON */
     .fab { position: fixed; bottom: 25px; right: 25px; background: #0F172A; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,0.25); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
     .fab:hover { transform: scale(1.06); }
 
-    /* MODALE */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
     .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -149,20 +145,13 @@
 
     <div id="filterPanel" class="filter-panel" style="display: none;">
       <div class="filter-label">Enfants</div>
-      <div class="filters-row" id="childFilters">
-        <div class="chip active" onclick="setChildFilter('Tous')">Tous</div>
-      </div>
+      <div class="filters-row" id="childFilters"></div>
 
       <div class="filter-label">Périodes & Vacances</div>
-      <div class="filters-row" id="periodeFilters">
-        <div class="chip active" onclick="setPeriodeFilter('Tous')">Toutes</div>
-        <div class="chip" onclick="setPeriodeFilter('HORS_VACANCES')">Hors vacances</div>
-      </div>
+      <div class="filters-row" id="periodeFilters"></div>
 
       <div class="filter-label">Responsable</div>
-      <div class="filters-row" id="intervenantFilters">
-        <div class="chip active" onclick="setIntervenantFilter('Tous')">Tous</div>
-      </div>
+      <div class="filters-row" id="intervenantFilters"></div>
 
       <button class="btn-reset-filters" onclick="reinitialiserFiltres()">
         <span class="material-symbols-outlined" style="font-size:14px;">restart_alt</span> Réinitialiser tous les filtres
@@ -196,26 +185,20 @@
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
           <label for="formTypeSelect">2. TYPE *</label>
-          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
-            <option value="">-- Choisir --</option>
-            <option value="NOUVEAU">+ Ajouter un type...</option>
-          </select>
+          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()"></select>
           <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type..." aria-label="Saisir un autre type">
         </div>
 
         <div class="form-group" style="flex: 1;">
           <label for="formResponsableSelect">3. RESPONSABLE *</label>
-          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
-            <option value="">-- Choisir --</option>
-            <option value="NOUVEAU">+ Ajouter...</option>
-          </select>
+          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()"></select>
           <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable..." aria-label="Saisir un autre responsable">
         </div>
       </div>
 
       <div class="form-group">
         <label for="formTitre">4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
-        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Oréliance...">
+        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Médical...">
       </div>
 
       <div style="display: flex; gap: 10px;">
@@ -237,7 +220,7 @@
 
       <div class="form-group">
         <label for="formLieu">6. LIEU</label>
-        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
+        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie...">
       </div>
 
       <div class="form-group">
@@ -247,9 +230,7 @@
 
       <div class="form-group">
         <label for="formPeriodeSelect">PÉRIODE / VACANCES</label>
-        <select id="formPeriodeSelect" class="form-control">
-          <option value="">-- Hors vacances --</option>
-        </select>
+        <select id="formPeriodeSelect" class="form-control"></select>
       </div>
 
       <div class="recurrence-box" id="secRecurrence">
@@ -335,6 +316,14 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
+    // RÉFÉRENTIELS DE SECOURS (Zéro Hardcode UI, fallback local)
+    const REFERENTIELS_DEFAUT = {
+      "types": ["Garde", "École", "Activité", "Santé", "Transport", "Maison", "Événement", "Autre"],
+      "intervenants": [],
+      "periodes": [],
+      "enfants": []
+    };
+
     let donneesBrutes = [];
     let refEnfants = [];
     let refTypes = [];
@@ -357,9 +346,9 @@
     let enfantsInfo = {};
     let mapIdToPrenom = {};
 
-    window.onload = () => {
-      chargerDonnees();
-      chargerReferences();
+    window.onload = async () => {
+      await chargerReferences();
+      await chargerDonnees();
     };
 
     async function apiGet(action) {
@@ -405,59 +394,60 @@
       }
     }
 
-async function chargerReferences() {
-  try {
-    let refs;
-    try {
-      // 1. Essai de chargement du fichier local / relatif
-      const resp = await fetch('./referentiels.json');
-      if (!resp.ok) throw new Error("Fichier local introuvable");
-      refs = await resp.json();
-    } catch (eLocal) {
-      console.warn("Échec du chargement local, tentative via GitHub Raw...", eLocal);
-      // 2. Fallback automatique sur l'URL Raw de ton dépôt GitHub
-      const respRaw = await fetch('https://raw.githubusercontent.com/charlottebataille45-cell/GardeTribu/refs/heads/main/referentiels.json');
-      if (!respRaw.ok) throw new Error("Impossible de charger referentiels.json depuis GitHub");
-      refs = await respRaw.json();
-    }
+    async function chargerReferences() {
+      let refs = null;
 
-    refEnfants = refs.enfants || [];
-    refTypes = refs.types || [];
-    refIntervenantsObjets = refs.intervenants || [];
-    refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
-    refPeriodes = refs.periodes || [];
-
-    enfantsInfo = {};
-    enfantsListe = [];
-    mapIdToPrenom = {};
-
-    refEnfants.forEach(e => {
-      // Correction : prise en compte du booléen true présent dans le JSON
-      if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
-        enfantsInfo[e.prenom] = {
-          id: e.id,
-          color: e.couleur || '#64748B',
-          emoji: e.emoji || '👤'
-        };
-        enfantsListe.push(e.prenom);
-        mapIdToPrenom[e.id] = e.prenom;
+      try {
+        const resp = await fetch('./referentiels.json');
+        if (resp.ok) refs = await resp.json();
+      } catch (eLocal) {
+        console.warn("Échec du chargement local, tentative via GitHub Raw...", eLocal);
       }
-    });
 
-    if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-      enfantsModalSelectionnes = [enfantsListe[0]];
+      if (!refs) {
+        try {
+          const respRaw = await fetch('https://raw.githubusercontent.com/charlottebataille45-cell/GardeTribu/refs/heads/main/referentiels.json');
+          if (respRaw.ok) refs = await respRaw.json();
+        } catch (eRaw) {
+          console.warn("Échec du chargement GitHub Raw, secours sur l'objet embarqué.");
+        }
+      }
+
+      if (!refs) refs = REFERENTIELS_DEFAUT;
+
+      refEnfants = refs.enfants || [];
+      refTypes = refs.types || [];
+      refIntervenantsObjets = (refs.intervenants || []).filter(i => i.actif === true || i.actif === 'Oui' || i.actif === undefined);
+      refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
+      refPeriodes = refs.periodes || [];
+
+      enfantsInfo = {};
+      enfantsListe = [];
+      mapIdToPrenom = {};
+
+      refEnfants.forEach(e => {
+        if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
+          enfantsInfo[e.prenom] = {
+            id: String(e.id),
+            color: e.couleur || '#64748B',
+            emoji: e.emoji || '👤'
+          };
+          enfantsListe.push(e.prenom);
+          mapIdToPrenom[String(e.id)] = e.prenom;
+        }
+      });
+
+      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
+        enfantsModalSelectionnes = [enfantsListe[0]];
+      }
+
+      genererFiltresEnfants();
+      genererSelectorEnfantsModal();
+      majSelectsModal();
+      genererFiltresIntervenants();
+      genererFiltresPeriodes();
     }
 
-    genererFiltresEnfants();
-    genererSelectorEnfantsModal();
-    majSelectsModal();
-    genererFiltresIntervenants();
-    genererFiltresPeriodes();
-    afficherTimeline();
-  } catch(err) {
-    console.error("Erreur de chargement des référentiels :", err);
-  }
-}
     function genererFiltresEnfants() {
       const container = document.getElementById('childFilters');
       if (!container) return;
@@ -730,7 +720,7 @@ async function chargerReferences() {
 
         if (isNaN(dStart.getTime())) return;
 
-        const prenoms = (evt.enfantsIds || []).map(id => mapIdToPrenom[id]).filter(Boolean);
+        const prenoms = (evt.enfantsIds || []).map(id => mapIdToPrenom[String(id)]).filter(Boolean);
 
         let dayCursor = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
         const dayEnd = !isNaN(dEnd.getTime()) 
@@ -756,7 +746,6 @@ async function chargerReferences() {
       return occurrences;
     }
 
-    // Dégradé vertical exact (ex: Enola, James, Andreas, Matys, Nino)
     function genererGradientBarre(enfants) {
       const cols = enfants.map(e => enfantsInfo[e] ? enfantsInfo[e].color : '#64748B');
       if (cols.length === 0) return 'background-color: #64748B;';
@@ -764,7 +753,6 @@ async function chargerReferences() {
       return `background: linear-gradient(to bottom, ${cols.join(', ')});`;
     }
 
-    // Badge coloré pour chaque enfant
     function genererBadgesEnfants(enfants) {
       if (!enfants || enfants.length === 0) return '';
       
@@ -837,7 +825,12 @@ async function chargerReferences() {
 
       const groupesParJour = {};
       occurrencesFiltrees.forEach(occ => {
-        const keyJour = occ.occurrenceDate.toISOString().split('T')[0];
+        // CORRECTION FUSEAU HORAIRE : Formate en local pour éviter le décalage de jour
+        const y = occ.occurrenceDate.getFullYear();
+        const m = String(occ.occurrenceDate.getMonth() + 1).padStart(2, '0');
+        const d = String(occ.occurrenceDate.getDate()).padStart(2, '0');
+        const keyJour = `${y}-${m}-${d}`;
+
         if (!groupesParJour[keyJour]) groupesParJour[keyJour] = [];
         groupesParJour[keyJour].push(occ);
       });
@@ -1062,7 +1055,7 @@ async function chargerReferences() {
       document.getElementById("formId").value = evt.id;
       document.getElementById("formIdSerie").value = evt.idSerie || "";
       
-      const prenomsEvt = (evt.enfantsIds || []).map(idEnf => mapIdToPrenom[idEnf]).filter(Boolean);
+      const prenomsEvt = (evt.enfantsIds || []).map(idEnf => mapIdToPrenom[String(idEnf)]).filter(Boolean);
       enfantsModalSelectionnes = prenomsEvt.length > 0 ? prenomsEvt : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
       majRenduPucesModal();
 
@@ -1115,6 +1108,18 @@ async function chargerReferences() {
       document.getElementById("modalEvt").style.display = "flex";
     }
 
+    function estDoublonStrict(payload) {
+      const idsTriesNouveau = [...payload.enfantsIds].map(String).sort().join(',');
+      const keyNouveau = `${payload.debut}_${payload.fin}_${payload.type.toLowerCase()}_${payload.responsable.toLowerCase()}_${idsTriesNouveau}`;
+
+      return donneesBrutes.some(evt => {
+        if (String(evt.id).trim() === String(payload.id).trim()) return false;
+        const idsTriesExistant = [...(evt.enfantsIds || [])].map(String).sort().join(',');
+        const keyExistant = `${evt.debut}_${evt.fin}_${(evt.type || '').toLowerCase()}_${(evt.responsable || '').toLowerCase()}_${idsTriesExistant}`;
+        return keyNouveau === keyExistant;
+      });
+    }
+
     function soumettre() {
       if (!validerControleDates()) return;
 
@@ -1137,7 +1142,9 @@ async function chargerReferences() {
         ? document.querySelector('input[name="optSerieAction"]:checked').value 
         : 'UNIQUE';
 
-      const targetIds = enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
+      const targetIds = enfantsModalSelectionnes
+        .map(p => enfantsInfo[p] ? String(enfantsInfo[p].id) : null)
+        .filter(Boolean);
 
       const payload = {
         id: document.getElementById("formId").value,
@@ -1162,6 +1169,12 @@ async function chargerReferences() {
         ajustementsConflitEnfants: []
       };
 
+      // DÉDOUBLONNAGE : Prévention des doublons stricts
+      if (estDoublonStrict(payload)) {
+        alert("Cet événement existe déjà à l'identique (mêmes dates, intervenant et enfants).");
+        return;
+      }
+
       analyserConflitsEtValider(payload);
     }
 
@@ -1181,6 +1194,9 @@ async function chargerReferences() {
       let conflitsEnfants = [];
       let conflitsResponsable = [];
 
+      // DÉTECTION INTELLIGENTE DES CHEVAUCHEMENTS
+      const payloadEnfantsIdsStr = (payload.enfantsIds || []).map(String);
+
       donneesBrutes.forEach(evt => {
         if (String(evt.id).trim() === String(payload.id).trim()) return;
         if ((evt.type || "").toLowerCase() !== "garde") return;
@@ -1188,13 +1204,14 @@ async function chargerReferences() {
         const startExistant = new Date(evt.debut);
         const endExistant = new Date(evt.fin);
 
+        // Formule de chevauchement temporel : (DebutA < FinB) ET (FinA > DebutB)
         if (startNouveau < endExistant && endNouveau > startExistant) {
-          const evtEnfantsIds = evt.enfantsIds || [];
-          const enfantsEnConflitIds = evtEnfantsIds.filter(id => payload.enfantsIds.includes(id));
+          const evtEnfantsIdsStr = (evt.enfantsIds || []).map(String);
+          const enfantsEnConflitIds = evtEnfantsIdsStr.filter(id => payloadEnfantsIdsStr.includes(id));
 
           if (enfantsEnConflitIds.length > 0) {
             const enfantsEnConflitPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-            const enfantsRestantsIds = evtEnfantsIds.filter(id => !payload.enfantsIds.includes(id));
+            const enfantsRestantsIds = evtEnfantsIdsStr.filter(id => !payloadEnfantsIdsStr.includes(id));
             const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
 
             conflitsEnfants.push({
@@ -1216,7 +1233,7 @@ async function chargerReferences() {
           if (c.enfantsRestants.length === 0) {
             idsGardesARemplacer.push(c.id);
           } else {
-            const restantsIds = c.enfantsRestants.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
+            const restantsIds = c.enfantsRestants.map(p => enfantsInfo[p] ? String(enfantsInfo[p].id) : null).filter(Boolean);
             ajustementsConflitEnfants.push({
               id: c.id,
               nouveauxEnfantsIds: restantsIds
@@ -1287,8 +1304,8 @@ async function chargerReferences() {
         }
 
         fermerModal();
-        chargerDonnees();
-        chargerReferences();
+        await chargerReferences();
+        await chargerDonnees();
       } catch(err) {
         btn.innerHTML = "Enregistrer";
         btn.disabled = false;
