@@ -1,74 +1,178 @@
 {
   "types": [
     "Garde",
-    "RDV",
     "École",
     "Activité",
-    "Autre",
-    "Médical/RDV"
+    "Santé",
+    "Transport",
+    "Maison",
+    "Événement",
+    "Autre"
   ],
   "intervenants": [
     {
+      "id": "INT001",
       "nom": "Papy Michel & MamIsa",
+      "type": "grand-parent",
       "tel1": "0621213979",
       "tel2": "0618035434",
-      "email": ""
+      "email": "",
+      "actif": true
     },
     {
+      "id": "INT002",
       "nom": "Charlotte",
+      "type": "parent",
       "tel1": "0631456620",
       "tel2": "",
-      "email": ""
+      "email": "",
+      "actif": true
     },
     {
+      "id": "INT003",
       "nom": "Mamie Colette",
+      "type": "grand-parent",
       "tel1": "0685360175",
       "tel2": "",
-      "email": ""
+      "email": "",
+      "actif": true
     },
     {
+      "id": "INT004",
       "nom": "Mamie Sylvie",
+      "type": "grand-parent",
       "tel1": "0612173977",
       "tel2": "",
-      "email": ""
+      "email": "",
+      "actif": true
     },
     {
+      "id": "INT005",
       "nom": "Mathieu",
+      "type": "parent",
       "tel1": "0603194541",
       "tel2": "",
-      "email": ""
+      "email": "",
+      "actif": true
     },
     {
+      "id": "INT006",
       "nom": "Maman (James)",
+      "type": "parent",
       "tel1": "",
       "tel2": "",
-      "email": ""
+      "email": "",
+      "actif": true
     },
     {
-      "nom": "Centre de loisirs / Domicile",
-      "tel1": "",
-      "tel2": "",
-      "email": ""
-    },
-    {
-      "nom": "Loisirs",
-      "tel1": "",
-      "tel2": "",
-      "email": ""
-    },
-    {
+      "id": "INT007",
       "nom": "Isabelle",
+      "type": "famille",
       "tel1": "0603326111",
       "tel2": "",
-      "email": ""
+      "email": "",
+      "actif": true
     }
+  ],
+  "lieux": [
+    {
+      "id": "LIEU001",
+      "nom": "Domicile",
+      "type": "domicile_famille",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU002",
+      "nom": "Chez Papy Michel & MamIsa",
+      "type": "domicile_famille",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU003",
+      "nom": "Chez Mamie Colette",
+      "type": "domicile_famille",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU004",
+      "nom": "Chez Mamie Sylvie",
+      "type": "domicile_famille",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU005",
+      "nom": "Chez Maman (James)",
+      "type": "domicile_famille",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU006",
+      "nom": "Centre de loisirs",
+      "type": "structure",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU007",
+      "nom": "École",
+      "type": "structure",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU008",
+      "nom": "Collège",
+      "type": "structure",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU009",
+      "nom": "Gymnase",
+      "type": "structure",
+      "adresse": ""
+    },
+    {
+      "id": "LIEU010",
+      "nom": "Lycée",
+      "type": "structure",
+      "adresse": ""
+    }
+    
   ],
   "periodes": [
     {
       "id": "PER001",
       "nom": "Toussaint",
-      "dateDebut": "2026-10-24",
-      "dateFin": "2026-11-01"
+      "dateDebut": "2026-10-17",
+      "dateFin": "2026-11-02"
+    },
+    {
+      "id": "PER002",
+      "nom": "Noël",
+      "dateDebut": "2026-12-19",
+      "dateFin": "2027-01-04"
+    },
+    {
+      "id": "PER003",
+      "nom": "Hiver",
+      "dateDebut": "2027-02-20",
+      "dateFin": "2027-03-08"
+    },
+    {
+      "id": "PER004",
+      "nom": "Printemps",
+      "dateDebut": "2027-04-17",
+      "dateFin": "2027-05-03"
+    },
+    {
+      "id": "PER005",
+      "nom": "Pont de l'Ascension",
+      "dateDebut": "2027-05-05",
+      "dateFin": "2027-05-10"
+    },
+    {
+      "id": "PER006",
+      "nom": "Été",
+      "dateDebut": "2027-07-03",
+      "dateFin": "2027-08-31"
     }
   ],
   "enfants": [
