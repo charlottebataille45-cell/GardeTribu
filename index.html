@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐢 La Tribu – Agenda familial</title>
+  <title>🐢 La Tribu – Agenda familial · V2</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <style>
@@ -397,8 +397,11 @@
       document.getElementById("modalConflit").style.display = "none";
       document.getElementById("modalSuppression").style.display = "none";
 
+      // V2 : l'interface est initialisée immédiatement avec les référentiels embarqués.
+      // Le réseau ne bloque plus l'affichage initial sur téléphone.
+      appliquerReferentielsAPI(REFERENTIELS_DEFAUT);
       chargerDonnees();
-      chargerReferences();
+      chargerReferencesEnArrierePlan();
     };
 
     function parseDateSecurisee(dateStr) {
@@ -410,9 +413,18 @@
 
     async function apiGet(action, params = {}) {
       const query = new URLSearchParams({ action, ...params }).toString();
-      const resp = await fetch(`${API_URL}?${query}`);
-      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
-      return await resp.json();
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      try {
+        const resp = await fetch(`${API_URL}?${query}`, { signal: controller.signal, cache: 'no-store' });
+        if (!resp.ok) throw new Error(`API Apps Script HTTP ${resp.status}`);
+        return await resp.json();
+      } catch (e) {
+        if (e.name === 'AbortError') throw new Error("L'API met trop de temps à répondre");
+        throw e;
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
     async function apiPost(action, payload) {
@@ -567,19 +579,69 @@
       return `${y}-${m}-${j}`;
     }
 
+    const CACHE_LOCAL_PREFIX = 'gardetribu_planning_v2_';
+    const CACHE_LOCAL_TTL_MS = 30 * 60 * 1000;
+
+    function chargerCacheLocalPlanning(key) {
+      try {
+        const raw = localStorage.getItem(CACHE_LOCAL_PREFIX + key);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj || !obj.data) return null;
+        if (Date.now() - Number(obj.ts || 0) > CACHE_LOCAL_TTL_MS) return obj.data;
+        return obj.data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function enregistrerCacheLocalPlanning(key, data) {
+      try {
+        localStorage.setItem(CACHE_LOCAL_PREFIX + key, JSON.stringify({ ts: Date.now(), data }));
+      } catch (e) {
+        // Le cache local est facultatif : une saturation ne doit jamais bloquer l'application.
+      }
+    }
+
+    function afficherCachePlanning(cache) {
+      if (!cache || !Array.isArray(cache.evenements)) return false;
+      cachePlanning.set(cache.filtre?.key || 'LOCAL', cache);
+      derniereReponseAPI = cache;
+      donneesBrutes = cache.evenements.slice();
+      if (cache.referentiels) appliquerReferentielsAPI(cache.referentiels);
+      document.getElementById('loader').style.display = 'none';
+      afficherTimeline();
+      return true;
+    }
+
+    async function chargerReferencesEnArrierePlan() {
+      try {
+        const refs = await apiGet('getReferentiels');
+        if (refs?.success && refs.referentiels) appliquerReferentielsAPI(refs.referentiels);
+      } catch (e) {
+        console.warn('Référentiels distants indisponibles : utilisation du référentiel embarqué.');
+      }
+    }
+
     async function chargerDonnees(force = false) {
       const fenetre = calculerFenetrePlanning();
       const loader = document.getElementById('loader');
       const timeline = document.getElementById('timeline');
 
       if (!force && cachePlanning.has(fenetre.key)) {
-        const cache = cachePlanning.get(fenetre.key);
-        derniereReponseAPI = cache;
-        donneesBrutes = cache.evenements.slice();
-        if (cache.referentiels) appliquerReferentielsAPI(cache.referentiels);
-        loader.style.display = 'none';
-        afficherTimeline();
+        afficherCachePlanning(cachePlanning.get(fenetre.key));
+        // Le cache mémoire est instantané ; on ne refait pas d'appel réseau.
         return;
+      }
+
+      if (!force) {
+        const cacheLocal = chargerCacheLocalPlanning(fenetre.key);
+        if (cacheLocal) {
+          afficherCachePlanning(cacheLocal);
+          // Affichage immédiat, puis rafraîchissement silencieux en arrière-plan.
+          setTimeout(() => chargerDonnees(true).catch(() => {}), 0);
+          return cacheLocal;
+        }
       }
 
       if (chargementEnCours) return chargementEnCours;
@@ -594,8 +656,9 @@
           if (fenetre.from) params.from = fenetre.from;
           if (fenetre.to) params.to = fenetre.to;
           if (fenetre.includeAll) params.includeAll = '1';
-          if (!refEnfants.length || !refIntervenantsObjets.length) params.includeRefs = '1';
-          else params.includeRefs = '0';
+          // V2 : les référentiels embarqués sont disponibles immédiatement.
+          // L'API de planning ne les renvoie plus à chaque requête.
+          params.includeRefs = '0';
 
           const reponse = await apiGet('getPlanningData', params);
           const normalisee = normaliserReponsePlanning(reponse);
@@ -604,7 +667,9 @@
             throw new Error(reponse?.message || 'API Apps Script : réponse en erreur');
           }
 
+          normalisee.filtre = { ...(normalisee.filtre || {}), key: fenetre.key };
           cachePlanning.set(fenetre.key, normalisee);
+          enregistrerCacheLocalPlanning(fenetre.key, normalisee);
           derniereReponseAPI = normalisee;
           donneesBrutes = normalisee.evenements.slice();
 
