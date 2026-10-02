@@ -391,6 +391,12 @@
     let mapIdToPrenom = {};
 
     window.onload = () => {
+      // Sécurité : toutes les modales doivent être fermées au démarrage.
+      // Le formulaire ne doit s'ouvrir que via le bouton FAB ou l'édition d'un événement.
+      document.getElementById("modalEvt").style.display = "none";
+      document.getElementById("modalConflit").style.display = "none";
+      document.getElementById("modalSuppression").style.display = "none";
+
       chargerDonnees();
       chargerReferences();
     };
