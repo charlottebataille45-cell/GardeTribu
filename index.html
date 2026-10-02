@@ -1220,72 +1220,127 @@
     }
 
     // Fonctions 11 & 12 : Détection et gestion des conflits de garde et de responsable
-    function analyserConflitsEtValider(payload) {
-      payloadEnAttente = payload;
-      idsGardesARemplacer = [];
-      ajustementsConflitEnfants = [];
+function analyserConflitsEtValider(payload) {
+  payloadEnAttente = payload;
+  idsGardesARemplacer = [];
+  ajustementsConflitEnfants = [];
 
-      const typePayload = (payload.type || "").trim().toLowerCase();
-      if (typePayload !== "garde") {
-        executerEnregistrement(payload);
-        return;
+  const startNouveau = parseDateSecurisee(payload.debut);
+  const endNouveau = parseDateSecurisee(payload.fin);
+
+  if (!startNouveau || !endNouveau) {
+    executerEnregistrement(payload);
+    return;
+  }
+
+  const typePayload = (payload.type || "").trim().toLowerCase();
+  const payloadEnfantsIds = (payload.enfantsIds || []).map(id => String(id).trim());
+
+  let conflitsGardesEnfants = [];
+  let avertissementsEnfants = [];
+  let avertissementsResponsables = [];
+
+  donneesBrutes.forEach(evt => {
+    // Exclure l'événement en cours d'édition
+    if (String(evt.id).trim() === String(payload.id).trim()) return;
+
+    const startExistant = parseDateSecurisee(evt.debut);
+    const endExistant = parseDateSecurisee(evt.fin);
+    if (!startExistant || !endExistant) return;
+
+    // Détection de chevauchement horaire
+    if (startNouveau < endExistant && endNouveau > startExistant) {
+      const typeExistant = (evt.type || "").trim().toLowerCase();
+      const isBothGarde = (typePayload === "garde" && typeExistant === "garde");
+
+      // Extraction des enfants de l'événement existant
+      let evtEnfantsIds = [];
+      if (Array.isArray(evt.enfantsIds)) {
+        evtEnfantsIds = evt.enfantsIds.map(id => String(id).trim());
+      } else if (typeof evt.enfantsIds === 'string') {
+        evtEnfantsIds = evt.enfantsIds.split(',').map(id => id.trim());
       }
 
-      const startNouveau = parseDateSecurisee(payload.debut);
-      const endNouveau = parseDateSecurisee(payload.fin);
+      // 1. Détection des conflits sur les enfants (TOUS types)
+      const enfantsEnConflitIds = evtEnfantsIds.filter(id => payloadEnfantsIds.includes(id));
+      if (enfantsEnConflitIds.length > 0) {
+        const enfantsPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
+        
+        if (isBothGarde) {
+          // Réorganisation automatique entre deux gardes
+          const enfantsRestantsIds = evtEnfantsIds.filter(id => !payloadEnfantsIds.includes(id));
+          const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
 
-      if (!startNouveau || !endNouveau) {
-        executerEnregistrement(payload);
-        return;
-      }
-
-      let conflitsEnfants = [];
-      let conflitsResponsable = [];
-
-      const payloadEnfantsIds = (payload.enfantsIds || []).map(id => String(id).trim());
-
-      donneesBrutes.forEach(evt => {
-        if (String(evt.id).trim() === String(payload.id).trim()) return;
-
-        const typeExistant = (evt.type || "").trim().toLowerCase();
-        if (typeExistant !== "garde") return;
-
-        const startExistant = parseDateSecurisee(evt.debut);
-        const endExistant = parseDateSecurisee(evt.fin);
-
-        if (!startExistant || !endExistant) return;
-
-        // Détection du chevauchement temporel
-        if (startNouveau < endExistant && endNouveau > startExistant) {
-          
-          let evtEnfantsIds = [];
-          if (Array.isArray(evt.enfantsIds)) {
-            evtEnfantsIds = evt.enfantsIds.map(id => String(id).trim());
-          } else if (typeof evt.enfantsIds === 'string') {
-            evtEnfantsIds = evt.enfantsIds.split(',').map(id => id.trim());
-          }
-
-          const enfantsEnConflitIds = evtEnfantsIds.filter(id => payloadEnfantsIds.includes(id));
-
-          if (enfantsEnConflitIds.length > 0) {
-            const enfantsEnConflitPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-            const enfantsRestantsIds = evtEnfantsIds.filter(id => !payloadEnfantsIds.includes(id));
-            const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-
-            conflitsEnfants.push({
-              id: evt.id,
-              enfantsTouchés: enfantsEnConflitPrenoms,
-              enfantsRestants: enfantsRestantsPrenoms,
-              responsable: evt.responsable
-            });
-          }
-
-          if (evt.responsable && evt.responsable.trim().toLowerCase() === (payload.responsable || "").trim().toLowerCase()) {
-            conflitsResponsable.push(evt);
-          }
+          conflitsGardesEnfants.push({
+            id: evt.id,
+            enfantsTouchés: enfantsPrenoms,
+            enfantsRestants: enfantsRestantsPrenoms,
+            responsable: evt.responsable
+          });
+        } else {
+          // Avertissement pour chevauchement d'activités, santé, école, etc.
+          const nomEvt = evt.titre ? `${evt.type} (${evt.titre})` : evt.type;
+          avertissementsEnfants.push(
+            `• <strong>${enfantsPrenoms.join(', ')}</strong> a déjà un événement : <em>${nomEvt}</em> avec ${evt.responsable}.`
+          );
         }
-      });
+      }
 
+      // 2. Détection du conflit sur le responsable (TOUS types)
+      if (evt.responsable && payload.responsable && evt.responsable.trim().toLowerCase() === payload.responsable.trim().toLowerCase()) {
+        const nomEvtExistant = evt.titre ? `${evt.type} (${evt.titre})` : evt.type;
+        avertissementsResponsables.push(
+          `• <strong>${payload.responsable}</strong> est déjà engagé(e) sur : <em>${nomEvtExistant}</em>.`
+        );
+      }
+    }
+  });
+
+  // CAS 1 : Réorganisation automatique si conflit entre deux Gardes
+  if (conflitsGardesEnfants.length > 0) {
+    conflitsGardesEnfants.forEach(c => {
+      if (c.enfantsRestants.length === 0) {
+        idsGardesARemplacer.push(c.id);
+      } else {
+        const restantsIds = c.enfantsRestants.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
+        ajustementsConflitEnfants.push({
+          id: c.id,
+          nouveauxEnfantsIds: restantsIds
+        });
+      }
+    });
+
+    const detailsText = conflitsGardesEnfants.map(c => {
+      if (c.enfantsRestants.length > 0) {
+        return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. <strong>${c.enfantsRestants.join(', ')}</strong> reste géré(e) par ${c.responsable}.`;
+      }
+      return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. L'ancienne garde de ${c.responsable} sera supprimée.`;
+    }).join('<br>');
+
+    ouvrirModalConflit(
+      "Ajustement des gardes",
+      `Garde existante détectée sur ce créneau :<br><br>${detailsText}<br><br>Voulez-vous valider cette réorganisation ?`,
+      "Valider et Réorganiser"
+    );
+    return;
+  }
+
+  // CAS 2 : Avertissements combinés (Activités/Santé enfants ou Responsable déjà pris)
+  const tousLesAvertissements = [...avertissementsEnfants, ...avertissementsResponsables];
+  if (tousLesAvertissements.length > 0) {
+    const messagesUniques = [...new Set(tousLesAvertissements)];
+    ouvrirModalConflit(
+      "Chevauchement détecté",
+      `Un ou plusieurs chevauchements ont été détectés :<br><br>${messagesUniques.join('<br>')}<br><br>Souhaitez-vous quand même enregistrer cet événement ?`,
+      "Confirmer et Enregistrer"
+    );
+    return;
+  }
+
+  // Aucun conflit
+  executerEnregistrement(payload);
+}
+    
       // Fonction 11 : Conflit Enfant
       if (conflitsEnfants.length > 0) {
         conflitsEnfants.forEach(c => {
