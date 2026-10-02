@@ -439,15 +439,117 @@
       arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
     }
 
+    /**
+     * CONTRAT DE DONNÉES FRONT/BACK
+     * Le backend renvoie :
+     * {
+     *   referentiels: {...},
+     *   evenements: [...],
+     *   evenementEnfants: [...],
+     *   series: [...]
+     * }
+     *
+     * Le front conserve ensuite donneesBrutes sous la forme d'un
+     * tableau d'événements normalisés, afin que toutes les fonctions
+     * historiques (find/forEach/filter...) travaillent sur le même format.
+     */
+    function normaliserDonneesPlanning(reponse) {
+      if (Array.isArray(reponse)) {
+        return reponse.map(normaliserEvenementFront);
+      }
+
+      if (!reponse || typeof reponse !== 'object') {
+        throw new Error("Réponse API invalide : objet de planning attendu.");
+      }
+
+      const evenements = Array.isArray(reponse.evenements) ? reponse.evenements : [];
+      const liensEnfants = Array.isArray(reponse.evenementEnfants)
+        ? reponse.evenementEnfants
+        : [];
+
+      const enfantsParEvenement = {};
+      liensEnfants.forEach(lien => {
+        const idEvt = String(lien.idEvenement ?? lien.ID_Evenement ?? '').trim();
+        const idEnfant = String(lien.idEnfant ?? lien.ID_Enfant ?? '').trim();
+        if (!idEvt || !idEnfant) return;
+        if (!enfantsParEvenement[idEvt]) enfantsParEvenement[idEvt] = [];
+        if (!enfantsParEvenement[idEvt].includes(idEnfant)) {
+          enfantsParEvenement[idEvt].push(idEnfant);
+        }
+      });
+
+      return evenements.map(evt => {
+        const normalise = normaliserEvenementFront(evt);
+        const idEvt = String(normalise.id ?? '').trim();
+
+        // La table BDD_Evenement_Enfants est la source de vérité pour les enfants.
+        normalise.enfantsIds = enfantsParEvenement[idEvt] || normalise.enfantsIds || [];
+        return normalise;
+      });
+    }
+
+    function normaliserEvenementFront(evt) {
+      if (!evt || typeof evt !== 'object') return null;
+
+      let enfantsIds = evt.enfantsIds;
+
+      if (typeof enfantsIds === 'string') {
+        try {
+          const parsed = JSON.parse(enfantsIds);
+          enfantsIds = Array.isArray(parsed) ? parsed : enfantsIds.split(',');
+        } catch (e) {
+          enfantsIds = enfantsIds.split(',');
+        }
+      }
+
+      if (!Array.isArray(enfantsIds)) enfantsIds = [];
+
+      return {
+        ...evt,
+
+        // Identifiants utilisés partout dans le front.
+        id: evt.id ?? evt.idEvenement ?? evt.ID_Evenement ?? '',
+        idSerie: evt.idSerie ?? evt.ID_Serie ?? '',
+
+        type: evt.type ?? evt.Type ?? '',
+        responsable: evt.responsable ?? evt.responsableTexte ?? evt.Responsable ?? '',
+        titre: evt.titre ?? evt.Titre ?? '',
+
+        debut: evt.debut ?? evt.Debut ?? '',
+        fin: evt.fin ?? evt.Fin ?? '',
+
+        lieu: evt.lieu ?? evt.lieuTexte ?? evt.Lieu ?? '',
+        details: evt.details ?? evt.Details ?? '',
+        idPeriode: evt.idPeriode ?? evt.ID_Periode ?? '',
+        statut: evt.statut ?? evt.Statut ?? '',
+
+        idIntervenant: evt.idIntervenant ?? evt.ID_Intervenant ?? '',
+        idsIntervenants: evt.idsIntervenants ?? evt.IDs_Intervenants ?? [],
+        idLieu: evt.idLieu ?? evt.ID_Lieu ?? '',
+
+        enfantsIds: enfantsIds
+          .map(id => String(id).trim())
+          .filter(Boolean)
+      };
+    }
+
     async function chargerDonnees() {
       document.getElementById('loader').style.display = 'block';
       document.getElementById('timeline').innerHTML = '';
+
       try {
-        donneesBrutes = await apiGet('getPlanningData');
+        const reponse = await apiGet('getPlanningData');
+
+        // IMPORTANT : donneesBrutes reste TOUJOURS un tableau.
+        // Cela évite notamment : "donneesBrutes.forEach is not a function".
+        donneesBrutes = normaliserDonneesPlanning(reponse);
+
         document.getElementById('loader').style.display = 'none';
         afficherTimeline();
       } catch(err) {
-        document.getElementById('loader').innerText = "Erreur de chargement : " + err;
+        console.error("Erreur chargement planning :", err);
+        document.getElementById('loader').innerText =
+          "Erreur de chargement : " + (err.message || err);
       }
     }
 
