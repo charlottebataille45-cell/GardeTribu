@@ -49,6 +49,7 @@
     .date-header { font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
     .date-count-badge { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 
+    /* CARTE ÉVÉNEMENT */
     .event-card { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); position: relative; }
     .event-card.highlight-upcoming { border: 2px solid #3B82F6; background: #EFF6FF; }
     .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; }
@@ -68,6 +69,7 @@
     .action-links-container { display: flex; gap: 6px; margin-bottom: 8px; }
     .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 4px; }
 
+    /* CRÉNEAU INTERNE (SUB-SLOT) */
     .sub-slot-item { background: var(--subslot-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 8px; cursor: pointer; transition: background 0.15s ease; position: relative; }
     .sub-slot-item:hover { background: #F1F5F9; }
 
@@ -84,9 +86,11 @@
     .sub-slot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
     .edit-icon-btn { font-size: 16px; color: #94A3B8; display: flex; align-items: center; }
 
+    /* FAB BUTTON */
     .fab { position: fixed; bottom: 25px; right: 25px; background: #0F172A; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,0.25); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
     .fab:hover { transform: scale(1.06); }
 
+    /* MODALE */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
     .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -145,13 +149,20 @@
 
     <div id="filterPanel" class="filter-panel" style="display: none;">
       <div class="filter-label">Enfants</div>
-      <div class="filters-row" id="childFilters"></div>
+      <div class="filters-row" id="childFilters">
+        <div class="chip active" onclick="setChildFilter('Tous')">Tous</div>
+      </div>
 
       <div class="filter-label">Périodes & Vacances</div>
-      <div class="filters-row" id="periodeFilters"></div>
+      <div class="filters-row" id="periodeFilters">
+        <div class="chip active" onclick="setPeriodeFilter('Tous')">Toutes</div>
+        <div class="chip" onclick="setPeriodeFilter('HORS_VACANCES')">Hors vacances</div>
+      </div>
 
       <div class="filter-label">Responsable</div>
-      <div class="filters-row" id="intervenantFilters"></div>
+      <div class="filters-row" id="intervenantFilters">
+        <div class="chip active" onclick="setIntervenantFilter('Tous')">Tous</div>
+      </div>
 
       <button class="btn-reset-filters" onclick="reinitialiserFiltres()">
         <span class="material-symbols-outlined" style="font-size:14px;">restart_alt</span> Réinitialiser tous les filtres
@@ -185,20 +196,26 @@
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
           <label for="formTypeSelect">2. TYPE *</label>
-          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()"></select>
+          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
+            <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter un type...</option>
+          </select>
           <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type..." aria-label="Saisir un autre type">
         </div>
 
         <div class="form-group" style="flex: 1;">
           <label for="formResponsableSelect">3. RESPONSABLE *</label>
-          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()"></select>
+          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
+            <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter...</option>
+          </select>
           <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable..." aria-label="Saisir un autre responsable">
         </div>
       </div>
 
       <div class="form-group">
         <label for="formTitre">4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
-        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Médical...">
+        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Oréliance...">
       </div>
 
       <div style="display: flex; gap: 10px;">
@@ -220,7 +237,7 @@
 
       <div class="form-group">
         <label for="formLieu">6. LIEU</label>
-        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie...">
+        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
       </div>
 
       <div class="form-group">
@@ -230,9 +247,12 @@
 
       <div class="form-group">
         <label for="formPeriodeSelect">PÉRIODE / VACANCES</label>
-        <select id="formPeriodeSelect" class="form-control"></select>
+        <select id="formPeriodeSelect" class="form-control">
+          <option value="">-- Hors vacances --</option>
+        </select>
       </div>
 
+      <!-- Fonctions 9 & 10 : Récurrence & Gestion de Série -->
       <div class="recurrence-box" id="secRecurrence">
         <div class="toggle-row" onclick="toggleRecurrenceOpt()">
           <div class="toggle-title">
@@ -273,7 +293,7 @@
     </div>
   </div>
 
-  <!-- Modale Conflit -->
+  <!-- Fonctions 11 & 12 : Modale Conflit -->
   <div class="modal-overlay" id="modalConflit" style="z-index: 1100;">
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
@@ -288,7 +308,7 @@
     </div>
   </div>
 
-  <!-- Modale Suppression -->
+  <!-- Fonction 10 : Modale Suppression de série -->
   <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;">
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
@@ -316,12 +336,34 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
-    // RÉFÉRENTIELS DE SECOURS (Zéro Hardcode UI, fallback local)
+    // Embarquement de secours en cas d'indisponibilité de referentiels.json
     const REFERENTIELS_DEFAUT = {
       "types": ["Garde", "École", "Activité", "Santé", "Transport", "Maison", "Événement", "Autre"],
-      "intervenants": [],
-      "periodes": [],
-      "enfants": []
+      "intervenants": [
+        { "id": "INT001", "nom": "Papy Michel & MamIsa", "type": "famille", "tel1": "0621213979", "tel2": "0618035434", "actif": true },
+        { "id": "INT002", "nom": "Charlotte", "type": "parent", "tel1": "0631456620", "tel2": "", "actif": true },
+        { "id": "INT003", "nom": "Mamie Colette", "type": "grand-parent", "tel1": "0685360175", "tel2": "", "actif": true },
+        { "id": "INT004", "nom": "Mamie Sylvie", "type": "grand-parent", "tel1": "0612173977", "tel2": "", "actif": true },
+        { "id": "INT005", "nom": "Mathieu", "type": "parent", "tel1": "0603194541", "tel2": "", "actif": true },
+        { "id": "INT006", "nom": "Sarah", "type": "parent", "tel1": "", "tel2": "", "actif": true },
+        { "id": "INT007", "nom": "Isabelle", "type": "grand-parent", "tel1": "0603326111", "tel2": "", "actif": true },
+        { "id": "INT008", "nom": "Renaud", "type": "parent", "tel1": "", "tel2": "", "actif": true }
+      ],
+      "periodes": [
+        { "id": "PER001", "nom": "Toussaint", "dateDebut": "2026-10-17", "dateFin": "2026-11-02" },
+        { "id": "PER002", "nom": "Noël", "dateDebut": "2026-12-19", "dateFin": "2027-01-04" },
+        { "id": "PER003", "nom": "Hiver", "dateDebut": "2027-02-20", "dateFin": "2027-03-08" },
+        { "id": "PER004", "nom": "Printemps", "dateDebut": "2027-04-17", "dateFin": "2027-05-03" },
+        { "id": "PER005", "nom": "Pont de l'Ascension", "dateDebut": "2027-05-05", "dateFin": "2027-05-10" },
+        { "id": "PER006", "nom": "Été", "dateDebut": "2027-07-03", "dateFin": "2027-08-31" }
+      ],
+      "enfants": [
+        { "id": "ENF01", "prenom": "Enola", "actif": true, "couleur": "#E91E63", "emoji": "🍒" },
+        { "id": "ENF02", "prenom": "James", "actif": true, "couleur": "#2196F3", "emoji": "🦖" },
+        { "id": "ENF03", "prenom": "Andreas", "actif": true, "couleur": "#4CAF50", "emoji": "⚡" },
+        { "id": "ENF04", "prenom": "Matys", "actif": true, "couleur": "#FF9800", "emoji": "🎮" },
+        { "id": "ENF05", "prenom": "Nino", "actif": true, "couleur": "#9C27B0", "emoji": "🏀" }
+      ]
     };
 
     let donneesBrutes = [];
@@ -346,10 +388,17 @@
     let enfantsInfo = {};
     let mapIdToPrenom = {};
 
-    window.onload = async () => {
-      await chargerReferences();
-      await chargerDonnees();
+    window.onload = () => {
+      chargerDonnees();
+      chargerReferences();
     };
+
+    function parseDateSecurisee(dateStr) {
+      if (!dateStr) return null;
+      const isoStr = String(dateStr).trim().replace(' ', 'T');
+      const d = new Date(isoStr);
+      return isNaN(d.getTime()) ? null : d;
+    }
 
     async function apiGet(action) {
       const resp = await fetch(`${API_URL}?action=${action}`);
@@ -400,24 +449,26 @@
       try {
         const resp = await fetch('./referentiels.json');
         if (resp.ok) refs = await resp.json();
-      } catch (eLocal) {
-        console.warn("Échec du chargement local, tentative via GitHub Raw...", eLocal);
+      } catch (e) {
+        console.warn("Échec du chargement local de referentiels.json");
       }
 
       if (!refs) {
         try {
           const respRaw = await fetch('https://raw.githubusercontent.com/charlottebataille45-cell/GardeTribu/refs/heads/main/referentiels.json');
           if (respRaw.ok) refs = await respRaw.json();
-        } catch (eRaw) {
-          console.warn("Échec du chargement GitHub Raw, secours sur l'objet embarqué.");
+        } catch (e) {
+          console.warn("Échec du chargement GitHub Raw");
         }
       }
 
-      if (!refs) refs = REFERENTIELS_DEFAUT;
+      if (!refs) {
+        refs = REFERENTIELS_DEFAUT;
+      }
 
       refEnfants = refs.enfants || [];
       refTypes = refs.types || [];
-      refIntervenantsObjets = (refs.intervenants || []).filter(i => i.actif === true || i.actif === 'Oui' || i.actif === undefined);
+      refIntervenantsObjets = (refs.intervenants || []).filter(i => i.actif === true || i.actif === undefined || i.actif === 'Oui');
       refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
       refPeriodes = refs.periodes || [];
 
@@ -428,12 +479,12 @@
       refEnfants.forEach(e => {
         if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
           enfantsInfo[e.prenom] = {
-            id: String(e.id),
+            id: e.id,
             color: e.couleur || '#64748B',
             emoji: e.emoji || '👤'
           };
           enfantsListe.push(e.prenom);
-          mapIdToPrenom[String(e.id)] = e.prenom;
+          mapIdToPrenom[e.id] = e.prenom;
         }
       });
 
@@ -446,6 +497,7 @@
       majSelectsModal();
       genererFiltresIntervenants();
       genererFiltresPeriodes();
+      afficherTimeline();
     }
 
     function genererFiltresEnfants() {
@@ -535,8 +587,8 @@
 
     function formatForInput(dateObj) {
       if (!dateObj) return "";
-      const d = new Date(dateObj);
-      if (isNaN(d.getTime())) return "";
+      const d = parseDateSecurisee(dateObj);
+      if (!d) return "";
 
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -582,6 +634,7 @@
       });
     }
 
+    // Fonction 9 : Gestion de la boîte de récurrence
     function toggleRecurrenceOpt(e) {
       if (e && e.target && e.target.id === 'chkRecurent') {
       } else if (e) {
@@ -593,7 +646,7 @@
       document.getElementById('recurrenceFields').style.display = chkVal ? 'block' : 'none';
       
       if (chkVal && !document.getElementById('formRecurFin').value) {
-        const dDeb = new Date(document.getElementById('formDebut').value || Date.now());
+        const dDeb = parseDateSecurisee(document.getElementById('formDebut').value) || new Date();
         dDeb.setMonth(dDeb.getMonth() + 1);
         document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
       }
@@ -605,11 +658,11 @@
       
       document.getElementById("formDate").value = debutStr.split('T')[0];
       
-      const d = new Date(debutStr);
+      const d = parseDateSecurisee(debutStr);
       const finInput = document.getElementById("formFin");
       const finStr = finInput.value;
       
-      if (!finStr || new Date(finStr) <= d) {
+      if (!finStr || parseDateSecurisee(finStr) <= d) {
         const nouvelleFin = new Date(d.getTime() + (60 * 60 * 1000));
         finInput.value = formatForInput(nouvelleFin);
       }
@@ -623,8 +676,8 @@
       const btnSubmit = document.getElementById("btnSubmit");
 
       if (debutVal && finVal) {
-        const d = new Date(debutVal);
-        const f = new Date(finVal);
+        const d = parseDateSecurisee(debutVal);
+        const f = parseDateSecurisee(finVal);
         if (f <= d) {
           errorMsg.style.display = "flex";
           btnSubmit.disabled = true;
@@ -709,21 +762,27 @@
       afficherTimeline();
     }
 
+    // Fonction 9 : Traitement des occurrences individuelles
     function genererOccurrences() {
       const occurrences = [];
 
       donneesBrutes.forEach(evt => {
         if (!evt.debut) return;
 
-        const dStart = new Date(evt.debut);
-        const dEnd = evt.fin ? new Date(evt.fin) : new Date(evt.debut);
+        const dStart = parseDateSecurisee(evt.debut);
+        const dEnd = evt.fin ? parseDateSecurisee(evt.fin) : parseDateSecurisee(evt.debut);
 
-        if (isNaN(dStart.getTime())) return;
+        if (!dStart) return;
 
-        const prenoms = (evt.enfantsIds || []).map(id => mapIdToPrenom[String(id)]).filter(Boolean);
+        let prenoms = [];
+        if (Array.isArray(evt.enfantsIds)) {
+          prenoms = evt.enfantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
+        } else if (typeof evt.enfantsIds === 'string') {
+          prenoms = evt.enfantsIds.split(',').map(id => mapIdToPrenom[id.trim()]).filter(Boolean);
+        }
 
         let dayCursor = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
-        const dayEnd = !isNaN(dEnd.getTime()) 
+        const dayEnd = dEnd 
           ? new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate())
           : new Date(dayCursor);
 
@@ -767,7 +826,7 @@
     }
 
     function nettoyerNumero(tel) {
-      return tel ? tel.replace(/\s+/g, '') : '';
+      return tel ? String(tel).replace(/\s+/g, '') : '';
     }
 
     function afficherTimeline() {
@@ -825,12 +884,7 @@
 
       const groupesParJour = {};
       occurrencesFiltrees.forEach(occ => {
-        // CORRECTION FUSEAU HORAIRE : Formate en local pour éviter le décalage de jour
-        const y = occ.occurrenceDate.getFullYear();
-        const m = String(occ.occurrenceDate.getMonth() + 1).padStart(2, '0');
-        const d = String(occ.occurrenceDate.getDate()).padStart(2, '0');
-        const keyJour = `${y}-${m}-${d}`;
-
+        const keyJour = occ.occurrenceDate.toISOString().split('T')[0];
         if (!groupesParJour[keyJour]) groupesParJour[keyJour] = [];
         groupesParJour[keyJour].push(occ);
       });
@@ -1047,6 +1101,7 @@
       document.getElementById("modalEvt").style.display = "none";
     }
 
+    // Fonction 10 : Modification avec détection d'idSerie
     function editerEvenement(id) {
       const evt = donneesBrutes.find(e => String(e.id).trim() === String(id).trim());
       if (!evt) return;
@@ -1055,7 +1110,13 @@
       document.getElementById("formId").value = evt.id;
       document.getElementById("formIdSerie").value = evt.idSerie || "";
       
-      const prenomsEvt = (evt.enfantsIds || []).map(idEnf => mapIdToPrenom[String(idEnf)]).filter(Boolean);
+      let prenomsEvt = [];
+      if (Array.isArray(evt.enfantsIds)) {
+        prenomsEvt = evt.enfantsIds.map(idEnf => mapIdToPrenom[idEnf]).filter(Boolean);
+      } else if (typeof evt.enfantsIds === 'string') {
+        prenomsEvt = evt.enfantsIds.split(',').map(idEnf => mapIdToPrenom[idEnf.trim()]).filter(Boolean);
+      }
+
       enfantsModalSelectionnes = prenomsEvt.length > 0 ? prenomsEvt : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
       majRenduPucesModal();
 
@@ -1097,7 +1158,7 @@
       document.getElementById("formTitre").value = evt.titre || "";
       document.getElementById("formDebut").value = formatForInput(evt.debut);
       document.getElementById("formFin").value = formatForInput(evt.fin);
-      document.getElementById("formDate").value = evt.date ? evt.date.split('T')[0] : (evt.debut ? evt.debut.split('T')[0] : "");
+      document.getElementById("formDate").value = evt.date ? String(evt.date).split('T')[0] : (evt.debut ? String(evt.debut).split('T')[0] : "");
       document.getElementById("formLieu").value = evt.lieu || "";
       document.getElementById("formDetails").value = evt.details || "";
       document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
@@ -1106,18 +1167,6 @@
 
       document.getElementById("btnDelete").style.display = "block";
       document.getElementById("modalEvt").style.display = "flex";
-    }
-
-    function estDoublonStrict(payload) {
-      const idsTriesNouveau = [...payload.enfantsIds].map(String).sort().join(',');
-      const keyNouveau = `${payload.debut}_${payload.fin}_${payload.type.toLowerCase()}_${payload.responsable.toLowerCase()}_${idsTriesNouveau}`;
-
-      return donneesBrutes.some(evt => {
-        if (String(evt.id).trim() === String(payload.id).trim()) return false;
-        const idsTriesExistant = [...(evt.enfantsIds || [])].map(String).sort().join(',');
-        const keyExistant = `${evt.debut}_${evt.fin}_${(evt.type || '').toLowerCase()}_${(evt.responsable || '').toLowerCase()}_${idsTriesExistant}`;
-        return keyNouveau === keyExistant;
-      });
     }
 
     function soumettre() {
@@ -1142,9 +1191,7 @@
         ? document.querySelector('input[name="optSerieAction"]:checked').value 
         : 'UNIQUE';
 
-      const targetIds = enfantsModalSelectionnes
-        .map(p => enfantsInfo[p] ? String(enfantsInfo[p].id) : null)
-        .filter(Boolean);
+      const targetIds = enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
 
       const payload = {
         id: document.getElementById("formId").value,
@@ -1152,8 +1199,8 @@
         modeModifSerie: modeModif,
         date: document.getElementById("formDate").value,
         enfantsIds: targetIds,
-        type: typeFinal,
-        responsable: responsableFinal,
+        type: typeFinal.trim(),
+        responsable: responsableFinal.trim(),
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
@@ -1169,49 +1216,60 @@
         ajustementsConflitEnfants: []
       };
 
-      // DÉDOUBLONNAGE : Prévention des doublons stricts
-      if (estDoublonStrict(payload)) {
-        alert("Cet événement existe déjà à l'identique (mêmes dates, intervenant et enfants).");
-        return;
-      }
-
       analyserConflitsEtValider(payload);
     }
 
+    // Fonctions 11 & 12 : Détection et gestion des conflits de garde et de responsable
     function analyserConflitsEtValider(payload) {
       payloadEnAttente = payload;
       idsGardesARemplacer = [];
       ajustementsConflitEnfants = [];
 
-      if (payload.type.toLowerCase() !== "garde") {
+      const typePayload = (payload.type || "").trim().toLowerCase();
+      if (typePayload !== "garde") {
         executerEnregistrement(payload);
         return;
       }
 
-      const startNouveau = new Date(payload.debut);
-      const endNouveau = new Date(payload.fin);
+      const startNouveau = parseDateSecurisee(payload.debut);
+      const endNouveau = parseDateSecurisee(payload.fin);
+
+      if (!startNouveau || !endNouveau) {
+        executerEnregistrement(payload);
+        return;
+      }
 
       let conflitsEnfants = [];
       let conflitsResponsable = [];
 
-      // DÉTECTION INTELLIGENTE DES CHEVAUCHEMENTS
-      const payloadEnfantsIdsStr = (payload.enfantsIds || []).map(String);
+      const payloadEnfantsIds = (payload.enfantsIds || []).map(id => String(id).trim());
 
       donneesBrutes.forEach(evt => {
         if (String(evt.id).trim() === String(payload.id).trim()) return;
-        if ((evt.type || "").toLowerCase() !== "garde") return;
 
-        const startExistant = new Date(evt.debut);
-        const endExistant = new Date(evt.fin);
+        const typeExistant = (evt.type || "").trim().toLowerCase();
+        if (typeExistant !== "garde") return;
 
-        // Formule de chevauchement temporel : (DebutA < FinB) ET (FinA > DebutB)
+        const startExistant = parseDateSecurisee(evt.debut);
+        const endExistant = parseDateSecurisee(evt.fin);
+
+        if (!startExistant || !endExistant) return;
+
+        // Détection du chevauchement temporel
         if (startNouveau < endExistant && endNouveau > startExistant) {
-          const evtEnfantsIdsStr = (evt.enfantsIds || []).map(String);
-          const enfantsEnConflitIds = evtEnfantsIdsStr.filter(id => payloadEnfantsIdsStr.includes(id));
+          
+          let evtEnfantsIds = [];
+          if (Array.isArray(evt.enfantsIds)) {
+            evtEnfantsIds = evt.enfantsIds.map(id => String(id).trim());
+          } else if (typeof evt.enfantsIds === 'string') {
+            evtEnfantsIds = evt.enfantsIds.split(',').map(id => id.trim());
+          }
+
+          const enfantsEnConflitIds = evtEnfantsIds.filter(id => payloadEnfantsIds.includes(id));
 
           if (enfantsEnConflitIds.length > 0) {
             const enfantsEnConflitPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-            const enfantsRestantsIds = evtEnfantsIdsStr.filter(id => !payloadEnfantsIdsStr.includes(id));
+            const enfantsRestantsIds = evtEnfantsIds.filter(id => !payloadEnfantsIds.includes(id));
             const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
 
             conflitsEnfants.push({
@@ -1222,18 +1280,19 @@
             });
           }
 
-          if (evt.responsable && evt.responsable.toLowerCase() === payload.responsable.toLowerCase()) {
+          if (evt.responsable && evt.responsable.trim().toLowerCase() === (payload.responsable || "").trim().toLowerCase()) {
             conflitsResponsable.push(evt);
           }
         }
       });
 
+      // Fonction 11 : Conflit Enfant
       if (conflitsEnfants.length > 0) {
         conflitsEnfants.forEach(c => {
           if (c.enfantsRestants.length === 0) {
             idsGardesARemplacer.push(c.id);
           } else {
-            const restantsIds = c.enfantsRestants.map(p => enfantsInfo[p] ? String(enfantsInfo[p].id) : null).filter(Boolean);
+            const restantsIds = c.enfantsRestants.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
             ajustementsConflitEnfants.push({
               id: c.id,
               nouveauxEnfantsIds: restantsIds
@@ -1245,7 +1304,7 @@
           if (c.enfantsRestants.length > 0) {
             return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. <strong>${c.enfantsRestants.join(', ')}</strong> reste géré(e) par ${c.responsable}.`;
           }
-          return `• <strong>${c.enfantsTouchés.join(', ')}</strong> est transféré(e) depuis la garde de ${c.responsable}.`;
+          return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. L'ancienne garde gérée par ${c.responsable} sera supprimée.`;
         }).join('<br>');
         
         ouvrirModalConflit(
@@ -1256,6 +1315,7 @@
         return;
       }
 
+      // Fonction 12 : Conflit Responsable
       if (conflitsResponsable.length > 0) {
         ouvrirModalConflit(
           "Superposition de garde",
@@ -1304,8 +1364,8 @@
         }
 
         fermerModal();
-        await chargerReferences();
-        await chargerDonnees();
+        chargerDonnees();
+        chargerReferences();
       } catch(err) {
         btn.innerHTML = "Enregistrer";
         btn.disabled = false;
@@ -1313,6 +1373,7 @@
       }
     }
 
+    // Fonction 10 : Demande de suppression (unique ou toute la série)
     function supprimer() {
       const id = document.getElementById("formId").value;
       const idSerie = document.getElementById("formIdSerie").value;
@@ -1342,8 +1403,8 @@
 
       let modeSuppr = 'UNIQUE';
       if (idSerie) {
-        const optionCoquee = document.querySelector('input[name="optSupprSerie"]:checked');
-        if (optionCoquee) modeSuppr = optionCoquee.value;
+        const optionCochee = document.querySelector('input[name="optSupprSerie"]:checked');
+        if (optionCochee) modeSuppr = optionCochee.value;
       }
 
       fermerModalSuppression();
