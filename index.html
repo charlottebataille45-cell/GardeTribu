@@ -4,89 +4,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐢 La Tribu – Agenda familial</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <style>
     :root {
       --bg: #F8FAFC; 
       --card: #FFFFFF; 
-      --text-main: #1E293B; 
+      --text-main: #0F172A; 
       --text-muted: #64748B; 
       --border: #E2E8F0;
+      --subslot-bg: #F8FAFC;
     }
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-    body { background-color: var(--bg); color: var(--text-main); padding-bottom: 80px; }
+    body { background-color: var(--bg); color: var(--text-main); padding-bottom: 90px; }
 
-    header { background: var(--card); padding: 12px 16px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    header { background: var(--card); padding: 12px 16px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0; }
+    h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0; color: #0F172A; }
 
     .btn-toggle-filters { background: #F1F5F9; border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; cursor: pointer; transition: background 0.2s; }
     .btn-toggle-filters:hover { background: #E2E8F0; }
 
-    .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 6px 0 4px 2px; }
+    .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 8px 0 4px 2px; }
     .filters-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 6px; }
     .filters-row::-webkit-scrollbar { display: none; }
     
-    .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; transition: all 0.2s ease; user-select: none; }
+    .chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; transition: all 0.2s ease; user-select: none; }
     .chip:hover { border-color: var(--text-main); color: var(--text-main); }
-    .chip.active { background: var(--text-main); color: white; border-color: var(--text-main); }
-    .chip.time-filter { border-style: dashed; }
-    .chip.time-filter.active { background: #E2E8F0; color: var(--text-main); border-style: solid; border-color: var(--text-muted); }
+    .chip.active { background: #1E293B; color: white; border-color: #1E293B; }
+    .chip.time-filter { border-style: solid; background: #F1F5F9; color: #475569; border-color: transparent; }
+    .chip.time-filter.active { background: #E2E8F0; color: #0F172A; font-weight: 700; border: 1px solid #CBD5E1; }
 
     .filter-panel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .btn-reset-filters { margin-top: 8px; width: 100%; padding: 6px 12px; background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
-    .week-nav { display: none; align-items: center; justify-content: space-between; background: #F1F5F9; border-radius: 10px; padding: 6px 12px; margin-top: 6px; }
+    .week-nav { display: none; align-items: center; justify-content: space-between; background: #F1F5F9; border-radius: 12px; padding: 6px 10px; margin-top: 6px; }
     .week-nav.active { display: flex; }
-    .week-nav-btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 2px; transition: 0.2s; color: var(--text-main); }
-    .week-nav-btn:hover { background: var(--text-main); color: white; border-color: var(--text-main); }
+    .week-nav-btn { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 2px; color: var(--text-main); }
     .week-nav-title { font-size: 12px; font-weight: 700; color: var(--text-main); }
 
-    .timeline-container { padding: 16px; max-width: 600px; margin: 0 auto; }
+    .timeline-container { padding: 12px 16px; max-width: 600px; margin: 0 auto; }
     
-    .date-header-container { margin: 20px 0 10px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #E2E8F0; padding-bottom: 6px; }
-    .date-header { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    .date-header-container { margin: 24px 0 10px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #E2E8F0; padding-bottom: 6px; }
+    .date-header { font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
     .date-count-badge { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 
-    .event-card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; gap: 12px; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; position: relative; }
-    .event-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-
-    .event-card.highlight-upcoming { border: 2px solid #3B82F6; background: #EFF6FF; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15); }
-    .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15); }
+    /* CARTE ÉVÉNEMENT & STRUCTURE APPLICATION */
+    .event-card { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); position: relative; }
+    .event-card.highlight-upcoming { border: 2px solid #3B82F6; background: #EFF6FF; }
+    .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; }
 
     .badge-upcoming { background: #3B82F6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
     .badge-encours { background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; animation: pulse 2s infinite; }
 
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
-    .event-color-bar { width: 5px; border-radius: 4px; flex-shrink: 0; }
-    .event-content { flex: 1; }
-    .event-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
-    .event-type { font-size: 11px; padding: 3px 8px; background: #F1F5F9; border-radius: 12px; font-weight: 600; color: #475569; }
-    .event-resp { font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .event-color-bar { width: 5px; border-radius: 4px; flex-shrink: 0; min-height: 100%; }
+    .event-content { flex: 1; width: 100%; }
     
-    .action-links-container { display: flex; gap: 6px; margin-top: 6px; margin-bottom: 6px; flex-wrap: wrap; }
-    .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 4px; transition: 0.15s; }
-    .action-btn-phone:hover { background: #DBEAFE; }
+    .event-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .event-resp { font-size: 14px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px; }
+    .event-type-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; background: #F1F5F9; color: #475569; }
 
-    .event-time-pill { font-size: 12px; font-weight: 700; color: #1E293B; background: #E2E8F0; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
-    
-    .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 700; line-height: 1.2; }
-    .enfants-badges-container { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .action-links-container { display: flex; gap: 6px; margin-bottom: 8px; }
+    .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 4px; }
 
-    .sub-slot-item { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
-    .sub-slot-item:hover { background: #F1F5F9; border-color: #CBD5E1; }
-    .sub-slot-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .sub-slot-right { display: flex; align-items: center; gap: 6px; }
-    .sub-slot-details { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    /* CRÉNEAUX INTERNES */
+    .sub-slot-item { background: var(--subslot-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 8px; cursor: pointer; transition: background 0.15s ease; position: relative; }
+    .sub-slot-item:hover { background: #F1F5F9; }
 
-    .fab { position: fixed; bottom: 25px; right: 25px; background: var(--text-main); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
-    .fab:hover { transform: scale(1.08); }
+    .sub-slot-header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .event-time-pill { font-size: 12px; font-weight: 700; color: #0F172A; background: #E2E8F0; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
 
+    .enfants-badges-container { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 14px; font-size: 11px; font-weight: 700; line-height: 1.2; }
+
+    .sub-slot-body { margin-top: 4px; }
+    .sub-slot-title { font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 2px; }
+    .sub-slot-location { font-size: 12px; color: #64748B; display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+
+    .sub-slot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+    .edit-icon-btn { font-size: 16px; color: #94A3B8; display: flex; align-items: center; }
+
+    /* BOUTON D'AJOUT FAB */
+    .fab { position: fixed; bottom: 25px; right: 25px; background: #0F172A; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,0.25); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
+    .fab:hover { transform: scale(1.06); }
+
+    /* MODALE (Masquée par défaut) */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
     .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -110,12 +114,10 @@
     .serie-options { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 12px; }
     .error-msg { color: #EF4444; font-size: 12px; font-weight: 600; margin-top: 5px; display: none; align-items: center; gap: 4px; }
 
-    .btn-submit { width: 100%; padding: 14px; background: var(--text-main); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: background 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-    .btn-submit:hover { background: #0F172A; }
+    .btn-submit { width: 100%; padding: 14px; background: #0F172A; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
     .btn-submit:disabled { background: #94A3B8; cursor: not-allowed; }
 
-    .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; transition: color 0.2s; }
-    .btn-delete:hover { color: #B91C1C; }
+    .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; }
 
     .spin { animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -123,6 +125,7 @@
 </head>
 <body>
 
+  <!-- ENTÊTE DE L'APPLICATION -->
   <header>
     <div class="header-top">
       <h1>🐢 La Tribu</h1>
@@ -141,7 +144,7 @@
 
     <div class="week-nav active" id="weekNav">
       <button class="week-nav-btn" onclick="naviguerSemaine(-1)"><span class="material-symbols-outlined" style="font-size:14px;">chevron_left</span> Préc.</button>
-      <span class="week-nav-title" id="weekNavTitle">Semaine courante</span>
+      <span class="week-nav-title" id="weekNavTitle">Cette semaine</span>
       <button class="week-nav-btn" onclick="naviguerSemaine(1)">Suiv. <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span></button>
     </div>
 
@@ -161,9 +164,14 @@
       <div class="filters-row" id="intervenantFilters">
         <div class="chip active" onclick="setIntervenantFilter('Tous')">Tous</div>
       </div>
+
+      <button class="btn-reset-filters" onclick="reinitialiserFiltres()">
+        <span class="material-symbols-outlined" style="font-size:14px;">restart_alt</span> Réinitialiser tous les filtres
+      </button>
     </div>
   </header>
 
+  <!-- TIMELINE ET CONTENU PRINCIPAL DE L'APPLICATION -->
   <div class="timeline-container">
     <div id="loader" style="text-align:center; padding: 40px; color: #64748B;">Chargement du planning...</div>
     <div id="timeline"></div>
@@ -171,7 +179,7 @@
 
   <button class="fab" onclick="ouvrirModal()" aria-label="Ajouter un événement"><span class="material-symbols-outlined">add</span></button>
 
-  <!-- Modale Édition / Création -->
+  <!-- MODALE FORMULAIRE DE CRÉATION ET D'ÉDITION -->
   <div class="modal-overlay" id="modalEvt">
     <div class="modal">
       <div class="modal-header">
@@ -190,17 +198,20 @@
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
           <label for="formTypeSelect">2. TYPE *</label>
-          <select id="formTypeSelect" class="form-control">
+          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
             <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter un type...</option>
           </select>
+          <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type..." aria-label="Saisir un autre type">
         </div>
 
         <div class="form-group" style="flex: 1;">
-          <label for="formResponsableSelect">3. QUI S'EN OCCUPE ? *</label>
-          <select id="formResponsableSelect" class="form-control">
-            <option value="">-- Choisir un intervenant --</option>
+          <label for="formResponsableSelect">3. RESPONSABLE *</label>
+          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
+            <option value="">-- Choisir --</option>
+            <option value="NOUVEAU">+ Ajouter...</option>
           </select>
-          <div id="responsableHint" style="font-size:11px;color:var(--text-muted);margin-top:5px;"></div>
+          <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable..." aria-label="Saisir un autre responsable">
         </div>
       </div>
 
@@ -227,10 +238,8 @@
       <input type="hidden" id="formDate">
 
       <div class="form-group">
-        <label for="formLieu">6. OÙ ?</label>
-        <select id="formLieu" class="form-control">
-          <option value="">-- Aucun lieu --</option>
-        </select>
+        <label for="formLieu">6. LIEU</label>
+        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
       </div>
 
       <div class="form-group">
@@ -245,20 +254,21 @@
         </select>
       </div>
 
+      <!-- Fonctions 9 & 10 : Récurrence & Option de Série -->
       <div class="recurrence-box" id="secRecurrence">
         <div class="toggle-row" onclick="toggleRecurrenceOpt()">
           <div class="toggle-title">
             <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
             8. Répéter cet événement
           </div>
-          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence de l'événement" style="cursor:pointer; width:16px; height:16px;">
+          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence" style="cursor:pointer; width:16px; height:16px;">
         </div>
 
         <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
           <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
             <label for="formRecurIntervalle" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Toutes les :</label>
             <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
-            <select id="formRecurUnite" class="form-control" style="flex: 1;" aria-label="Unité de fréquence de récurrence">
+            <select id="formRecurUnite" class="form-control" style="flex: 1;" aria-label="Unité de fréquence">
               <option value="Jours">Jours</option>
               <option value="Semaines" selected>Semaines</option>
               <option value="Mois">Mois</option>
@@ -285,12 +295,12 @@
     </div>
   </div>
 
-  <!-- Modale Conflit -->
+  <!-- Fonctions 11 & 12 : Modale Conflit & Avertissement -->
   <div class="modal-overlay" id="modalConflit" style="z-index: 1100;">
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="conflitTitle">Attention aux chevauchements</div>
-        <button class="close-btn" onclick="fermerModalConflit()" aria-label="Fermer la fenêtre de conflit">×</button>
+        <button class="close-btn" onclick="fermerModalConflit()" aria-label="Fermer la fenêtre">×</button>
       </div>
       <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5;"></div>
       <div style="display: flex; gap: 10px; flex-direction: column;">
@@ -300,12 +310,12 @@
     </div>
   </div>
 
-  <!-- Modale Suppression -->
+  <!-- Fonction 10 : Modale Suppression de série -->
   <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;">
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="supprModalTitle">Confirmer la suppression</div>
-        <button class="close-btn" onclick="fermerModalSuppression()" aria-label="Fermer la fenêtre de suppression">×</button>
+        <button class="close-btn" onclick="fermerModalSuppression()" aria-label="Fermer la fenêtre">×</button>
       </div>
       <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;"></div>
       
@@ -325,53 +335,46 @@
     </div>
   </div>
 
+  <!-- MOTEUR JAVASCRIPT ET LOGIQUE INTELLIGENTE -->
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
     const REFERENTIELS_DEFAUT = {
-      types: ["Garde", "École", "Activité", "Santé", "Transport", "Maison", "Événement", "Autre"],
-      intervenants: [
-        {id:"INT001",nom:"Papy Michel & MamIsa",type:"famille",tel1:"0621213979",tel2:"0618035434",actif:true},
-        {id:"INT002",nom:"Charlotte",type:"parent",tel1:"0631456620",tel2:"",actif:true},
-        {id:"INT003",nom:"Mamie Colette",type:"grand-parent",tel1:"0685360175",tel2:"",actif:true},
-        {id:"INT004",nom:"Mamie Sylvie",type:"grand-parent",tel1:"0612173977",tel2:"",actif:true},
-        {id:"INT005",nom:"Mathieu",type:"parent",tel1:"0603194541",tel2:"",actif:true},
-        {id:"INT006",nom:"Sarah",type:"parent",tel1:"",tel2:"",actif:true},
-        {id:"INT007",nom:"Isabelle",type:"grand-parent",tel1:"0603326111",tel2:"",actif:true},
-        {id:"INT008",nom:"Renaud",type:"parent",tel1:"",tel2:"",actif:true}
+      "types": ["Garde", "École", "Activité", "Santé", "Transport", "Maison", "Événement", "Autre"],
+      "intervenants": [
+        { "id": "INT001", "nom": "Papy Michel & MamIsa", "type": "famille", "tel1": "0621213979", "tel2": "0618035434", "actif": true },
+        { "id": "INT002", "nom": "Charlotte", "type": "parent", "tel1": "0631456620", "tel2": "", "actif": true },
+        { "id": "INT003", "nom": "Mamie Colette", "type": "grand-parent", "tel1": "0685360175", "tel2": "", "actif": true },
+        { "id": "INT004", "nom": "Mamie Sylvie", "type": "grand-parent", "tel1": "0612173977", "tel2": "", "actif": true },
+        { "id": "INT005", "nom": "Mathieu", "type": "parent", "tel1": "0603194541", "tel2": "", "actif": true },
+        { "id": "INT006", "nom": "Sarah", "type": "parent", "tel1": "", "tel2": "", "actif": true },
+        { "id": "INT007", "nom": "Isabelle", "type": "grand-parent", "tel1": "0603326111", "tel2": "", "actif": true },
+        { "id": "INT008", "nom": "Renaud", "type": "parent", "tel1": "", "tel2": "", "actif": true }
       ],
-      periodes: [
-        {id:"PER001",nom:"Toussaint",dateDebut:"2026-10-17",dateFin:"2026-11-02"},
-        {id:"PER002",nom:"Noël",dateDebut:"2026-12-19",dateFin:"2027-01-04"},
-        {id:"PER003",nom:"Hiver",dateDebut:"2027-02-20",dateFin:"2027-03-08"},
-        {id:"PER004",nom:"Printemps",dateDebut:"2027-04-17",dateFin:"2027-05-03"},
-        {id:"PER005",nom:"Pont de l'Ascension",dateDebut:"2027-05-05",dateFin:"2027-05-10"},
-        {id:"PER006",nom:"Été",dateDebut:"2027-07-03",dateFin:"2027-08-31"}
+      "periodes": [
+        { "id": "PER001", "nom": "Toussaint", "dateDebut": "2026-10-17", "dateFin": "2026-11-02" },
+        { "id": "PER002", "nom": "Noël", "dateDebut": "2026-12-19", "dateFin": "2027-01-04" },
+        { "id": "PER003", "nom": "Hiver", "dateDebut": "2027-02-20", "dateFin": "2027-03-08" },
+        { "id": "PER004", "nom": "Printemps", "dateDebut": "2027-04-17", "dateFin": "2027-05-03" },
+        { "id": "PER005", "nom": "Pont de l'Ascension", "dateDebut": "2027-05-05", "dateFin": "2027-05-10" },
+        { "id": "PER006", "nom": "Été", "dateDebut": "2027-07-03", "dateFin": "2027-08-31" }
       ],
-      enfants: [
-        {id:"ENF01",prenom:"Enola",actif:true,couleur:"#E91E63",emoji:"🍒"},
-        {id:"ENF02",prenom:"James",actif:true,couleur:"#2196F3",emoji:"🦖"},
-        {id:"ENF03",prenom:"Andreas",actif:true,couleur:"#4CAF50",emoji:"⚡"},
-        {id:"ENF04",prenom:"Matys",actif:true,couleur:"#FF9800",emoji:"🎮"},
-        {id:"ENF05",prenom:"Nino",actif:true,couleur:"#9C27B0",emoji:"🏀"}
-      ],
-      lieux: [],
-      relationsFamiliales: []
+      "enfants": [
+        { "id": "ENF01", "prenom": "Enola", "actif": true, "couleur": "#E91E63", "emoji": "🍒" },
+        { "id": "ENF02", "prenom": "James", "actif": true, "couleur": "#2196F3", "emoji": "🦖" },
+        { "id": "ENF03", "prenom": "Andreas", "actif": true, "couleur": "#4CAF50", "emoji": "⚡" },
+        { "id": "ENF04", "prenom": "Matys", "actif": true, "couleur": "#FF9800", "emoji": "🎮" },
+        { "id": "ENF05", "prenom": "Nino", "actif": true, "couleur": "#9C27B0", "emoji": "🏀" }
+      ]
     };
 
     let donneesBrutes = [];
-    let planningCache = new Map();
     let refEnfants = [];
     let refTypes = [];
     let refResponsables = [];
     let refIntervenantsObjets = [];
     let refPeriodes = [];
-    let refLieux = [];
-    let refRelationsFamiliales = [];
-    let relationsParEnfant = {};
-    let mapIntervenantIdToNom = {};
-    let mapLieuIdToNom = {};
-
+    
     let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
     let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
     let filtrePeriode = localStorage.getItem('tribu_filtrePeriode') || 'Tous';
@@ -382,197 +385,44 @@
     let payloadEnAttente = null;
     let idsGardesARemplacer = [];
     let ajustementsConflitEnfants = [];
+    
     let enfantsListe = [];
     let enfantsInfo = {};
     let mapIdToPrenom = {};
 
-    let referencesChargees = false;
-    let chargementPlanning = null;
-
-    window.onload = async () => {
+    window.onload = () => {
+      // Sécurité : toutes les modales doivent être fermées au démarrage.
+      // Le formulaire ne doit s'ouvrir que via le bouton FAB ou l'édition d'un événement.
       document.getElementById("modalEvt").style.display = "none";
       document.getElementById("modalConflit").style.display = "none";
       document.getElementById("modalSuppression").style.display = "none";
 
-      // Les référentiels embarqués permettent d'afficher immédiatement l'interface.
-      appliquerReferentiels(REFERENTIELS_DEFAUT);
-
-      // Données planning et référentiels distants se chargent en parallèle.
-      await Promise.allSettled([chargerDonnees(false), chargerReferences()]);
-      document.getElementById('formResponsableSelect')?.addEventListener('change', afficherHintResponsable);
+      chargerDonnees();
+      chargerReferences();
     };
 
     function parseDateSecurisee(dateStr) {
       if (!dateStr) return null;
-      const s = String(dateStr).trim();
-      let m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
-      if (m) return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]), Number(m[4]||0), Number(m[5]||0));
-      m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:[ T](\d{2}):(\d{2}))?/);
-      if (m) return new Date(Number(m[3]), Number(m[2])-1, Number(m[1]), Number(m[4]||0), Number(m[5]||0));
-      const d = new Date(s.replace(' ', 'T'));
+      const isoStr = String(dateStr).trim().replace(' ', 'T');
+      const d = new Date(isoStr);
       return isNaN(d.getTime()) ? null : d;
     }
 
-    function normaliserDonneesPlanning(reponse) {
-      if (Array.isArray(reponse)) return reponse.map(normaliserEvenementFront).filter(Boolean);
-      if (!reponse || typeof reponse !== 'object') throw new Error('Réponse API invalide.');
-      const evenements = Array.isArray(reponse.evenements) ? reponse.evenements : [];
-      const liens = Array.isArray(reponse.evenementEnfants) ? reponse.evenementEnfants : [];
-      const enfantsParEvenement = {};
-      liens.forEach(lien => {
-        const idEvt = String(lien.idEvenement ?? lien.ID_Evenement ?? '').trim();
-        const idEnfant = String(lien.idEnfant ?? lien.ID_Enfant ?? '').trim();
-        if (!idEvt || !idEnfant) return;
-        (enfantsParEvenement[idEvt] ||= []).push(idEnfant);
-      });
-      return evenements.map(evt => {
-        const e = normaliserEvenementFront(evt);
-        if (!e) return null;
-        const ids = enfantsParEvenement[String(e.id).trim()];
-        e.enfantsIds = [...new Set((ids || e.enfantsIds || []).map(String).map(s => s.trim()).filter(Boolean))];
-        return e;
-      }).filter(Boolean);
-    }
-
-    function normaliserEvenementFront(evt) {
-      if (!evt || typeof evt !== 'object') return null;
-      let enfantsIds = evt.enfantsIds ?? evt.IDs_Enfants ?? [];
-      if (typeof enfantsIds === 'string') {
-        try { enfantsIds = JSON.parse(enfantsIds); } catch (_) { enfantsIds = enfantsIds.split(','); }
-      }
-      if (!Array.isArray(enfantsIds)) enfantsIds = [];
-      return {
-        ...evt,
-        id: evt.id ?? evt.idEvenement ?? evt.ID_Evenement ?? '',
-        idSerie: evt.idSerie ?? evt.ID_Serie ?? '',
-        type: evt.type ?? evt.Type ?? '',
-        responsable: evt.responsable ?? evt.responsableTexte ?? evt.Responsable ?? '',
-        titre: evt.titre ?? evt.Titre ?? '',
-        debut: evt.debut ?? evt.Debut ?? '',
-        fin: evt.fin ?? evt.Fin ?? '',
-        lieu: evt.lieu ?? evt.lieuTexte ?? evt.Lieu ?? '',
-        details: evt.details ?? evt.Details ?? '',
-        idPeriode: evt.idPeriode ?? evt.ID_Periode ?? '',
-        statut: evt.statut ?? evt.Statut ?? '',
-        idIntervenant: evt.idIntervenant ?? evt.ID_Intervenant ?? '',
-        idsIntervenants: evt.idsIntervenants ?? evt.IDs_Intervenants ?? [],
-        idLieu: evt.idLieu ?? evt.ID_Lieu ?? '',
-        enfantsIds: enfantsIds.map(String).map(s => s.trim()).filter(Boolean)
-      };
-    }
-
-    function plageDemandee() {
-      const now = new Date();
-      if (filtreTemps === 'Tous') return {from:'', to:''};
-      if (filtreTemps === 'Jour') {
-        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const f = new Date(d); f.setHours(23,59,59,999);
-        return {from: formatDateApi(d), to: formatDateApi(f)};
-      }
-      const day = now.getDay() || 7;
-      const from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      from.setDate(from.getDate() - day + 1 + offsetSemaines * 7);
-      const to = new Date(from); to.setDate(to.getDate()+6); to.setHours(23,59,59,999);
-      return {from: formatDateApi(from), to: formatDateApi(to)};
-    }
-
-    function formatDateApi(d) {
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
-
-    async function apiGet(action, params={}) {
-      const query = new URLSearchParams({action, ...params}).toString();
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
-      try {
-        const resp = await fetch(`${API_URL}?${query}`, {signal: controller.signal, cache:'no-store'});
-        if (!resp.ok) throw new Error(`Erreur réseau API (${resp.status})`);
-        return await resp.json();
-      } catch (e) {
-        if (e.name === 'AbortError') throw new Error('Le serveur met trop de temps à répondre.');
-        throw e;
-      } finally { clearTimeout(timeout); }
-    }
-
-    async function apiPost(action, payload) {
-      const resp = await fetch(API_URL, {
-        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({action, payload})
-      });
-      if (!resp.ok) throw new Error(`Erreur réseau API (${resp.status})`);
+    async function apiGet(action, params = {}) {
+      const query = new URLSearchParams({ action, ...params }).toString();
+      const resp = await fetch(`${API_URL}?${query}`);
+      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
       return await resp.json();
     }
 
-    async function chargerDonnees(force=false) {
-      const plage = plageDemandee();
-      const key = `${plage.from}|${plage.to}`;
-      if (!force && planningCache.has(key)) {
-        donneesBrutes = planningCache.get(key);
-        document.getElementById('loader').style.display = 'none';
-        afficherTimeline();
-        return;
-      }
-      if (chargementPlanning) return chargementPlanning;
-      const loader = document.getElementById('loader');
-      loader.style.display = 'block';
-      loader.innerText = filtreTemps === 'Tous' ? 'Chargement du planning complet…' : 'Chargement de la période…';
-      document.getElementById('timeline').innerHTML = '';
-      chargementPlanning = (async () => {
-        try {
-          const reponse = await apiGet('getPlanningData', plage.from ? {from:plage.from,to:plage.to} : {});
-          const data = normaliserDonneesPlanning(reponse);
-          planningCache.set(key, data);
-          donneesBrutes = data;
-          loader.style.display = 'none';
-          afficherTimeline();
-        } catch(err) {
-          console.error(err);
-          loader.innerHTML = `Erreur de chargement : ${echapper(err.message || err)}<br><button class="chip active" style="margin-top:10px" onclick="chargerDonnees(true)">Réessayer</button>`;
-        } finally { chargementPlanning = null; }
-      })();
-      return chargementPlanning;
-    }
-
-    function appliquerReferentiels(refs) {
-      refs = refs || REFERENTIELS_DEFAUT;
-      refEnfants = refs.enfants || [];
-      refTypes = refs.types || [];
-      refIntervenantsObjets = refs.intervenants || [];
-      refLieux = refs.lieux || [];
-      refPeriodes = refs.periodes || [];
-      refRelationsFamiliales = refs.relationsFamiliales || [];
-      refResponsables = refIntervenantsObjets.filter(i => i.actif !== false && i.actif !== 'Non').map(i=>i.nom).filter(Boolean);
-      mapIntervenantIdToNom = {}; refIntervenantsObjets.forEach(i=>{if(i.id) mapIntervenantIdToNom[i.id]=i.nom;});
-      mapLieuIdToNom = {}; refLieux.forEach(l=>{if(l.id) mapLieuIdToNom[l.id]=l.nom;});
-      relationsParEnfant = {};
-      refRelationsFamiliales.forEach(r=>{(relationsParEnfant[r.enfantId] ||= []).push(r);});
-      enfantsInfo = {}; enfantsListe=[]; mapIdToPrenom={};
-      refEnfants.forEach(e=>{
-        if(e.actif !== false && e.actif !== 'Non'){
-          enfantsInfo[e.prenom]={id:e.id,color:e.couleur||'#64748B',emoji:e.emoji||'👤'};
-          enfantsListe.push(e.prenom); mapIdToPrenom[e.id]=e.prenom;
-        }
+    async function apiPost(action, payload) {
+      const resp = await fetch(`${API_URL}?action=${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: action, payload: payload })
       });
-      referencesChargees = true;
-      if (enfantsModalSelectionnes.length===0 && enfantsListe.length) enfantsModalSelectionnes=[enfantsListe[0]];
-      genererFiltresEnfants(); genererSelectorEnfantsModal(); majSelectsModal(); genererFiltresIntervenants(); genererFiltresPeriodes();
-    }
-
-    async function fetchJsonAvecTimeout(url, ms=2500) {
-      const controller = new AbortController();
-      const timer = setTimeout(()=>controller.abort(), ms);
-      try {
-        const r = await fetch(url,{cache:'no-store',signal:controller.signal});
-        return r.ok ? await r.json() : null;
-      } catch (_) { return null; }
-      finally { clearTimeout(timer); }
-    }
-
-    async function chargerReferences() {
-      let refs = await fetchJsonAvecTimeout('./referentiels.json', 2000);
-      if (!refs) refs = await fetchJsonAvecTimeout('https://raw.githubusercontent.com/charlottebataille45-cell/GardeTribu/refs/heads/main/referentiels.json', 2500);
-      appliquerReferentiels(refs || REFERENTIELS_DEFAUT);
-      if (donneesBrutes.length) afficherTimeline();
+      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
+      return await resp.json();
     }
 
     function sauvegarderFiltresLocal() {
@@ -588,6 +438,284 @@
       const isHidden = panel.style.display === 'none';
       panel.style.display = isHidden ? 'block' : 'none';
       arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
+    }
+
+    // =====================================================================
+    // API / CACHE TEMPOREL — le téléphone ne charge jamais tout le planning
+    // sauf si l'utilisateur choisit explicitement « Tout le planning ».
+    // =====================================================================
+    const cachePlanning = new Map();
+    let chargementEnCours = null;
+    let derniereReponseAPI = null;
+
+    function normaliserEvenementFront(evt, liens) {
+      if (!evt || typeof evt !== 'object') return null;
+
+      const id = String(evt.id ?? evt.idEvenement ?? '').trim();
+      if (!id) return null;
+
+      let enfantsIds = Array.isArray(evt.enfantsIds)
+        ? evt.enfantsIds.map(String).map(v => v.trim()).filter(Boolean)
+        : [];
+
+      if (!enfantsIds.length && Array.isArray(liens)) {
+        enfantsIds = liens
+          .filter(l => String(l.idEvenement ?? l.ID_Evenement ?? '').trim() === id)
+          .map(l => String(l.idEnfant ?? l.ID_Enfant ?? '').trim())
+          .filter(Boolean);
+      }
+
+      const normalise = {
+        ...evt,
+        id,
+        idEvenement: id,
+        idSerie: String(evt.idSerie ?? evt.ID_Serie ?? '').trim(),
+        type: String(evt.type ?? evt.Type ?? '').trim(),
+        responsable: String(evt.responsable ?? evt.responsableTexte ?? evt.Responsable ?? '').trim(),
+        responsableTexte: String(evt.responsableTexte ?? evt.responsable ?? evt.Responsable ?? '').trim(),
+        titre: String(evt.titre ?? evt.Titre ?? '').trim(),
+        debut: evt.debut ?? evt.Debut ?? null,
+        fin: evt.fin ?? evt.Fin ?? null,
+        lieu: String(evt.lieu ?? evt.lieuTexte ?? evt.Lieu ?? '').trim(),
+        lieuTexte: String(evt.lieuTexte ?? evt.lieu ?? evt.Lieu ?? '').trim(),
+        details: String(evt.details ?? evt.Details ?? '').trim(),
+        idPeriode: String(evt.idPeriode ?? evt.ID_Periode ?? '').trim(),
+        statut: String(evt.statut ?? evt.Statut ?? 'Confirmé').trim(),
+        idIntervenant: String(evt.idIntervenant ?? evt.ID_Intervenant ?? '').trim(),
+        idsIntervenants: Array.isArray(evt.idsIntervenants)
+          ? evt.idsIntervenants.map(String).map(v => v.trim()).filter(Boolean)
+          : [],
+        idLieu: String(evt.idLieu ?? evt.ID_Lieu ?? '').trim(),
+        enfantsIds,
+        raw: evt.raw ?? null
+      };
+
+      if (!normalise.idsIntervenants.length && normalise.idIntervenant) {
+        normalise.idsIntervenants = [normalise.idIntervenant];
+      }
+
+      return normalise;
+    }
+
+    function normaliserReponsePlanning(reponse) {
+      if (Array.isArray(reponse)) {
+        return {
+          evenements: reponse.map(e => normaliserEvenementFront(e, [])).filter(Boolean),
+          evenementEnfants: [],
+          series: [],
+          referentiels: null,
+          raw: reponse
+        };
+      }
+
+      const liens = Array.isArray(reponse?.evenementEnfants) ? reponse.evenementEnfants : [];
+      const evenements = Array.isArray(reponse?.evenements)
+        ? reponse.evenements.map(e => normaliserEvenementFront(e, liens)).filter(Boolean)
+        : [];
+
+      return {
+        success: reponse?.success !== false,
+        evenements,
+        evenementEnfants: liens,
+        series: Array.isArray(reponse?.series) ? reponse.series : [],
+        referentiels: reponse?.referentiels || null,
+        filtre: reponse?.filtre || null,
+        totalDisponible: Number(reponse?.totalDisponible ?? evenements.length),
+        totalVisible: Number(reponse?.totalVisible ?? evenements.length),
+        raw: reponse
+      };
+    }
+
+    function calculerFenetrePlanning() {
+      const maintenant = new Date();
+      const debutJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
+
+      if (filtreTemps === 'Tous') {
+        return { from: '', to: '', includeAll: true, key: 'ALL' };
+      }
+
+      if (filtreTemps === 'Jour') {
+        const finJour = new Date(debutJour);
+        finJour.setHours(23, 59, 59, 999);
+        return {
+          from: formaterDateAPI(debutJour),
+          to: formaterDateAPI(finJour),
+          includeAll: false,
+          key: `DAY_${formaterDateAPI(debutJour)}`
+        };
+      }
+
+      const jourSemaine = debutJour.getDay() || 7;
+      const debut = new Date(debutJour);
+      debut.setDate(debut.getDate() - jourSemaine + 1 + offsetSemaines * 7);
+      const fin = new Date(debut);
+      fin.setDate(fin.getDate() + 6);
+      fin.setHours(23, 59, 59, 999);
+
+      return {
+        from: formaterDateAPI(debut),
+        to: formaterDateAPI(fin),
+        includeAll: false,
+        key: `WEEK_${formaterDateAPI(debut)}`
+      };
+    }
+
+    function formaterDateAPI(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const j = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${j}`;
+    }
+
+    async function chargerDonnees(force = false) {
+      const fenetre = calculerFenetrePlanning();
+      const loader = document.getElementById('loader');
+      const timeline = document.getElementById('timeline');
+
+      if (!force && cachePlanning.has(fenetre.key)) {
+        const cache = cachePlanning.get(fenetre.key);
+        derniereReponseAPI = cache;
+        donneesBrutes = cache.evenements.slice();
+        if (cache.referentiels) appliquerReferentielsAPI(cache.referentiels);
+        loader.style.display = 'none';
+        afficherTimeline();
+        return;
+      }
+
+      if (chargementEnCours) return chargementEnCours;
+
+      loader.style.display = 'block';
+      loader.innerText = 'Chargement…';
+      timeline.innerHTML = '';
+
+      chargementEnCours = (async () => {
+        try {
+          const params = {};
+          if (fenetre.from) params.from = fenetre.from;
+          if (fenetre.to) params.to = fenetre.to;
+          if (fenetre.includeAll) params.includeAll = '1';
+          if (!refEnfants.length || !refIntervenantsObjets.length) params.includeRefs = '1';
+          else params.includeRefs = '0';
+
+          const reponse = await apiGet('getPlanningData', params);
+          const normalisee = normaliserReponsePlanning(reponse);
+
+          if (normalisee.success === false) {
+            throw new Error(reponse?.message || 'API Apps Script : réponse en erreur');
+          }
+
+          cachePlanning.set(fenetre.key, normalisee);
+          derniereReponseAPI = normalisee;
+          donneesBrutes = normalisee.evenements.slice();
+
+          if (normalisee.referentiels) {
+            appliquerReferentielsAPI(normalisee.referentiels);
+          }
+
+          loader.style.display = 'none';
+          afficherTimeline();
+          return normalisee;
+        } catch (err) {
+          console.error('Erreur chargement planning :', err);
+          loader.innerHTML = `Erreur de chargement : ${echapperHTML(err.message || err)}<br><button onclick="chargerDonnees(true)" style="margin-top:10px;padding:8px 12px;border-radius:8px;border:1px solid #CBD5E1;background:white;">Réessayer</button>`;
+          throw err;
+        } finally {
+          chargementEnCours = null;
+        }
+      })();
+
+      return chargementEnCours;
+    }
+
+    function appliquerReferentielsAPI(refs) {
+      if (!refs || typeof refs !== 'object') return;
+      if (Array.isArray(refs.enfants)) refEnfants = refs.enfants;
+      if (Array.isArray(refs.types)) refTypes = refs.types;
+      if (Array.isArray(refs.intervenants)) refIntervenantsObjets = refs.intervenants.filter(i => i.actif === true || i.actif === undefined || i.actif === 'Oui');
+      if (Array.isArray(refs.periodes)) refPeriodes = refs.periodes;
+
+      refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
+      enfantsInfo = {};
+      enfantsListe = [];
+      mapIdToPrenom = {};
+
+      refEnfants.forEach(e => {
+        if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
+          enfantsInfo[e.prenom] = { id: e.id, color: e.couleur || '#64748B', emoji: e.emoji || '👤' };
+          enfantsListe.push(e.prenom);
+          mapIdToPrenom[e.id] = e.prenom;
+        }
+      });
+
+      genererFiltresEnfants();
+      genererSelectorEnfantsModal();
+      majSelectsModal();
+      genererFiltresIntervenants();
+      genererFiltresPeriodes();
+    }
+
+    async function chargerReferences() {
+      // L'API fournit désormais les référentiels avec les données : pas de second
+      // aller-retour réseau si la réponse API les contient.
+      if (derniereReponseAPI && derniereReponseAPI.referentiels) {
+        appliquerReferentielsAPI(derniereReponseAPI.referentiels);
+        return;
+      }
+
+      let refs = null;
+
+      try {
+        const resp = await fetch('./referentiels.json');
+        if (resp.ok) refs = await resp.json();
+      } catch (e) {
+        console.warn("Échec du chargement local de referentiels.json");
+      }
+
+      if (!refs) {
+        try {
+          const respRaw = await fetch('https://raw.githubusercontent.com/charlottebataille45-cell/GardeTribu/refs/heads/main/referentiels.json');
+          if (respRaw.ok) refs = await respRaw.json();
+        } catch (e) {
+          console.warn("Échec du chargement GitHub Raw");
+        }
+      }
+
+      if (!refs) {
+        refs = REFERENTIELS_DEFAUT;
+      }
+
+      refEnfants = refs.enfants || [];
+      refTypes = refs.types || [];
+      refIntervenantsObjets = (refs.intervenants || []).filter(i => i.actif === true || i.actif === undefined || i.actif === 'Oui');
+      refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
+      refPeriodes = refs.periodes || [];
+
+      enfantsInfo = {};
+      enfantsListe = [];
+      mapIdToPrenom = {};
+
+      refEnfants.forEach(e => {
+        if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
+          enfantsInfo[e.prenom] = {
+            id: e.id,
+            color: e.couleur || '#64748B',
+            emoji: e.emoji || '👤'
+          };
+          enfantsListe.push(e.prenom);
+          mapIdToPrenom[e.id] = e.prenom;
+        }
+      });
+
+      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
+        enfantsModalSelectionnes = [enfantsListe[0]];
+      }
+
+      genererFiltresEnfants();
+      genererSelectorEnfantsModal();
+      majSelectsModal();
+      genererFiltresIntervenants();
+      genererFiltresPeriodes();
+      if (donneesBrutes.length) afficherTimeline();
     }
 
     function genererFiltresEnfants() {
@@ -640,78 +768,45 @@
       });
     }
 
+    function reinitialiserFiltres() {
+      filtreEnfant = 'Tous';
+      filtreIntervenant = 'Tous';
+      filtrePeriode = 'Tous';
+      filtreTemps = 'Semaine';
+      offsetSemaines = 0;
+      sauvegarderFiltresLocal();
+      genererFiltresEnfants();
+      genererFiltresIntervenants();
+      genererFiltresPeriodes();
+      setTimeFilter('Semaine');
+    }
+
     function majSelectsModal() {
       const selectType = document.getElementById('formTypeSelect');
       selectType.innerHTML = '<option value="">-- Choisir --</option>';
       refTypes.forEach(t => {
-        selectType.innerHTML += `<option value="${echapper(t)}">${echapper(t)}</option>`;
+        selectType.innerHTML += `<option value="${t}">${t}</option>`;
       });
+      selectType.innerHTML += '<option value="NOUVEAU">+ Ajouter un type...</option>';
 
       const selectResp = document.getElementById('formResponsableSelect');
-      selectResp.innerHTML = '<option value="">-- Choisir un intervenant --</option>';
-      refIntervenantsObjets.filter(i => i.actif !== false).forEach(i => {
-        const relationLabel = relationLabelPourIntervenant(i.id);
-        selectResp.innerHTML += `<option value="${echapper(i.id)}">${echapper(i.nom)}${relationLabel ? ' · ' + echapper(relationLabel) : ''}</option>`;
+      selectResp.innerHTML = '<option value="">-- Choisir --</option>';
+      refResponsables.forEach(r => {
+        selectResp.innerHTML += `<option value="${r}">${r}</option>`;
       });
-
-      const selectLieu = document.getElementById('formLieu');
-      selectLieu.innerHTML = '<option value="">-- Aucun lieu --</option>';
-      refLieux.forEach(l => {
-        selectLieu.innerHTML += `<option value="${echapper(l.id)}">${echapper(l.nom)}</option>`;
-      });
+      selectResp.innerHTML += '<option value="NOUVEAU">+ Ajouter un responsable...</option>';
 
       const selectPeriode = document.getElementById('formPeriodeSelect');
       selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
       refPeriodes.forEach(p => {
-        selectPeriode.innerHTML += `<option value="${echapper(p.id)}">${echapper(p.nom)}</option>`;
+        selectPeriode.innerHTML += `<option value="${p.id}">${p.nom}</option>`;
       });
-    }
-
-    function echapper(value) {
-      return String(value == null ? '' : value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function relationLabelPourIntervenant(intervenantId) {
-      const noms = [];
-      const ids = enfantsModalSelectionnes.map(n => enfantsInfo[n]?.id).filter(Boolean);
-      ids.forEach(enfantId => {
-        (relationsParEnfant[enfantId] || []).forEach(r => {
-          if (r.intervenantId === intervenantId && r.relation && !noms.includes(r.relation)) noms.push(r.relation);
-        });
-      });
-      return noms.join(', ');
-    }
-
-    function rafraichirLibellesIntervenants() {
-      const selectResp = document.getElementById('formResponsableSelect');
-      if (!selectResp) return;
-      const valeur = selectResp.value;
-      selectResp.innerHTML = '<option value="">-- Choisir un intervenant --</option>';
-      refIntervenantsObjets.filter(i => i.actif !== false).forEach(i => {
-        const relationLabel = relationLabelPourIntervenant(i.id);
-        selectResp.innerHTML += `<option value="${echapper(i.id)}">${echapper(i.nom)}${relationLabel ? ' · ' + echapper(relationLabel) : ''}</option>`;
-      });
-      if (refIntervenantsObjets.some(i => i.id === valeur)) selectResp.value = valeur;
-      afficherHintResponsable();
-    }
-
-    function afficherHintResponsable() {
-      const id = document.getElementById('formResponsableSelect')?.value;
-      const hint = document.getElementById('responsableHint');
-      if (!hint) return;
-      const obj = refIntervenantsObjets.find(i => i.id === id);
-      hint.textContent = obj ? (obj.tel1 || obj.tel2 ? '📞 Coordonnées disponibles' : '') : '';
     }
 
     function formatForInput(dateObj) {
       if (!dateObj) return "";
-      const d = new Date(dateObj);
-      if (isNaN(d.getTime())) return "";
+      const d = parseDateSecurisee(dateObj);
+      if (!d) return "";
 
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -740,7 +835,6 @@
         enfantsModalSelectionnes = [enfantsListe[0]];
       }
       majRenduPucesModal();
-      if (refIntervenantsObjets.length) rafraichirLibellesIntervenants();
     }
 
     function majRenduPucesModal() {
@@ -758,6 +852,7 @@
       });
     }
 
+    /* FEATURE 9 : Gestion récurrence UI */
     function toggleRecurrenceOpt(e) {
       if (e && e.target && e.target.id === 'chkRecurent') {
       } else if (e) {
@@ -769,7 +864,7 @@
       document.getElementById('recurrenceFields').style.display = chkVal ? 'block' : 'none';
       
       if (chkVal && !document.getElementById('formRecurFin').value) {
-        const dDeb = new Date(document.getElementById('formDebut').value || Date.now());
+        const dDeb = parseDateSecurisee(document.getElementById('formDebut').value) || new Date();
         dDeb.setMonth(dDeb.getMonth() + 1);
         document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
       }
@@ -781,11 +876,11 @@
       
       document.getElementById("formDate").value = debutStr.split('T')[0];
       
-      const d = new Date(debutStr);
+      const d = parseDateSecurisee(debutStr);
       const finInput = document.getElementById("formFin");
       const finStr = finInput.value;
       
-      if (!finStr || new Date(finStr) <= d) {
+      if (!finStr || parseDateSecurisee(finStr) <= d) {
         const nouvelleFin = new Date(d.getTime() + (60 * 60 * 1000));
         finInput.value = formatForInput(nouvelleFin);
       }
@@ -799,8 +894,8 @@
       const btnSubmit = document.getElementById("btnSubmit");
 
       if (debutVal && finVal) {
-        const d = new Date(debutVal);
-        const f = new Date(finVal);
+        const d = parseDateSecurisee(debutVal);
+        const f = parseDateSecurisee(finVal);
         if (f <= d) {
           errorMsg.style.display = "flex";
           btnSubmit.disabled = true;
@@ -861,46 +956,62 @@
       afficherTimeline();
     }
 
-    function setTimeFilter(temps) {
+    async function setTimeFilter(temps) {
       filtreTemps = temps;
       offsetSemaines = 0;
       sauvegarderFiltresLocal();
-      
       document.querySelectorAll('#timeFilters .chip').forEach(chip => {
         chip.classList.toggle('active', chip.innerText.includes(temps === 'Jour' ? "Aujourd'hui" : temps === 'Semaine' ? "semaine" : "Tout"));
       });
-
-      const weekNav = document.getElementById('weekNav');
-      if (temps === 'Semaine') {
-        weekNav.classList.add('active');
-      } else {
-        weekNav.classList.remove('active');
-      }
-
-      chargerDonnees(false);
+      document.getElementById('weekNav').classList.toggle('active', temps === 'Semaine');
+      await chargerDonnees(false);
     }
 
-    function naviguerSemaine(direction) {
+    async function naviguerSemaine(direction) {
       offsetSemaines += direction;
-      chargerDonnees(false);
+      await chargerDonnees(false);
     }
 
+    /* FEATURE 9 : Découpage des événements multi-jours et séries récurrentes */
     function genererOccurrences() {
       const occurrences = [];
-      const maxJours = 31;
-      donneesBrutes.forEach(evt => {
+
+      (Array.isArray(donneesBrutes) ? donneesBrutes : []).forEach(evt => {
+        if (!evt.debut) return;
+
         const dStart = parseDateSecurisee(evt.debut);
+        const dEnd = evt.fin ? parseDateSecurisee(evt.fin) : parseDateSecurisee(evt.debut);
+
         if (!dStart) return;
-        const dEnd = parseDateSecurisee(evt.fin) || dStart;
-        const prenoms = (evt.enfantsIds || []).map(id => mapIdToPrenom[id]).filter(Boolean);
-        const startDay = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
-        const endDay = new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate());
-        let cursor = new Date(startDay), count=0;
-        while(cursor <= endDay && count < maxJours){
-          occurrences.push({...evt,enfantsPrenoms:prenoms,occurrenceDate:new Date(cursor),isMultiDay:endDay.getTime()>startDay.getTime(),dStart,dEnd,enfants:prenoms.length?prenoms:(enfantsListe.length?[enfantsListe[0]]:[])});
-          cursor.setDate(cursor.getDate()+1); count++;
+
+        let prenoms = [];
+        if (Array.isArray(evt.enfantsIds)) {
+          prenoms = evt.enfantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
+        } else if (typeof evt.enfantsIds === 'string') {
+          prenoms = evt.enfantsIds.split(',').map(id => mapIdToPrenom[id.trim()]).filter(Boolean);
+        }
+
+        let dayCursor = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
+        const dayEnd = dEnd 
+          ? new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate())
+          : new Date(dayCursor);
+
+        let count = 0;
+        while (dayCursor <= dayEnd && count < 30) {
+          occurrences.push({
+            ...evt,
+            enfantsPrenoms: prenoms,
+            occurrenceDate: new Date(dayCursor),
+            isMultiDay: dayEnd.getTime() > new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate()).getTime(),
+            dStart: dStart,
+            dEnd: dEnd,
+            enfants: prenoms.length > 0 ? prenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : [])
+          });
+          dayCursor.setDate(dayCursor.getDate() + 1);
+          count++;
         }
       });
+
       return occurrences;
     }
 
@@ -917,7 +1028,7 @@
       return `<div class="enfants-badges-container">` + 
         enfants.map(e => {
           const info = enfantsInfo[e] || { color: '#64748B', emoji: '👤' };
-          return `<span class="badge-enfant" style="background-color: ${info.color}18; color: ${info.color}; border: 1px solid ${info.color}50;">
+          return `<span class="badge-enfant" style="background-color: ${info.color}15; color: ${info.color}; border: 1px solid ${info.color}40;">
             ${info.emoji} ${e}
           </span>`;
         }).join('') +
@@ -925,9 +1036,10 @@
     }
 
     function nettoyerNumero(tel) {
-      return tel ? tel.replace(/\s+/g, '') : '';
+      return tel ? String(tel).replace(/\s+/g, '') : '';
     }
 
+    /* AFFICHAGE DU PLANNING EN CARTE & CRÉNEAUX INTERNES */
     function afficherTimeline() {
       const container = document.getElementById('timeline');
       container.innerHTML = '';
@@ -998,7 +1110,7 @@
 
         const dRef = listeJour[0].occurrenceDate;
         const optionsDate = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        const dateHeaderStr = dRef.toLocaleDateString('fr-FR', optionsDate);
+        const dateHeaderStr = dRef.toLocaleDateString('fr-FR', optionsDate).toUpperCase();
 
         const headerCont = document.createElement('div');
         headerCont.className = 'date-header-container';
@@ -1079,7 +1191,7 @@
             } else {
               const hDeb = occ.dStart.getHours().toString().padStart(2,'0') + 'h' + occ.dStart.getMinutes().toString().padStart(2,'0');
               const hFin = occ.dEnd.getHours().toString().padStart(2,'0') + 'h' + occ.dEnd.getMinutes().toString().padStart(2,'0');
-              heureTexte = `${hDeb} - ${hFin}`;
+              heureTexte = `${hDeb} ➔ ${hFin}`;
             }
 
             const estEnCours = (maintenant >= occ.dStart && maintenant <= occ.dEnd);
@@ -1097,20 +1209,22 @@
             }
 
             const subBadgesEnfants = genererBadgesEnfants(occ.enfants);
-            const subTitre = occ.titre ? `<div style="font-weight: 700; font-size: 13px; color: var(--text-main);">${occ.titre}</div>` : '';
-            const subLieu = occ.lieu ? `<div class="sub-slot-details"><span class="material-symbols-outlined" style="font-size:13px;">location_on</span> ${occ.lieu}</div>` : '';
+            const subTitre = occ.titre ? `<div class="sub-slot-title">${occ.titre}</div>` : '';
+            const subLieu = occ.lieu ? `<div class="sub-slot-location"><span class="material-symbols-outlined" style="font-size:14px;">location_on</span> ${occ.lieu}</div>` : '';
 
             subSlotsHtml += `
               <div class="sub-slot-item" onclick="event.stopPropagation(); editerEvenement('${occ.id}')">
-                <div class="sub-slot-left">
-                  <span class="event-time-pill"><span class="material-symbols-outlined" style="font-size:13px;">schedule</span> ${heureTexte}</span>
+                <div class="sub-slot-header">
+                  <span class="event-time-pill"><span class="material-symbols-outlined" style="font-size:14px;">schedule</span> ${heureTexte}</span>
                   ${subBadgesEnfants}
+                  ${badgeSub}
+                </div>
+                <div class="sub-slot-body">
                   ${subTitre}
                   ${subLieu}
                 </div>
-                <div class="sub-slot-right">
-                  ${badgeSub}
-                  <span class="material-symbols-outlined" style="font-size:16px; color: var(--text-muted);">edit</span>
+                <div class="sub-slot-footer">
+                  <span class="edit-icon-btn"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></span>
                 </div>
               </div>
             `;
@@ -1124,14 +1238,14 @@
             <div class="event-color-bar" style="${styleBarre}"></div>
             <div class="event-content">
               <div class="event-header">
-                <div class="event-resp" style="margin-bottom: 0;">
-                  <span class="material-symbols-outlined" style="font-size:18px;">person</span> 
-                  <strong style="font-size: 15px;">${groupe.responsable}</strong>
+                <div class="event-resp">
+                  <span class="material-symbols-outlined" style="font-size:18px; color: #64748B;">person</span> 
+                  <span>${groupe.responsable}</span>
                 </div>
-                <span class="event-type">${groupe.type}</span>
+                <span class="event-type-badge">${groupe.type}</span>
               </div>
               ${actionsTelHtml}
-              <div style="margin-top: 8px;">
+              <div>
                 ${subSlotsHtml}
               </div>
             </div>
@@ -1168,11 +1282,15 @@
       document.getElementById("secOptionSerie").style.display = "none";
 
       const selectType = document.getElementById("formTypeSelect");
-      selectType.value = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
-
+      const defaultType = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
+      selectType.value = defaultType;
+      document.getElementById("formTypeInput").value = defaultType;
+      document.getElementById("formTypeInput").style.display = "none";
+      
       const selectResp = document.getElementById("formResponsableSelect");
       selectResp.value = "";
-      rafraichirLibellesIntervenants();
+      document.getElementById("formResponsableInput").value = "";
+      document.getElementById("formResponsableInput").style.display = "none";
       
       document.getElementById("formTitre").value = "";
       document.getElementById("formLieu").value = "";
@@ -1194,6 +1312,7 @@
       document.getElementById("modalEvt").style.display = "none";
     }
 
+    /* FEATURE 10 : Modification événement & gestion idSerie */
     function editerEvenement(id) {
       const evt = donneesBrutes.find(e => String(e.id).trim() === String(id).trim());
       if (!evt) return;
@@ -1202,7 +1321,13 @@
       document.getElementById("formId").value = evt.id;
       document.getElementById("formIdSerie").value = evt.idSerie || "";
       
-      const prenomsEvt = (evt.enfantsIds || []).map(idEnf => mapIdToPrenom[idEnf]).filter(Boolean);
+      let prenomsEvt = [];
+      if (Array.isArray(evt.enfantsIds)) {
+        prenomsEvt = evt.enfantsIds.map(idEnf => mapIdToPrenom[idEnf]).filter(Boolean);
+      } else if (typeof evt.enfantsIds === 'string') {
+        prenomsEvt = evt.enfantsIds.split(',').map(idEnf => mapIdToPrenom[idEnf.trim()]).filter(Boolean);
+      }
+
       enfantsModalSelectionnes = prenomsEvt.length > 0 ? prenomsEvt : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
       majRenduPucesModal();
 
@@ -1214,31 +1339,38 @@
       }
 
       const selectType = document.getElementById("formTypeSelect");
+      const inputType = document.getElementById("formTypeInput");
       const typeVal = (evt.type || "").trim();
-      selectType.value = refTypes.find(t => t.toLowerCase() === typeVal.toLowerCase()) || typeVal;
+      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
+      if (matchType) {
+        selectType.value = matchType;
+        inputType.style.display = "none";
+        inputType.value = matchType;
+      } else {
+        selectType.value = "NOUVEAU";
+        inputType.style.display = "block";
+        inputType.value = typeVal;
+      }
 
       const selectResp = document.getElementById("formResponsableSelect");
-      const respObj = refIntervenantsObjets.find(i => i.nom.toLowerCase() === String(evt.responsable || '').trim().toLowerCase());
-      selectResp.value = respObj ? respObj.id : '';
-      rafraichirLibellesIntervenants();
-      if (respObj) selectResp.value = respObj.id;
-      afficherHintResponsable();
+      const inputResp = document.getElementById("formResponsableInput");
+      const respVal = (evt.responsable || "").trim();
+      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
+      if (matchResp) {
+        selectResp.value = matchResp;
+        inputResp.style.display = "none";
+        inputResp.value = matchResp;
+      } else {
+        selectResp.value = "NOUVEAU";
+        inputResp.style.display = "block";
+        inputResp.value = respVal;
+      }
 
       document.getElementById("formTitre").value = evt.titre || "";
       document.getElementById("formDebut").value = formatForInput(evt.debut);
       document.getElementById("formFin").value = formatForInput(evt.fin);
-      document.getElementById("formDate").value = evt.date ? evt.date.split('T')[0] : (evt.debut ? evt.debut.split('T')[0] : "");
-      const selectLieu = document.getElementById("formLieu");
-      const lieuObj = refLieux.find(l => l.nom.toLowerCase() === String(evt.lieu || '').trim().toLowerCase());
-      if (!lieuObj && evt.lieu) {
-        const opt = document.createElement('option');
-        opt.value = '__LEGACY__';
-        opt.textContent = evt.lieu;
-        selectLieu.appendChild(opt);
-        selectLieu.value = '__LEGACY__';
-      } else {
-        selectLieu.value = lieuObj ? lieuObj.id : "";
-      }
+      document.getElementById("formDate").value = evt.date ? String(evt.date).split('T')[0] : (evt.debut ? String(evt.debut).split('T')[0] : "");
+      document.getElementById("formLieu").value = evt.lieu || "";
       document.getElementById("formDetails").value = evt.details || "";
       document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
       
@@ -1251,16 +1383,21 @@
     function soumettre() {
       if (!validerControleDates()) return;
 
-      const typeFinal = document.getElementById("formTypeSelect").value;
-      const intervenantId = document.getElementById("formResponsableSelect").value;
-      const intervenantObj = refIntervenantsObjets.find(i => i.id === intervenantId);
-      const responsableFinal = intervenantObj ? intervenantObj.nom : '';
-      const lieuId = document.getElementById("formLieu").value;
-      const lieuObj = refLieux.find(l => l.id === lieuId);
-      const lieuFinal = lieuObj ? lieuObj.nom : '';
+      let typeFinal = document.getElementById("formTypeSelect").value;
+      if (typeFinal === 'NOUVEAU' || typeFinal === '') {
+        typeFinal = document.getElementById("formTypeInput").value;
+      }
 
-      if (!typeFinal.trim() || !intervenantId) {
-        alert("Merci de renseigner le type et l'intervenant.");
+      const responsableSelect = document.getElementById("formResponsableSelect").value;
+      let responsableFinal = responsableSelect;
+      if (responsableFinal === 'NOUVEAU' || responsableFinal === '') {
+        responsableFinal = document.getElementById("formResponsableInput").value;
+      }
+      const intervenantObj = refIntervenantsObjets.find(i => String(i.nom).trim().toLowerCase() === String(responsableFinal).trim().toLowerCase());
+      const idIntervenantFinal = intervenantObj ? String(intervenantObj.id || '').trim() : '';
+
+      if (!typeFinal.trim() || !responsableFinal.trim()) {
+        alert("Merci de renseigner le type et le responsable.");
         return;
       }
 
@@ -1276,14 +1413,14 @@
         modeModifSerie: modeModif,
         date: document.getElementById("formDate").value,
         enfantsIds: targetIds,
-        type: typeFinal,
-        intervenantId: intervenantId,
-        responsable: responsableFinal,
-        lieuId: lieuId,
-        lieu: lieuFinal,
+        type: typeFinal.trim(),
+        responsable: responsableFinal.trim(),
+        idIntervenant: idIntervenantFinal,
+        idsIntervenants: idIntervenantFinal ? [idIntervenantFinal] : [],
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
+        lieu: document.getElementById("formLieu").value,
         details: document.getElementById("formDetails").value,
         idPeriode: document.getElementById("formPeriodeSelect").value,
         statut: "Confirmé",
@@ -1298,52 +1435,79 @@
       analyserConflitsEtValider(payload);
     }
 
+    /* FEATURES 11 & 12 : Détection temporelle & Conflits intelligent d'enfants / responsable */
     async function analyserConflitsEtValider(payload) {
       payloadEnAttente = payload;
-      // Le chargement initial est volontairement limité à la fenêtre affichée.
-      // Pour un événement créé/modifié hors de cette fenêtre, on charge uniquement sa semaine.
-      if ((payload.type || '').trim().toLowerCase() === 'garde') {
-        const d = parseDateSecurisee(payload.debut);
-        if (d) {
-          const day = d.getDay() || 7;
-          const from = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-          from.setDate(from.getDate() - day + 1);
-          const to = new Date(from); to.setDate(to.getDate()+6); to.setHours(23,59,59,999);
-          const key = `${formatDateApi(from)}|${formatDateApi(to)}`;
-          if (planningCache.has(key)) donneesBrutes = planningCache.get(key);
-          else {
-            try { const rep = await apiGet('getPlanningData',{from:formatDateApi(from),to:formatDateApi(to)}); const data = normaliserDonneesPlanning(rep); planningCache.set(key,data); donneesBrutes=data; } catch(e) { console.warn('Vérification conflits limitée:',e); }
-          }
+
+      // Si l'utilisateur crée/modifie un événement hors de la fenêtre actuellement
+      // affichée, on charge uniquement sa fenêtre avant de calculer les conflits.
+      const dPayload = parseDateSecurisee(payload.debut);
+      if (dPayload && filtreTemps !== 'Tous') {
+        const datePayload = formaterDateAPI(dPayload);
+        const fenetre = calculerFenetrePlanning();
+        if (!fenetre.from || datePayload < fenetre.from || datePayload > fenetre.to) {
+          const ancienOffset = offsetSemaines;
+          const ancienFiltre = filtreTemps;
+          const jourSemaine = dPayload.getDay() || 7;
+          const debutCible = new Date(dPayload.getFullYear(), dPayload.getMonth(), dPayload.getDate());
+          debutCible.setDate(debutCible.getDate() - jourSemaine + 1);
+          const debutActuel = new Date();
+          const js = debutActuel.getDay() || 7;
+          debutActuel.setDate(debutActuel.getDate() - js + 1);
+          offsetSemaines = Math.round((debutCible - debutActuel) / 604800000);
+          await chargerDonnees(true);
+          offsetSemaines = ancienOffset;
+          filtreTemps = ancienFiltre;
         }
       }
       idsGardesARemplacer = [];
       ajustementsConflitEnfants = [];
 
-      if (payload.type.toLowerCase() !== "garde") {
+      const typePayload = (payload.type || "").trim().toLowerCase();
+      if (typePayload !== "garde") {
         executerEnregistrement(payload);
         return;
       }
 
-      const startNouveau = new Date(payload.debut);
-      const endNouveau = new Date(payload.fin);
+      const startNouveau = parseDateSecurisee(payload.debut);
+      const endNouveau = parseDateSecurisee(payload.fin);
+
+      if (!startNouveau || !endNouveau) {
+        executerEnregistrement(payload);
+        return;
+      }
 
       let conflitsEnfants = [];
       let conflitsResponsable = [];
 
-      donneesBrutes.forEach(evt => {
+      const payloadEnfantsIds = (payload.enfantsIds || []).map(id => String(id).trim());
+
+      (Array.isArray(donneesBrutes) ? donneesBrutes : []).forEach(evt => {
         if (String(evt.id).trim() === String(payload.id).trim()) return;
-        if ((evt.type || "").toLowerCase() !== "garde") return;
 
-        const startExistant = new Date(evt.debut);
-        const endExistant = new Date(evt.fin);
+        const typeExistant = (evt.type || "").trim().toLowerCase();
+        if (typeExistant !== "garde") return;
 
+        const startExistant = parseDateSecurisee(evt.debut);
+        const endExistant = parseDateSecurisee(evt.fin);
+
+        if (!startExistant || !endExistant) return;
+
+        // Détection de la superposition d'horaires
         if (startNouveau < endExistant && endNouveau > startExistant) {
-          const evtEnfantsIds = evt.enfantsIds || [];
-          const enfantsEnConflitIds = evtEnfantsIds.filter(id => payload.enfantsIds.includes(id));
+          
+          let evtEnfantsIds = [];
+          if (Array.isArray(evt.enfantsIds)) {
+            evtEnfantsIds = evt.enfantsIds.map(id => String(id).trim());
+          } else if (typeof evt.enfantsIds === 'string') {
+            evtEnfantsIds = evt.enfantsIds.split(',').map(id => id.trim());
+          }
+
+          const enfantsEnConflitIds = evtEnfantsIds.filter(id => payloadEnfantsIds.includes(id));
 
           if (enfantsEnConflitIds.length > 0) {
             const enfantsEnConflitPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-            const enfantsRestantsIds = evtEnfantsIds.filter(id => !payload.enfantsIds.includes(id));
+            const enfantsRestantsIds = evtEnfantsIds.filter(id => !payloadEnfantsIds.includes(id));
             const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
 
             conflitsEnfants.push({
@@ -1354,12 +1518,13 @@
             });
           }
 
-          if (evt.responsable && evt.responsable.toLowerCase() === payload.responsable.toLowerCase()) {
+          if (evt.responsable && evt.responsable.trim().toLowerCase() === (payload.responsable || "").trim().toLowerCase()) {
             conflitsResponsable.push(evt);
           }
         }
       });
 
+      // FEATURE 11 : Réorganisation automatique des enfants en garde
       if (conflitsEnfants.length > 0) {
         conflitsEnfants.forEach(c => {
           if (c.enfantsRestants.length === 0) {
@@ -1377,7 +1542,7 @@
           if (c.enfantsRestants.length > 0) {
             return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. <strong>${c.enfantsRestants.join(', ')}</strong> reste géré(e) par ${c.responsable}.`;
           }
-          return `• <strong>${c.enfantsTouchés.join(', ')}</strong> est transféré(e) depuis la garde de ${c.responsable}.`;
+          return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. L'ancienne garde gérée par ${c.responsable} sera supprimée.`;
         }).join('<br>');
         
         ouvrirModalConflit(
@@ -1388,6 +1553,7 @@
         return;
       }
 
+      // FEATURE 12 : Superposition de responsable
       if (conflitsResponsable.length > 0) {
         ouvrirModalConflit(
           "Superposition de garde",
@@ -1436,7 +1602,7 @@
         }
 
         fermerModal();
-        planningCache.clear();
+        cachePlanning.clear();
         await chargerDonnees(true);
       } catch(err) {
         btn.innerHTML = "Enregistrer";
@@ -1445,6 +1611,7 @@
       }
     }
 
+    /* FEATURE 10 : Suppression d'une occurrence ou de la série */
     function supprimer() {
       const id = document.getElementById("formId").value;
       const idSerie = document.getElementById("formIdSerie").value;
@@ -1474,8 +1641,8 @@
 
       let modeSuppr = 'UNIQUE';
       if (idSerie) {
-        const optionCoquee = document.querySelector('input[name="optSupprSerie"]:checked');
-        if (optionCoquee) modeSuppr = optionCoquee.value;
+        const optionCochee = document.querySelector('input[name="optSupprSerie"]:checked');
+        if (optionCochee) modeSuppr = optionCochee.value;
       }
 
       fermerModalSuppression();
@@ -1489,7 +1656,8 @@
         fermerModal();
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
-        chargerDonnees();
+        cachePlanning.clear();
+        await chargerDonnees(true);
       } catch(err) {
         alert("Erreur lors de la suppression : " + err);
         btn.innerText = "Supprimer cet événement";
