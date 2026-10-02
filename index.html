@@ -5,17 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Garde Tribu</title>
   <style>
-    :root { --bg: #f4f6f8; --card: #ffffff; --primary: #4CAF50; --border: #e2e8f0; --accent: #2196F3; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: #2d3748; padding: 12px; margin: 0; }
+    :root { 
+      --bg: #f4f6f8; 
+      --card: #ffffff; 
+      --primary: #4CAF50; 
+      --border: #e2e8f0; 
+      --accent: #2196F3;
+      --text: #2d3748;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 12px; margin: 0; }
     .card { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); max-width: 480px; margin: 0 auto; }
     
     .form-group { margin-bottom: 12px; }
     label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; color: #4a5568; }
-    input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
+    input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; font-family: inherit; }
     
-    /* Boutons Puces Enfants */
+    /* Puces Enfants */
     .puces-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-    .puce-btn { padding: 6px 12px; border: 2px solid transparent; border-radius: 16px; background: #edf2f7; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: 0.15s; }
+    .puce-btn { padding: 6px 12px; border: 2px solid transparent; border-radius: 16px; background: #edf2f7; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: 0.15s; user-select: none; }
     .puce-btn.selected { color: white !important; }
 
     /* Raccourcis temps */
@@ -28,25 +35,31 @@
     summary { font-weight: 600; font-size: 0.85rem; cursor: pointer; color: var(--accent); }
 
     .btn-submit { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-top: 14px; }
-    #loading { text-align: center; padding: 30px; font-weight: 600; }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    #loading { text-align: center; padding: 30px; font-weight: 600; color: #718096; }
     #app { display: none; }
+
+    /* Timeline Preview */
+    .timeline-preview { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+    .event-item { background: #edf2f7; border-left: 4px solid var(--accent); padding: 6px 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.8rem; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <div id="loading">⏳ Chargement...</div>
+  <div id="loading">⏳ Chargement de Garde Tribu...</div>
   
   <div id="app">
     <form id="eventForm">
       
-      <!-- Enfants (Aucun sélectionné par défaut) -->
+      <!-- Enfants (Multi-sélection / Vide par défaut) -->
       <div class="form-group">
         <label>Pour qui ?</label>
         <div class="puces-grid" id="enfantsContainer"></div>
       </div>
 
-      <!-- Type & Responsable (Puces dynamiques) -->
+      <!-- Type & Responsable -->
       <div style="display: flex; gap: 8px;">
         <div class="form-group" style="flex: 1;">
           <label>Type</label>
@@ -125,80 +138,178 @@
 
       <button type="submit" class="btn-submit" id="submitBtn">Enregistrer</button>
     </form>
+
+    <!-- Aperçu de la Timeline -->
+    <div class="timeline-preview">
+      <label>Aperçu du Planning</label>
+      <div id="timelineContainer"></div>
+    </div>
   </div>
 </div>
 
 <script>
+  // ⚠️ ASSURE-TOI QUE CETTE URL EST CELLE DE TON DERNIER DÉPLOIEMENT WEB APP (VERSION EXÉCUTÉE EN TANT QUE MOI / ACCÈS TOUS)
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
-  let appData = null;
-  const enfantsSelectionnes = new Set(); // Vide par défaut
+  
+  let globalData = null; // Contiendra { referentiels, evenements, evenementEnfants, series }
+  const enfantsSelectionnes = new Set(); 
 
   window.onload = () => {
-    chargerDonnees();
+    chargerPlanningData();
     setDate('aujourdhui');
   };
 
-  function chargerDonnees() {
+  /**
+   * CHARGEMENT INITIAL (Un seul appel Réseau)
+   */
+  function chargerPlanningData() {
     fetch(`${SCRIPT_URL}?action=getPlanningData`, { method: "GET", redirect: "follow" })
       .then(res => res.json())
       .then(data => {
-        appData = data.referentiels;
-        construireInterface();
+        globalData = data;
+        construireFormulaire();
+        afficherTimeline();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('loading').innerText = "❌ Erreur de chargement. Veuillez rafraîchir.";
       });
   }
 
-  function construireInterface() {
-    // Enfants
+  /**
+   * GENERATION DYNAMIQUE DE L'UI DEPUIS LE REFERENTIEL
+   */
+  function construireFormulaire() {
+    const refs = globalData.referentiels;
+
+    // 1. Boutons Enfants
     const container = document.getElementById('enfantsContainer');
-    appData.enfants.forEach(e => {
-      if (e.actif === "Oui") {
-        const btn = document.createElement('div');
-        btn.className = 'puce-btn';
-        btn.innerText = `${e.emoji} ${e.prenom}`;
-        btn.style.borderColor = e.couleur;
-        btn.style.color = e.couleur;
-        btn.onclick = () => {
-          if (enfantsSelectionnes.has(e.id)) {
-            enfantsSelectionnes.delete(e.id);
-            btn.classList.remove('selected');
-            btn.style.backgroundColor = 'transparent';
-            btn.style.color = e.couleur;
-          } else {
-            enfantsSelectionnes.add(e.id);
-            btn.classList.add('selected');
-            btn.style.backgroundColor = e.couleur;
-          }
-          mettreAJourIntervenants();
-        };
-        container.appendChild(btn);
-      }
-    });
+    container.innerHTML = "";
+    if (refs.enfants && Array.isArray(refs.enfants)) {
+      refs.enfants.forEach(e => {
+        if (e.actif === "Oui") {
+          const btn = document.createElement('div');
+          btn.className = 'puce-btn';
+          btn.innerText = `${e.emoji} ${e.prenom}`;
+          btn.style.borderColor = e.couleur;
+          btn.style.color = e.couleur;
+          btn.onclick = () => toggleEnfant(e.id, btn, e.couleur);
+          container.appendChild(btn);
+        }
+      });
+    }
 
-    // Types
+    // 2. Types
     const typeSelect = document.getElementById('typeSelect');
-    appData.types.forEach(t => typeSelect.add(new Option(t, t)));
+    typeSelect.innerHTML = "";
+    if (refs.types && Array.isArray(refs.types)) {
+      refs.types.forEach(t => typeSelect.add(new Option(t, t)));
+    }
 
-    // Lieux
-    if (appData.lieux) {
-      const lieuSelect = document.getElementById('lieuSelect');
-      appData.lieux.forEach(l => lieuSelect.add(new Option(l.nom, l.id)));
+    // 3. Lieux
+    const lieuSelect = document.getElementById('lieuSelect');
+    lieuSelect.innerHTML = '<option value="">-- Aucun --</option>';
+    if (refs.lieux && Array.isArray(refs.lieux)) {
+      refs.lieux.forEach(l => lieuSelect.add(new Option(l.nom, l.id)));
     }
 
     mettreAJourIntervenants();
   }
 
+  function toggleEnfant(idEnfant, btn, couleur) {
+    if (enfantsSelectionnes.has(idEnfant)) {
+      enfantsSelectionnes.delete(idEnfant);
+      btn.classList.remove('selected');
+      btn.style.backgroundColor = 'transparent';
+      btn.style.color = couleur;
+    } else {
+      enfantsSelectionnes.add(idEnfant);
+      btn.classList.add('selected');
+      btn.style.backgroundColor = couleur;
+      btn.style.color = 'white';
+    }
+    mettreAJourIntervenants();
+  }
+
+  /**
+   * CALCUL DYNAMIQUE DES RELATIONS FAMILIALES SUR LES INTERVENANTS
+   */
   function mettreAJourIntervenants() {
     const select = document.getElementById('intervenantSelect');
+    const valeurSelectionnee = select.value;
     select.innerHTML = '<option value="">-- Choisir --</option>';
-    appData.intervenants.forEach(i => {
-      const intervId = i.id || i.nom;
-      select.add(new Option(i.nom, intervId));
+
+    const refs = globalData.referentiels;
+    if (!refs || !refs.intervenants || !Array.isArray(refs.intervenants)) return;
+
+    refs.intervenants.forEach(interv => {
+      const intervId = interv.id || interv.nom; 
+      let libelle = interv.nom;
+
+      // Déduction dynamique des relations depuis referentiels.json
+      if (refs.relationsFamiliales && Array.isArray(refs.relationsFamiliales) && enfantsSelectionnes.size > 0) {
+        let relsFound = [];
+        enfantsSelectionnes.forEach(idEnfant => {
+          const match = refs.relationsFamiliales.find(r => r.intervenantId === intervId && r.enfantId === idEnfant);
+          if (match) relsFound.push(match.relation);
+        });
+
+        if (relsFound.length > 0) {
+          const relsUniques = [...new Set(relsFound)].join(', ');
+          libelle = `👤 ${interv.nom} (${relsUniques})`;
+        }
+      }
+
+      select.add(new Option(libelle, intervId));
+    });
+
+    if (valeurSelectionnee) select.value = valeurSelectionnee;
+  }
+
+  /**
+   * ROBUSTE : GENERATION DE TIMELINE ET PREVENTION DES ERREURS FOREACH
+   */
+  function genererOccurrences(donneesBrutes) {
+    // Sécurité anti-crash si la variable passée n'est pas directement un tableau
+    const listeEvents = Array.isArray(donneesBrutes) 
+      ? donneesBrutes 
+      : (donneesBrutes && Array.isArray(donneesBrutes.evenements) ? donneesBrutes.evenements : []);
+
+    return listeEvents.map(evt => {
+      return {
+        id: evt.idEvenement,
+        titre: evt.titre || `${evt.type} - ${evt.responsableTexte}`,
+        debut: evt.debut,
+        fin: evt.fin,
+        lieu: evt.lieuTexte
+      };
     });
   }
 
-  // --- RACCOURCIS ET UTILITAIRES DATES ---
+  function afficherTimeline() {
+    const container = document.getElementById('timelineContainer');
+    container.innerHTML = "";
+
+    // Utilisation sécurisée
+    const listeEvenements = globalData ? globalData.evenements : [];
+    const occurrences = genererOccurrences(listeEvenements);
+
+    if (occurrences.length === 0) {
+      container.innerHTML = "<div style='font-size:0.8rem; color:#a0aec0;'>Aucun événement récent.</div>";
+      return;
+    }
+
+    occurrences.slice(-5).reverse().forEach(occ => {
+      const div = document.createElement('div');
+      div.className = 'event-item';
+      div.innerHTML = `<strong>${occ.titre}</strong><br><small>🕒 ${occ.debut} ➔ ${occ.fin}</small>`;
+      container.appendChild(div);
+    });
+  }
+
+  // --- RACCOURCIS DATES & HEURES ---
   function setDate(choix) {
     const d = new Date();
     if (choix === 'demain') d.setDate(d.getDate() + 1);
@@ -226,13 +337,18 @@
     document.getElementById('recurrenceOptions').style.display = isChecked ? 'block' : 'none';
   }
 
-  // --- SOUMISSION ---
+  // --- SOUMISSION DU FORMULAIRE ---
   document.getElementById('eventForm').onsubmit = (e) => {
     e.preventDefault();
+
     if (enfantsSelectionnes.size === 0) {
-      alert("Sélectionne au moins un enfant.");
+      alert("Veuillez sélectionner au moins un enfant.");
       return;
     }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "Enregistrement...";
 
     const intSelect = document.getElementById('intervenantSelect');
     const lieuSelect = document.getElementById('lieuSelect');
@@ -245,7 +361,7 @@
       heureFin: document.getElementById('heureFinInput').value,
       enfantsIds: Array.from(enfantsSelectionnes),
       idIntervenant: intSelect.value,
-      responsableTexte: intSelect.options[intSelect.selectedIndex].text,
+      responsableTexte: intSelect.options[intSelect.selectedIndex].text.replace(/👤\s?/, '').split(' (')[0],
       idLieu: lieuSelect.value,
       lieuTexte: lieuSelect.value ? lieuSelect.options[lieuSelect.selectedIndex].text : "",
       notes: document.getElementById('notesInput').value,
@@ -262,10 +378,20 @@
     })
     .then(res => res.json())
     .then(res => {
-      if (res.success) {
-        alert(`${res.nbOccurrences} événement(s) créé(s) avec succès !`);
+      if (res.status === "success") {
+        alert(res.message);
         location.reload();
+      } else {
+        alert("Erreur: " + res.message);
+        btn.disabled = false;
+        btn.innerText = "Enregistrer";
       }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Une erreur de communication est survenue.");
+      btn.disabled = false;
+      btn.innerText = "Enregistrer";
     });
   };
 </script>
