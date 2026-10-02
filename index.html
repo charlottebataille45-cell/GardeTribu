@@ -25,11 +25,11 @@
     .btn-toggle-filters { background: #F1F5F9; border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; cursor: pointer; transition: background 0.2s; }
     .btn-toggle-filters:hover { background: #E2E8F0; }
 
-    .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 8px 0 4px 2px; }
-    .filters-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 6px; }
+    .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 6px 0 4px 2px; }
+    .filters-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 4px; flex-wrap: wrap; }
     .filters-row::-webkit-scrollbar { display: none; }
     
-    .chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; transition: all 0.2s ease; user-select: none; }
+    .chip { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; transition: all 0.15s ease; user-select: none; display: inline-flex; align-items: center; gap: 4px; }
     .chip:hover { border-color: var(--text-main); color: var(--text-main); }
     .chip.active { background: #1E293B; color: white; border-color: #1E293B; }
     .chip.time-filter { border-style: solid; background: #F1F5F9; color: #475569; border-color: transparent; }
@@ -45,13 +45,12 @@
 
     .timeline-container { padding: 12px 16px; max-width: 600px; margin: 0 auto; }
     
-    .date-header-container { margin: 24px 0 10px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #E2E8F0; padding-bottom: 6px; }
+    .date-header-container { margin: 20px 0 8px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #E2E8F0; padding-bottom: 4px; }
     .date-header { font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
     .date-count-badge { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 
     /* CARTE ÉVÉNEMENT */
-    .event-card { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); position: relative; }
-    .event-card.highlight-upcoming { border: 2px solid #3B82F6; background: #EFF6FF; }
+    .event-card { background: var(--card); border-radius: 16px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); position: relative; }
     .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; }
 
     .badge-upcoming { background: #3B82F6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
@@ -62,62 +61,71 @@
     .event-color-bar { width: 5px; border-radius: 4px; flex-shrink: 0; min-height: 100%; }
     .event-content { flex: 1; width: 100%; }
     
-    .event-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .event-resp { font-size: 14px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px; }
-    .event-type-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; background: #F1F5F9; color: #475569; }
+    .event-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .event-resp { font-size: 13px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px; }
+    .event-type-badge { font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 600; background: #F1F5F9; color: #475569; }
 
-    .action-links-container { display: flex; gap: 6px; margin-bottom: 8px; }
-    .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 4px; }
+    .action-links-container { display: flex; gap: 6px; margin-bottom: 6px; }
+    .action-btn-phone { font-size: 11px; color: #1D4ED8; font-weight: 600; text-decoration: none; background: #EFF6FF; padding: 2px 6px; border-radius: 6px; border: 1px solid #BFDBFE; display: inline-flex; align-items: center; gap: 3px; }
 
     /* CRÉNEAU INTERNE (SUB-SLOT) */
-    .sub-slot-item { background: var(--subslot-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 8px; cursor: pointer; transition: background 0.15s ease; position: relative; }
+    .sub-slot-item { background: var(--subslot-bg); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; margin-top: 6px; cursor: pointer; transition: background 0.15s ease; position: relative; }
     .sub-slot-item:hover { background: #F1F5F9; }
 
-    .sub-slot-header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
-    .event-time-pill { font-size: 12px; font-weight: 700; color: #0F172A; background: #E2E8F0; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .sub-slot-header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .event-time-pill { font-size: 11px; font-weight: 700; color: #0F172A; background: #E2E8F0; padding: 3px 8px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px; }
 
     .enfants-badges-container { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-    .badge-enfant { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 14px; font-size: 11px; font-weight: 700; line-height: 1.2; }
+    .badge-enfant { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; line-height: 1.2; }
 
-    .sub-slot-body { margin-top: 4px; }
-    .sub-slot-title { font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 2px; }
-    .sub-slot-location { font-size: 12px; color: #64748B; display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+    .sub-slot-body { margin-top: 2px; }
+    .sub-slot-title { font-size: 12px; font-weight: 700; color: #0F172A; margin-bottom: 2px; }
+    .sub-slot-location { font-size: 11px; color: #64748B; display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
 
-    .sub-slot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
-    .edit-icon-btn { font-size: 16px; color: #94A3B8; display: flex; align-items: center; }
+    .sub-slot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+    .edit-icon-btn { font-size: 15px; color: #94A3B8; display: flex; align-items: center; }
 
     /* FAB BUTTON */
     .fab { position: fixed; bottom: 25px; right: 25px; background: #0F172A; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,0.25); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
     .fab:hover { transform: scale(1.06); }
 
-    /* MODALE */
+    /* MODALE COMPACTE */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
-    .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-title { font-size: 18px; font-weight: 700; }
-    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+    .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 18px 20px; max-height: 95vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); }
 
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
-    .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; transition: border-color 0.2s; }
+    .form-group { margin-bottom: 10px; }
+    .form-control { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: #F8FAFC; transition: border-color 0.2s; }
     .form-control:focus { outline: none; border-color: var(--text-main); background: white; }
     .form-control.is-invalid { border-color: #EF4444; background-color: #FEF2F2; }
 
-    .child-selector { display: flex; flex-wrap: wrap; gap: 8px; }
-    .child-chip { padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-muted); cursor: pointer; transition: 0.2s; user-select: none; }
+    .child-selector { display: flex; flex-wrap: wrap; gap: 6px; }
+    .child-chip { padding: 5px 10px; border-radius: 14px; font-size: 11px; font-weight: 700; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-muted); cursor: pointer; transition: 0.2s; user-select: none; }
     .child-chip.selected { color: white; border-color: transparent; }
 
-    .recurrence-box { background: #F1F5F9; border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
+    /* Accordéon Optionnel */
+    .btn-toggle-options { background: transparent; border: none; color: #3B82F6; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; margin: 8px 0; padding: 4px 0; }
+    .more-options-box { display: none; background: #F8FAFC; border: 1px dashed var(--border); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+
+    .recurrence-box { background: #F1F5F9; border-radius: 10px; padding: 10px; margin-top: 8px; border: 1px solid var(--border); }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-    .toggle-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .toggle-title { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 
-    .serie-options { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 12px; }
-    .error-msg { color: #EF4444; font-size: 12px; font-weight: 600; margin-top: 5px; display: none; align-items: center; gap: 4px; }
+    .serie-options { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 8px; margin-top: 8px; font-size: 11px; }
+    .error-msg { color: #EF4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; align-items: center; gap: 4px; }
 
-    .btn-submit { width: 100%; padding: 14px; background: #0F172A; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-submit { width: 100%; padding: 12px; background: #0F172A; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; display: flex; justify-content: center; align-items: center; gap: 8px; }
     .btn-submit:disabled { background: #94A3B8; cursor: not-allowed; }
 
-    .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; }
+    .btn-delete { width: 100%; padding: 10px; background: transparent; color: #EF4444; border: none; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 4px; display: none; }
+
+    /* CONFLITS - CARTE VISUELLE */
+    .conflict-card { background: #FFFBEB; border: 1px solid #FCD34D; border-left: 4px solid #F59E0B; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; text-align: left; }
+    .conflict-header { display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #92400E; margin-bottom: 4px; }
+    .conflict-details { color: #374151; font-size: 11px; display: flex; flex-direction: column; gap: 2px; }
+    .conflict-time { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: #1F2937; background: #FEF3C7; padding: 2px 6px; border-radius: 6px; width: fit-content; margin-bottom: 2px; }
 
     .spin { animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -177,7 +185,7 @@
 
   <button class="fab" onclick="ouvrirModal()" aria-label="Ajouter un événement"><span class="material-symbols-outlined">add</span></button>
 
-  <!-- Modale Édition / Création -->
+  <!-- Modale Édition / Création Révisée -->
   <div class="modal-overlay" id="modalEvt">
     <div class="modal">
       <div class="modal-header">
@@ -188,102 +196,116 @@
       <input type="hidden" id="formId">
       <input type="hidden" id="formIdSerie">
 
+      <!-- ENFANTS -->
       <div class="form-group">
-        <span class="filter-label" style="display:block; margin-bottom:6px;">1. CONCERNE L'ENFANT / LES ENFANTS *</span>
+        <div class="filter-label">Enfant(s) concerné(s)</div>
         <div class="child-selector" id="formEnfantSelector"></div>
       </div>
 
-      <div style="display: flex; gap: 10px;">
+      <!-- TYPE & RESPONSABLE (Puces dynamiques) -->
+      <div style="display: flex; gap: 8px;">
         <div class="form-group" style="flex: 1;">
-          <label for="formTypeSelect">2. TYPE *</label>
-          <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
-            <option value="">-- Choisir --</option>
-            <option value="NOUVEAU">+ Ajouter un type...</option>
-          </select>
-          <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Autre type..." aria-label="Saisir un autre type">
+          <div class="filter-label">Type</div>
+          <div class="filters-row" id="formTypeChips"></div>
+          <input type="text" id="formTypeInput" class="form-control" style="display:none; margin-top:4px;" placeholder="Autre type..." aria-label="Autre type">
         </div>
-
         <div class="form-group" style="flex: 1;">
-          <label for="formResponsableSelect">3. RESPONSABLE *</label>
-          <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
-            <option value="">-- Choisir --</option>
-            <option value="NOUVEAU">+ Ajouter...</option>
-          </select>
-          <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top: 8px;" placeholder="Nom responsable..." aria-label="Saisir un autre responsable">
+          <div class="filter-label">Responsable</div>
+          <div class="filters-row" id="formResponsableChips"></div>
+          <input type="text" id="formResponsableInput" class="form-control" style="display:none; margin-top:4px;" placeholder="Nom..." aria-label="Autre responsable">
         </div>
       </div>
 
+      <!-- DATE ET HEURES SIMPLIFIÉES -->
       <div class="form-group">
-        <label for="formTitre">4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
-        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Oréliance...">
-      </div>
-
-      <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;">
-          <label for="formDebut">5. DÉBUT *</label>
-          <input type="datetime-local" id="formDebut" class="form-control" onchange="surChangementDebut()">
+        <div class="filter-label">Date</div>
+        <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px;">
+          <button type="button" class="chip time-filter active" id="btnDateToday" onclick="setDateShortcut('today')">Aujourd'hui</button>
+          <button type="button" class="chip time-filter" id="btnDateTomorrow" onclick="setDateShortcut('tomorrow')">Demain</button>
+          <input type="date" id="formDateVal" class="form-control" style="width: auto; flex:1;" onchange="surChangementDatePicker(this.value)">
         </div>
-        <div class="form-group" style="flex: 1;">
-          <label for="formFin">FIN *</label>
-          <input type="datetime-local" id="formFin" class="form-control" onchange="validerControleDates()">
-        </div>
-      </div>
 
-      <div id="dateError" class="error-msg">
-        <span class="material-symbols-outlined" style="font-size: 16px;">error</span>
-        La fin de l'événement doit être postérieure au début.
-      </div>
-      <input type="hidden" id="formDate">
-
-      <div class="form-group">
-        <label for="formLieu">6. LIEU</label>
-        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
-      </div>
-
-      <div class="form-group">
-        <label for="formDetails">7. DÉTAILS / NOTES</label>
-        <input type="text" id="formDetails" class="form-control" placeholder="Infos complémentaires...">
-      </div>
-
-      <div class="form-group">
-        <label for="formPeriodeSelect">PÉRIODE / VACANCES</label>
-        <select id="formPeriodeSelect" class="form-control">
-          <option value="">-- Hors vacances --</option>
-        </select>
-      </div>
-
-      <div class="recurrence-box" id="secRecurrence">
-        <div class="toggle-row" onclick="toggleRecurrenceOpt()">
-          <div class="toggle-title">
-            <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
-            8. Répéter cet événement
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="flex: 1;">
+            <div class="filter-label">Début</div>
+            <input type="time" id="formHeureDebut" class="form-control" value="08:00" onchange="recalculerFinAutomatique()">
           </div>
-          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence" style="cursor:pointer; width:16px; height:16px;">
-        </div>
-
-        <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-            <label for="formRecurIntervalle" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Toutes les :</label>
-            <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
-            <select id="formRecurUnite" class="form-control" style="flex: 1;" aria-label="Unité de fréquence">
-              <option value="Jours">Jours</option>
-              <option value="Semaines" selected>Semaines</option>
-              <option value="Mois">Mois</option>
-            </select>
-          </div>
-
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <label for="formRecurFin" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Jusqu'au :</label>
-            <input type="date" id="formRecurFin" class="form-control" style="flex: 1;">
+          <div style="flex: 1;">
+            <div class="filter-label">Fin</div>
+            <input type="time" id="formHeureFin" class="form-control" value="09:00" onchange="validerControleDates()">
           </div>
         </div>
+
+        <div class="filters-row" style="margin-top: 6px; align-items: center;">
+          <span style="font-size: 10px; color: var(--text-muted); font-weight:700;">Durée :</span>
+          <button type="button" class="chip time-filter" onclick="ajouterDuree(30)">+30 min</button>
+          <button type="button" class="chip time-filter" onclick="ajouterDuree(60)">+1h</button>
+          <button type="button" class="chip time-filter" onclick="ajouterDuree(120)">+2h</button>
+          <button type="button" class="chip time-filter" onclick="setJourneeComplete()">Journée</button>
+        </div>
+
+        <div id="dateError" class="error-msg">
+          <span class="material-symbols-outlined" style="font-size: 16px;">error</span>
+          L'heure de fin doit être postérieure à l'heure de début.
+        </div>
       </div>
 
-      <div id="secOptionSerie" class="serie-options" style="display: none;">
-        <strong>Cet événement appartient à une série récurrente.</strong>
-        <div style="margin-top: 6px;">
-          <label><input type="radio" name="optSerieAction" value="UNIQUE" checked> Modifier uniquement cette occurrence</label><br>
-          <label><input type="radio" name="optSerieAction" value="SERIE"> Modifier toute la série (horaires inclus)</label>
+      <!-- TITRE / ACTIVITÉ -->
+      <div class="form-group">
+        <div class="filter-label">Titre / Activité (optionnel)</div>
+        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Basket, RDV Médical, Sortie...">
+      </div>
+
+      <!-- ACCORDÉON SECONDARISE (Lieu, Notes, Récurrence) -->
+      <button type="button" class="btn-toggle-options" onclick="toggleMoreOptions()">
+        <span class="material-symbols-outlined" id="iconMoreOpt" style="font-size:16px;">add</span>
+        <span id="txtMoreOpt">Plus d'options (Lieu, Notes, Récurrence)</span>
+      </button>
+
+      <div class="more-options-box" id="moreOptionsSection">
+        <div class="form-group">
+          <div class="filter-label">Lieu</div>
+          <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
+        </div>
+
+        <div class="form-group">
+          <div class="filter-label">Détails / Notes</div>
+          <input type="text" id="formDetails" class="form-control" placeholder="Infos complémentaires...">
+        </div>
+
+        <div class="recurrence-box" id="secRecurrence">
+          <div class="toggle-row" onclick="toggleRecurrenceOpt()">
+            <div class="toggle-title">
+              <span class="material-symbols-outlined" style="font-size: 16px;">repeat</span>
+              Répéter cet événement
+            </div>
+            <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence" style="cursor:pointer; width:16px; height:16px;">
+          </div>
+
+          <div id="recurrenceFields" style="display: none; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 11px; font-weight: 600;">Toutes les :</span>
+              <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 60px;">
+              <select id="formRecurUnite" class="form-control" style="flex: 1;" aria-label="Unité de fréquence">
+                <option value="Jours">Jours</option>
+                <option value="Semaines" selected>Semaines</option>
+                <option value="Mois">Mois</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span style="font-size: 11px; font-weight: 600;">Jusqu'au :</span>
+              <input type="date" id="formRecurFin" class="form-control" style="flex: 1;">
+            </div>
+          </div>
+        </div>
+
+        <div id="secOptionSerie" class="serie-options" style="display: none;">
+          <strong>Événement d'une série récurrente.</strong>
+          <div style="margin-top: 4px;">
+            <label><input type="radio" name="optSerieAction" value="UNIQUE" checked> Modifier uniquement cette occurrence</label><br>
+            <label><input type="radio" name="optSerieAction" value="SERIE"> Modifier toute la série</label>
+          </div>
         </div>
       </div>
 
@@ -299,8 +321,8 @@
         <div class="modal-title" id="conflitTitle">Attention aux chevauchements</div>
         <button class="close-btn" onclick="fermerModalConflit()" aria-label="Fermer la fenêtre">×</button>
       </div>
-      <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5;"></div>
-      <div style="display: flex; gap: 10px; flex-direction: column;">
+      <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.4;"></div>
+      <div style="display: flex; gap: 8px; flex-direction: column;">
         <button class="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
         <button class="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
       </div>
@@ -314,10 +336,10 @@
         <div class="modal-title" id="supprModalTitle">Confirmer la suppression</div>
         <button class="close-btn" onclick="fermerModalSuppression()" aria-label="Fermer la fenêtre">×</button>
       </div>
-      <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;"></div>
+      <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 12px; line-height: 1.4;"></div>
       
-      <div id="supprSerieOptions" style="display:none; margin-bottom: 15px; background: #F1F5F9; border-radius: 8px; padding: 10px; font-size: 12px;">
-        <label style="display:block; margin-bottom: 8px; cursor:pointer;">
+      <div id="supprSerieOptions" style="display:none; margin-bottom: 12px; background: #F1F5F9; border-radius: 8px; padding: 8px; font-size: 12px;">
+        <label style="display:block; margin-bottom: 6px; cursor:pointer;">
           <input type="radio" name="optSupprSerie" value="UNIQUE" checked> Supprimer uniquement cette occurrence
         </label>
         <label style="display:block; cursor:pointer;">
@@ -325,7 +347,7 @@
         </label>
       </div>
 
-      <div style="display: flex; gap: 10px; flex-direction: column;">
+      <div style="display: flex; gap: 8px; flex-direction: column;">
         <button class="btn-submit" style="background-color: #EF4444;" id="btnConfirmerSuppr" onclick="confirmerSuppressionEffective()">Supprimer</button>
         <button class="btn-delete" onclick="fermerModalSuppression()" style="display: block; color: var(--text-muted);">Annuler</button>
       </div>
@@ -335,7 +357,6 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
-    // Embarquement de secours en cas d'indisponibilité de referentiels.json
     const REFERENTIELS_DEFAUT = {
       "types": ["Garde", "École", "Activité", "Santé", "Transport", "Maison", "Événement", "Autre"],
       "intervenants": [
@@ -379,6 +400,8 @@
     let offsetSemaines = 0;
 
     let enfantsModalSelectionnes = [];
+    let typeModalSelectionne = "";
+    let responsableModalSelectionne = "";
     let payloadEnAttente = null;
     let idsGardesARemplacer = [];
     let ajustementsConflitEnfants = [];
@@ -461,9 +484,7 @@
         }
       }
 
-      if (!refs) {
-        refs = REFERENTIELS_DEFAUT;
-      }
+      if (!refs) refs = REFERENTIELS_DEFAUT;
 
       refEnfants = refs.enfants || [];
       refTypes = refs.types || [];
@@ -487,13 +508,10 @@
         }
       });
 
-      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-        enfantsModalSelectionnes = [enfantsListe[0]];
-      }
-
       genererFiltresEnfants();
       genererSelectorEnfantsModal();
-      majSelectsModal();
+      genererChipsTypeModal();
+      genererChipsResponsableModal();
       genererFiltresIntervenants();
       genererFiltresPeriodes();
       afficherTimeline();
@@ -524,6 +542,201 @@
       html += `<div class="child-chip" data-enfant="Tous" onclick="toggleFormEnfant('Tous')">👥 Tous</div>`;
       container.innerHTML = html;
       majRenduPucesModal();
+    }
+
+    function genererChipsTypeModal() {
+      const container = document.getElementById('formTypeChips');
+      if (!container) return;
+
+      let html = '';
+      refTypes.forEach(t => {
+        const isSel = typeModalSelectionne === t;
+        html += `<div class="chip ${isSel ? 'active' : ''}" onclick="choisirTypeModal('${t.replace(/'/g, "\\'")}')">${t}</div>`;
+      });
+      const isAutre = typeModalSelectionne === 'NOUVEAU';
+      html += `<div class="chip ${isAutre ? 'active' : ''}" onclick="choisirTypeModal('NOUVEAU')">+ Autre</div>`;
+      container.innerHTML = html;
+    }
+
+    function choisirTypeModal(t) {
+      typeModalSelectionne = t;
+      const input = document.getElementById('formTypeInput');
+      if (t === 'NOUVEAU') {
+        input.style.display = 'block';
+        input.value = '';
+      } else {
+        input.style.display = 'none';
+        input.value = t;
+      }
+      genererChipsTypeModal();
+    }
+
+    function genererChipsResponsableModal() {
+      const container = document.getElementById('formResponsableChips');
+      if (!container) return;
+
+      let html = '';
+      refResponsables.forEach(r => {
+        const isSel = responsableModalSelectionne === r;
+        html += `<div class="chip ${isSel ? 'active' : ''}" onclick="choisirResponsableModal('${r.replace(/'/g, "\\'")}')">${r}</div>`;
+      });
+      const isAutre = responsableModalSelectionne === 'NOUVEAU';
+      html += `<div class="chip ${isAutre ? 'active' : ''}" onclick="choisirResponsableModal('NOUVEAU')">+ Autre</div>`;
+      container.innerHTML = html;
+    }
+
+    function choisirResponsableModal(r) {
+      responsableModalSelectionne = r;
+      const input = document.getElementById('formResponsableInput');
+      if (r === 'NOUVEAU') {
+        input.style.display = 'block';
+        input.value = '';
+      } else {
+        input.style.display = 'none';
+        input.value = r;
+      }
+      genererChipsResponsableModal();
+    }
+
+    function toggleFormEnfant(enfant) {
+      if (enfant === 'Tous') {
+        enfantsModalSelectionnes = (enfantsModalSelectionnes.length === enfantsListe.length) ? [] : [...enfantsListe];
+      } else {
+        const index = enfantsModalSelectionnes.indexOf(enfant);
+        if (index > -1) {
+          enfantsModalSelectionnes.splice(index, 1);
+        } else {
+          enfantsModalSelectionnes.push(enfant);
+        }
+      }
+      majRenduPucesModal();
+    }
+
+    function majRenduPucesModal() {
+      document.querySelectorAll('#formEnfantSelector .child-chip').forEach(chip => {
+        const enf = chip.getAttribute('data-enfant');
+        const estSelect = (enf === 'Tous' && enfantsModalSelectionnes.length === enfantsListe.length) || enfantsModalSelectionnes.includes(enf);
+        
+        chip.classList.toggle('selected', estSelect);
+        if (estSelect) {
+          const couleur = enfantsInfo[enf] ? enfantsInfo[enf].color : 'var(--text-main)';
+          chip.style.backgroundColor = couleur;
+        } else {
+          chip.style.backgroundColor = '#F8FAFC';
+        }
+      });
+    }
+
+    /* GESTION DE LA DATE & DES HEURES SIMPLIFIÉES */
+    function setDateShortcut(shortcut) {
+      const d = new Date();
+      if (shortcut === 'tomorrow') d.setDate(d.getDate() + 1);
+      
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+
+      document.getElementById('formDateVal').value = dateStr;
+
+      document.getElementById('btnDateToday').classList.toggle('active', shortcut === 'today');
+      document.getElementById('btnDateTomorrow').classList.toggle('active', shortcut === 'tomorrow');
+    }
+
+    function surChangementDatePicker(val) {
+      document.getElementById('btnDateToday').classList.remove('active');
+      document.getElementById('btnDateTomorrow').classList.remove('active');
+    }
+
+    function ajouterDuree(minutes) {
+      const hDebStr = document.getElementById('formHeureDebut').value;
+      if (!hDebStr) return;
+
+      const [h, m] = hDebStr.split(':').map(Number);
+      const d = new Date();
+      d.setHours(h, m + minutes, 0, 0);
+
+      const hFin = String(d.getHours()).padStart(2, '0');
+      const mFin = String(d.getMinutes()).padStart(2, '0');
+      document.getElementById('formHeureFin').value = `${hFin}:${mFin}`;
+      validerControleDates();
+    }
+
+    function setJourneeComplete() {
+      document.getElementById('formHeureDebut').value = "08:00";
+      document.getElementById('formHeureFin').value = "18:00";
+      validerControleDates();
+    }
+
+    function recalculerFinAutomatique() {
+      const hDeb = document.getElementById('formHeureDebut').value;
+      const hFin = document.getElementById('formHeureFin').value;
+      if (hDeb && hFin && hFin <= hDeb) {
+        ajouterDuree(60);
+      } else {
+        validerControleDates();
+      }
+    }
+
+    function validerControleDates() {
+      const hDeb = document.getElementById('formHeureDebut').value;
+      const hFin = document.getElementById('formHeureFin').value;
+      const errorMsg = document.getElementById('dateError');
+      const btnSubmit = document.getElementById('btnSubmit');
+
+      if (hDeb && hFin && hFin <= hDeb) {
+        errorMsg.style.display = 'flex';
+        btnSubmit.disabled = true;
+        document.getElementById('formHeureFin').classList.add('is-invalid');
+        return false;
+      }
+      
+      document.getElementById('formHeureFin').classList.remove('is-invalid');
+      errorMsg.style.display = 'none';
+      btnSubmit.disabled = false;
+      return true;
+    }
+
+    function determinerPeriodeAutomatique(dateStr) {
+      if (!dateStr || !refPeriodes || refPeriodes.length === 0) return "";
+      const d = new Date(dateStr);
+      for (const p of refPeriodes) {
+        const deb = new Date(p.dateDebut);
+        const fin = new Date(p.dateFin);
+        if (d >= deb && d <= fin) {
+          return p.id;
+        }
+      }
+      return "";
+    }
+
+    function toggleMoreOptions() {
+      const box = document.getElementById('moreOptionsSection');
+      const icon = document.getElementById('iconMoreOpt');
+      const txt = document.getElementById('txtMoreOpt');
+      const isHidden = box.style.display === 'none' || box.style.display === '';
+
+      box.style.display = isHidden ? 'block' : 'none';
+      icon.innerText = isHidden ? 'remove' : 'add';
+      txt.innerText = isHidden ? "Moins d'options" : "Plus d'options (Lieu, Notes, Récurrence)";
+    }
+
+    function toggleRecurrenceOpt(e) {
+      if (e && e.target && e.target.id === 'chkRecurent') {
+      } else if (e) {
+        const chk = document.getElementById('chkRecurent');
+        chk.checked = !chk.checked;
+      }
+      
+      const chkVal = document.getElementById('chkRecurent').checked;
+      document.getElementById('recurrenceFields').style.display = chkVal ? 'block' : 'none';
+      
+      if (chkVal && !document.getElementById('formRecurFin').value) {
+        const dDebStr = document.getElementById('formDateVal').value || new Date().toISOString().split('T')[0];
+        const dDeb = new Date(dDebStr);
+        dDeb.setMonth(dDeb.getMonth() + 1);
+        document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
+      }
     }
 
     function genererFiltresIntervenants() {
@@ -560,159 +773,6 @@
       genererFiltresIntervenants();
       genererFiltresPeriodes();
       setTimeFilter('Semaine');
-    }
-
-    function majSelectsModal() {
-      const selectType = document.getElementById('formTypeSelect');
-      selectType.innerHTML = '<option value="">-- Choisir --</option>';
-      refTypes.forEach(t => {
-        selectType.innerHTML += `<option value="${t}">${t}</option>`;
-      });
-      selectType.innerHTML += '<option value="NOUVEAU">+ Ajouter un type...</option>';
-
-      const selectResp = document.getElementById('formResponsableSelect');
-      selectResp.innerHTML = '<option value="">-- Choisir --</option>';
-      refResponsables.forEach(r => {
-        selectResp.innerHTML += `<option value="${r}">${r}</option>`;
-      });
-      selectResp.innerHTML += '<option value="NOUVEAU">+ Ajouter un responsable...</option>';
-
-      const selectPeriode = document.getElementById('formPeriodeSelect');
-      selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
-      refPeriodes.forEach(p => {
-        selectPeriode.innerHTML += `<option value="${p.id}">${p.nom}</option>`;
-      });
-    }
-
-    function formatForInput(dateObj) {
-      if (!dateObj) return "";
-      const d = parseDateSecurisee(dateObj);
-      if (!d) return "";
-
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
-
-    function toggleFormEnfant(enfant) {
-      if (enfant === 'Tous') {
-        enfantsModalSelectionnes = [...enfantsListe];
-      } else {
-        if (enfantsModalSelectionnes.length === enfantsListe.length) {
-          enfantsModalSelectionnes = [];
-        }
-        const index = enfantsModalSelectionnes.indexOf(enfant);
-        if (index > -1) {
-          enfantsModalSelectionnes.splice(index, 1);
-        } else {
-          enfantsModalSelectionnes.push(enfant);
-        }
-      }
-      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-        enfantsModalSelectionnes = [enfantsListe[0]];
-      }
-      majRenduPucesModal();
-    }
-
-    function majRenduPucesModal() {
-      document.querySelectorAll('#formEnfantSelector .child-chip').forEach(chip => {
-        const enf = chip.getAttribute('data-enfant');
-        const estSelect = (enf === 'Tous' && enfantsModalSelectionnes.length === enfantsListe.length) || enfantsModalSelectionnes.includes(enf);
-        
-        chip.classList.toggle('selected', estSelect);
-        if (estSelect) {
-          const couleur = enfantsInfo[enf] ? enfantsInfo[enf].color : 'var(--text-main)';
-          chip.style.backgroundColor = couleur;
-        } else {
-          chip.style.backgroundColor = '#F8FAFC';
-        }
-      });
-    }
-
-    function toggleRecurrenceOpt(e) {
-      if (e && e.target && e.target.id === 'chkRecurent') {
-      } else if (e) {
-        const chk = document.getElementById('chkRecurent');
-        chk.checked = !chk.checked;
-      }
-      
-      const chkVal = document.getElementById('chkRecurent').checked;
-      document.getElementById('recurrenceFields').style.display = chkVal ? 'block' : 'none';
-      
-      if (chkVal && !document.getElementById('formRecurFin').value) {
-        const dDeb = parseDateSecurisee(document.getElementById('formDebut').value) || new Date();
-        dDeb.setMonth(dDeb.getMonth() + 1);
-        document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
-      }
-    }
-
-    function surChangementDebut() {
-      const debutStr = document.getElementById("formDebut").value;
-      if (!debutStr) return;
-      
-      document.getElementById("formDate").value = debutStr.split('T')[0];
-      
-      const d = parseDateSecurisee(debutStr);
-      const finInput = document.getElementById("formFin");
-      const finStr = finInput.value;
-      
-      if (!finStr || parseDateSecurisee(finStr) <= d) {
-        const nouvelleFin = new Date(d.getTime() + (60 * 60 * 1000));
-        finInput.value = formatForInput(nouvelleFin);
-      }
-      validerControleDates();
-    }
-
-    function validerControleDates() {
-      const debutVal = document.getElementById("formDebut").value;
-      const finVal = document.getElementById("formFin").value;
-      const errorMsg = document.getElementById("dateError");
-      const btnSubmit = document.getElementById("btnSubmit");
-
-      if (debutVal && finVal) {
-        const d = parseDateSecurisee(debutVal);
-        const f = parseDateSecurisee(finVal);
-        if (f <= d) {
-          errorMsg.style.display = "flex";
-          btnSubmit.disabled = true;
-          document.getElementById("formFin").classList.add("is-invalid");
-          return false;
-        }
-      }
-      
-      document.getElementById("formFin").classList.remove("is-invalid");
-      errorMsg.style.display = "none";
-      btnSubmit.disabled = false;
-      return true;
-    }
-
-    function gererTypeSelect() {
-      const val = document.getElementById('formTypeSelect').value;
-      const input = document.getElementById('formTypeInput');
-      if (val === 'NOUVEAU') {
-        input.style.display = 'block';
-        input.value = '';
-      } else {
-        input.style.display = 'none';
-        input.value = val;
-      }
-    }
-
-    function gererResponsableSelect() {
-      const val = document.getElementById('formResponsableSelect').value;
-      const input = document.getElementById('formResponsableInput');
-      
-      if (val === 'NOUVEAU') {
-        input.style.display = 'block';
-        input.value = '';
-      } else {
-        input.style.display = 'none';
-        input.value = val;
-      }
     }
 
     function setChildFilter(enfant) {
@@ -792,7 +852,7 @@
             isMultiDay: dayEnd.getTime() > new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate()).getTime(),
             dStart: dStart,
             dEnd: dEnd,
-            enfants: prenoms.length > 0 ? prenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : [])
+            enfants: prenoms.length > 0 ? prenoms : []
           });
           dayCursor.setDate(dayCursor.getDate() + 1);
           count++;
@@ -1010,30 +1070,26 @@
                   ${subLieu}
                 </div>
                 <div class="sub-slot-footer">
-                  <span class="edit-icon-btn"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></span>
+                  <span class="edit-icon-btn"><span class="material-symbols-outlined" style="font-size:15px;">edit</span></span>
                 </div>
               </div>
             `;
           });
 
-          if (hasEncoursGroup) {
-            card.classList.add('highlight-encours');
-          }
+          if (hasEncoursGroup) card.classList.add('highlight-encours');
 
           card.innerHTML = `
             <div class="event-color-bar" style="${styleBarre}"></div>
             <div class="event-content">
               <div class="event-header">
                 <div class="event-resp">
-                  <span class="material-symbols-outlined" style="font-size:18px; color: #64748B;">person</span> 
+                  <span class="material-symbols-outlined" style="font-size:16px; color: #64748B;">person</span> 
                   <span>${groupe.responsable}</span>
                 </div>
                 <span class="event-type-badge">${groupe.type}</span>
               </div>
               ${actionsTelHtml}
-              <div>
-                ${subSlotsHtml}
-              </div>
+              <div>${subSlotsHtml}</div>
             </div>
           `;
 
@@ -1053,43 +1109,41 @@
       document.getElementById("formId").value = "";
       document.getElementById("formIdSerie").value = "";
       
-      if (filtreEnfant !== 'Tous' && enfantsListe.includes(filtreEnfant)) {
-        enfantsModalSelectionnes = [filtreEnfant];
-      } else if (enfantsListe.length > 0) {
-        enfantsModalSelectionnes = [enfantsListe[0]];
-      } else {
-        enfantsModalSelectionnes = [];
-      }
+      // PAR DÉFAUT : Aucun enfant sélectionné
+      enfantsModalSelectionnes = [];
       majRenduPucesModal();
+
+      // Raccourci Date : Aujourd'hui par défaut
+      setDateShortcut('today');
+      document.getElementById('formHeureDebut').value = "08:00";
+      document.getElementById('formHeureFin').value = "09:00";
+
+      // Type & Responsable par défaut
+      typeModalSelectionne = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
+      responsableModalSelectionne = refResponsables.includes("Charlotte") ? "Charlotte" : (refResponsables[0] || "");
+      
+      genererChipsTypeModal();
+      genererChipsResponsableModal();
+
+      document.getElementById("formTypeInput").value = typeModalSelectionne;
+      document.getElementById("formResponsableInput").value = responsableModalSelectionne;
+
+      document.getElementById("formTitre").value = "";
+      document.getElementById("formLieu").value = "";
+      document.getElementById("formDetails").value = "";
 
       document.getElementById("chkRecurent").checked = false;
       document.getElementById("recurrenceFields").style.display = "none";
       document.getElementById("secRecurrence").style.display = "block";
       document.getElementById("secOptionSerie").style.display = "none";
 
-      const selectType = document.getElementById("formTypeSelect");
-      const defaultType = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
-      selectType.value = defaultType;
-      document.getElementById("formTypeInput").value = defaultType;
-      document.getElementById("formTypeInput").style.display = "none";
-      
-      const selectResp = document.getElementById("formResponsableSelect");
-      selectResp.value = "";
-      document.getElementById("formResponsableInput").value = "";
-      document.getElementById("formResponsableInput").style.display = "none";
-      
-      document.getElementById("formTitre").value = "";
-      document.getElementById("formLieu").value = "";
-      document.getElementById("formDetails").value = "";
-      document.getElementById("formPeriodeSelect").value = "";
-      
-      const now = new Date();
-      document.getElementById("formDebut").value = formatForInput(now);
-      now.setHours(now.getHours() + 1);
-      document.getElementById("formFin").value = formatForInput(now);
-      
-      surChangementDebut();
-      
+      // Re-masquer l'accordéon d'options
+      document.getElementById('moreOptionsSection').style.display = 'none';
+      document.getElementById('iconMoreOpt').innerText = 'add';
+      document.getElementById('txtMoreOpt').innerText = "Plus d'options (Lieu, Notes, Récurrence)";
+
+      validerControleDates();
+
       document.getElementById("btnDelete").style.display = "none";
       document.getElementById("modalEvt").style.display = "flex";
     }
@@ -1113,8 +1167,56 @@
         prenomsEvt = evt.enfantsIds.split(',').map(idEnf => mapIdToPrenom[idEnf.trim()]).filter(Boolean);
       }
 
-      enfantsModalSelectionnes = prenomsEvt.length > 0 ? prenomsEvt : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
+      enfantsModalSelectionnes = prenomsEvt;
       majRenduPucesModal();
+
+      // Dates & Heures
+      const dDeb = parseDateSecurisee(evt.debut);
+      const dFin = parseDateSecurisee(evt.fin);
+
+      if (dDeb) {
+        const yyyy = dDeb.getFullYear();
+        const mm = String(dDeb.getMonth() + 1).padStart(2, '0');
+        const dd = String(dDeb.getDate()).padStart(2, '0');
+        document.getElementById('formDateVal').value = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('formHeureDebut').value = `${String(dDeb.getHours()).padStart(2, '0')}:${String(dDeb.getMinutes()).padStart(2, '0')}`;
+      }
+
+      if (dFin) {
+        document.getElementById('formHeureFin').value = `${String(dFin.getHours()).padStart(2, '0')}:${String(dFin.getMinutes()).padStart(2, '0')}`;
+      }
+
+      // Type
+      const typeVal = (evt.type || "").trim();
+      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
+      if (matchType) {
+        typeModalSelectionne = matchType;
+        document.getElementById("formTypeInput").style.display = "none";
+        document.getElementById("formTypeInput").value = matchType;
+      } else {
+        typeModalSelectionne = "NOUVEAU";
+        document.getElementById("formTypeInput").style.display = "block";
+        document.getElementById("formTypeInput").value = typeVal;
+      }
+      genererChipsTypeModal();
+
+      // Responsable
+      const respVal = (evt.responsable || "").trim();
+      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
+      if (matchResp) {
+        responsableModalSelectionne = matchResp;
+        document.getElementById("formResponsableInput").style.display = "none";
+        document.getElementById("formResponsableInput").value = matchResp;
+      } else {
+        responsableModalSelectionne = "NOUVEAU";
+        document.getElementById("formResponsableInput").style.display = "block";
+        document.getElementById("formResponsableInput").value = respVal;
+      }
+      genererChipsResponsableModal();
+
+      document.getElementById("formTitre").value = evt.titre || "";
+      document.getElementById("formLieu").value = evt.lieu || "";
+      document.getElementById("formDetails").value = evt.details || "";
 
       document.getElementById("secRecurrence").style.display = "none";
       if (evt.idSerie) {
@@ -1123,41 +1225,16 @@
         document.getElementById("secOptionSerie").style.display = "none";
       }
 
-      const selectType = document.getElementById("formTypeSelect");
-      const inputType = document.getElementById("formTypeInput");
-      const typeVal = (evt.type || "").trim();
-      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
-      if (matchType) {
-        selectType.value = matchType;
-        inputType.style.display = "none";
-        inputType.value = matchType;
+      // Ouvrir l'accordéon d'options si un lieu/détail/récurrence existe
+      if (evt.lieu || evt.details || evt.idSerie) {
+        document.getElementById('moreOptionsSection').style.display = 'block';
+        document.getElementById('iconMoreOpt').innerText = 'remove';
+        document.getElementById('txtMoreOpt').innerText = "Moins d'options";
       } else {
-        selectType.value = "NOUVEAU";
-        inputType.style.display = "block";
-        inputType.value = typeVal;
+        document.getElementById('moreOptionsSection').style.display = 'none';
+        document.getElementById('iconMoreOpt').innerText = 'add';
+        document.getElementById('txtMoreOpt').innerText = "Plus d'options (Lieu, Notes, Récurrence)";
       }
-
-      const selectResp = document.getElementById("formResponsableSelect");
-      const inputResp = document.getElementById("formResponsableInput");
-      const respVal = (evt.responsable || "").trim();
-      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
-      if (matchResp) {
-        selectResp.value = matchResp;
-        inputResp.style.display = "none";
-        inputResp.value = matchResp;
-      } else {
-        selectResp.value = "NOUVEAU";
-        inputResp.style.display = "block";
-        inputResp.value = respVal;
-      }
-
-      document.getElementById("formTitre").value = evt.titre || "";
-      document.getElementById("formDebut").value = formatForInput(evt.debut);
-      document.getElementById("formFin").value = formatForInput(evt.fin);
-      document.getElementById("formDate").value = evt.date ? String(evt.date).split('T')[0] : (evt.debut ? String(evt.debut).split('T')[0] : "");
-      document.getElementById("formLieu").value = evt.lieu || "";
-      document.getElementById("formDetails").value = evt.details || "";
-      document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
       
       validerControleDates();
 
@@ -1168,20 +1245,25 @@
     function soumettre() {
       if (!validerControleDates()) return;
 
-      let typeFinal = document.getElementById("formTypeSelect").value;
-      if (typeFinal === 'NOUVEAU' || typeFinal === '') {
-        typeFinal = document.getElementById("formTypeInput").value;
-      }
+      let typeFinal = typeModalSelectionne === 'NOUVEAU' ? document.getElementById("formTypeInput").value : typeModalSelectionne;
+      let responsableFinal = responsableModalSelectionne === 'NOUVEAU' ? document.getElementById("formResponsableInput").value : responsableModalSelectionne;
 
-      let responsableFinal = document.getElementById("formResponsableSelect").value;
-      if (responsableFinal === 'NOUVEAU' || responsableFinal === '') {
-        responsableFinal = document.getElementById("formResponsableInput").value;
-      }
-
-      if (!typeFinal.trim() || !responsableFinal.trim()) {
-        alert("Merci de renseigner le type et le responsable.");
+      if (!typeFinal || !typeFinal.trim() || !responsableFinal || !responsableFinal.trim()) {
+        alert("Merci de sélectionner un type et un responsable.");
         return;
       }
+
+      const dateStr = document.getElementById("formDateVal").value;
+      const hDebStr = document.getElementById("formHeureDebut").value;
+      const hFinStr = document.getElementById("formHeureFin").value;
+
+      if (!dateStr || !hDebStr || !hFinStr) {
+        alert("Merci de renseigner la date et les horaires.");
+        return;
+      }
+
+      const debutISO = `${dateStr}T${hDebStr}:00`;
+      const finISO = `${dateStr}T${hFinStr}:00`;
 
       const modeModif = document.querySelector('input[name="optSerieAction"]:checked') 
         ? document.querySelector('input[name="optSerieAction"]:checked').value 
@@ -1189,20 +1271,23 @@
 
       const targetIds = enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
 
+      // Calcul automatique de la période selon la date
+      const idPeriodeAuto = determinerPeriodeAutomatique(dateStr);
+
       const payload = {
         id: document.getElementById("formId").value,
         idSerie: document.getElementById("formIdSerie").value,
         modeModifSerie: modeModif,
-        date: document.getElementById("formDate").value,
+        date: dateStr,
         enfantsIds: targetIds,
         type: typeFinal.trim(),
         responsable: responsableFinal.trim(),
         titre: document.getElementById("formTitre").value,
-        debut: document.getElementById("formDebut").value,
-        fin: document.getElementById("formFin").value,
+        debut: debutISO,
+        fin: finISO,
         lieu: document.getElementById("formLieu").value,
         details: document.getElementById("formDetails").value,
-        idPeriode: document.getElementById("formPeriodeSelect").value,
+        idPeriode: idPeriodeAuto,
         statut: "Confirmé",
         isRecurent: document.getElementById("chkRecurent").checked,
         intervalleRecurrence: document.getElementById("formRecurIntervalle").value,
@@ -1215,9 +1300,6 @@
       analyserConflitsEtValider(payload);
     }
 
-    // =========================================================================
-    // CORRECTION : FONCTION UNIQUE DE DÉTECTION ET GESTION DES CONFLITS
-    // =========================================================================
     function analyserConflitsEtValider(payload) {
       payloadEnAttente = payload;
       idsGardesARemplacer = [];
@@ -1238,20 +1320,22 @@
       let avertissementsEnfants = [];
       let avertissementsResponsables = [];
 
+      const formatHeure = (d) => {
+        if (!d) return '';
+        return String(d.getHours()).padStart(2, '0') + 'h' + String(d.getMinutes()).padStart(2, '0');
+      };
+
       donneesBrutes.forEach(evt => {
-        // Exclure l'événement en cours d'édition
         if (String(evt.id).trim() === String(payload.id).trim()) return;
 
         const startExistant = parseDateSecurisee(evt.debut);
         const endExistant = parseDateSecurisee(evt.fin);
         if (!startExistant || !endExistant) return;
 
-        // Détection de chevauchement horaire
         if (startNouveau < endExistant && endNouveau > startExistant) {
           const typeExistant = (evt.type || "").trim().toLowerCase();
           const isBothGarde = (typePayload === "garde" && typeExistant === "garde");
 
-          // Extraction des enfants de l'événement existant
           let evtEnfantsIds = [];
           if (Array.isArray(evt.enfantsIds)) {
             evtEnfantsIds = evt.enfantsIds.map(id => String(id).trim());
@@ -1259,13 +1343,15 @@
             evtEnfantsIds = evt.enfantsIds.split(',').map(id => id.trim());
           }
 
-          // 1. Détection des conflits sur les enfants (TOUS types)
+          const horaireTxt = `${formatHeure(startExistant)} ➔ ${formatHeure(endExistant)}`;
+          const lieuTxt = evt.lieu ? ` • 📍 <em>${evt.lieu}</em>` : '';
+          const titreTxt = evt.titre ? ` <strong>${evt.titre}</strong>` : '';
+
           const enfantsEnConflitIds = evtEnfantsIds.filter(id => payloadEnfantsIds.includes(id));
           if (enfantsEnConflitIds.length > 0) {
             const enfantsPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
             
             if (isBothGarde) {
-              // Réorganisation automatique exclusive aux conflits entre deux Gardes
               const enfantsRestantsIds = evtEnfantsIds.filter(id => !payloadEnfantsIds.includes(id));
               const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
 
@@ -1276,25 +1362,42 @@
                 responsable: evt.responsable
               });
             } else {
-              // Avertissement pour chevauchement d'activités, santé, école, etc.
-              const nomEvt = evt.titre ? `${evt.type} (${evt.titre})` : evt.type;
-              avertissementsEnfants.push(
-                `• <strong>${enfantsPrenoms.join(', ')}</strong> a déjà un événement : <em>${nomEvt}</em> avec ${evt.responsable}.`
-              );
+              avertissementsEnfants.push(`
+                <div class="conflict-card">
+                  <div class="conflict-header">
+                    <span>👶 ${enfantsPrenoms.join(', ')}</span>
+                    <span class="event-type-badge">${evt.type}</span>
+                  </div>
+                  <div class="conflict-details">
+                    <div class="conflict-time"><span class="material-symbols-outlined" style="font-size:14px;">schedule</span> ${horaireTxt}</div>
+                    <div>Événement :${titreTxt}${lieuTxt}</div>
+                    <div>Responsable : <strong>${evt.responsable}</strong></div>
+                  </div>
+                </div>
+              `);
             }
           }
 
-          // 2. Détection du conflit sur le responsable (TOUS types)
           if (evt.responsable && payload.responsable && evt.responsable.trim().toLowerCase() === payload.responsable.trim().toLowerCase()) {
-            const nomEvtExistant = evt.titre ? `${evt.type} (${evt.titre})` : evt.type;
-            avertissementsResponsables.push(
-              `• <strong>${payload.responsable}</strong> est déjà engagé(e) sur : <em>${nomEvtExistant}</em>.`
-            );
+            const prenomsEnfantsExistant = evtEnfantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
+            const enfantsTxt = prenomsEnfantsExistant.length > 0 ? ` (avec <strong>${prenomsEnfantsExistant.join(', ')}</strong>)` : '';
+
+            avertissementsResponsables.push(`
+              <div class="conflict-card">
+                <div class="conflict-header">
+                  <span>👤 ${evt.responsable}</span>
+                  <span class="event-type-badge">${evt.type}</span>
+                </div>
+                <div class="conflict-details">
+                  <div class="conflict-time"><span class="material-symbols-outlined" style="font-size:14px;">schedule</span> ${horaireTxt}</div>
+                  <div>Déjà engagé(e) sur :${titreTxt}${enfantsTxt}${lieuTxt}</div>
+                </div>
+              </div>
+            `);
           }
         }
       });
 
-      // CAS 1 : Réorganisation automatique si conflit entre deux Gardes
       if (conflitsGardesEnfants.length > 0) {
         conflitsGardesEnfants.forEach(c => {
           if (c.enfantsRestants.length === 0) {
@@ -1323,19 +1426,17 @@
         return;
       }
 
-      // CAS 2 : Avertissements combinés (Activités/Santé enfants ou Responsable déjà pris)
       const tousLesAvertissements = [...avertissementsEnfants, ...avertissementsResponsables];
       if (tousLesAvertissements.length > 0) {
         const messagesUniques = [...new Set(tousLesAvertissements)];
         ouvrirModalConflit(
           "Chevauchement détecté",
-          `Un ou plusieurs chevauchements ont été détectés :<br><br>${messagesUniques.join('<br>')}<br><br>Souhaitez-vous quand même enregistrer cet événement ?`,
+          `<div style="margin-bottom:8px;">Un ou plusieurs événements entrent en collision :</div>${messagesUniques.join('')}<div style="margin-top:8px;">Souhaitez-vous quand même enregistrer cet événement ?</div>`,
           "Confirmer et Enregistrer"
         );
         return;
       }
 
-      // Aucun conflit
       executerEnregistrement(payload);
     }
 
