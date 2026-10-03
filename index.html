@@ -56,6 +56,10 @@
 
     .badge-upcoming { background: #3B82F6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
     .badge-encours { background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; animation: pulse 2s infinite; }
+    .badge-warning { background:#FEF3C7; color:#92400E; border:1px solid #F59E0B; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
+    .badge-danger { background:#FEE2E2; color:#991B1B; border:1px solid #EF4444; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
+    .event-card.has-occurrence-warning { border-color:#F59E0B; }
+    .occurrence-warning-line { margin-top:6px; font-size:11px; font-weight:700; color:#92400E; display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
 
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
@@ -987,6 +991,16 @@
       return tel ? String(tel).replace(/\s+/g, '') : '';
     }
 
+    function genererBadgesControleOccurrence(occ) {
+      const c = occ.controleOccurrence || {};
+      const out = [];
+      if (occ.enfants && occ.enfants.length > 1) out.push('<span class="badge-warning">Multi-enfants</span>');
+      if ((c.enfantConflits || []).length) out.push('<span class="badge-danger">⚠ Enfant</span>');
+      if ((c.intervenantConflits || []).length || (c.intervenantMultiTaches || []).length) out.push('<span class="badge-warning">⚠ Intervenant</span>');
+      if ((c.doublons || []).length) out.push('<span class="badge-danger">⚠ Doublon</span>');
+      return out.join('');
+    }
+
     /* AFFICHAGE DU PLANNING EN CARTE & CRÉNEAUX INTERNES */
     function afficherTimeline() {
       const container = document.getElementById('timeline');
@@ -1088,13 +1102,12 @@
         const respMap = new Map();
 
         listeJour.forEach(occ => {
-          const keyGroup =
-            `${(occ.responsable || '').toLowerCase()}_${(occ.type || '').toLowerCase()}`;
+          const keyGroup = `${(occ.idIntervenant || occ.responsable || '').toLowerCase()}`;
 
           if (!respMap.has(keyGroup)) {
             const item = {
               responsable: occ.responsable,
-              type: occ.type,
+              idIntervenant: occ.idIntervenant || '',
               creneaux: []
             };
             respMap.set(keyGroup, item);
@@ -1115,6 +1128,10 @@
           const styleBarre = genererGradientBarre(tousEnfants);
           const card = document.createElement('div');
           card.className = 'event-card';
+          if (groupe.creneaux.some(c => {
+            const ctrl = c.controleOccurrence || {};
+            return (ctrl.enfantConflits || []).length || (ctrl.intervenantConflits || []).length || (ctrl.intervenantMultiTaches || []).length || (ctrl.doublons || []).length;
+          })) card.classList.add('has-occurrence-warning');
 
           const objResp = refIntervenantsObjets.find(i =>
             i.nom.toLowerCase() === (groupe.responsable || '').toLowerCase()
@@ -1213,6 +1230,8 @@
                     ${heureTexte}
                   </span>
                   ${subBadgesEnfants}
+                  <span class="event-type-badge">${occ.type || 'Autre'}</span>
+                  ${genererBadgesControleOccurrence(occ)}
                   ${badgeSub}
                 </div>
                 <div class="sub-slot-body">
@@ -1239,7 +1258,7 @@
                   <span class="material-symbols-outlined" style="font-size:18px; color:#64748B;">person</span>
                   <span>${groupe.responsable}</span>
                 </div>
-                <span class="event-type-badge">${groupe.type}</span>
+                <span class="event-type-badge">${groupe.creneaux.length} tâche${groupe.creneaux.length > 1 ? 's' : ''}</span>
               </div>
               ${actionsTelHtml}
               <div>${subSlotsHtml}</div>
@@ -1297,10 +1316,18 @@
       document.getElementById("formDetails").value = "";
       document.getElementById("formPeriodeSelect").value = "";
       
-      const now = new Date();
-      document.getElementById("formDebut").value = formatForInput(now);
-      now.setHours(now.getHours() + 1);
-      document.getElementById("formFin").value = formatForInput(now);
+      let debutAjout = new Date(timelineAnchorDate);
+      const maintenant = new Date();
+      if (formatDateISO(timelineAnchorDate) === formatDateISO(maintenant)) {
+        debutAjout = new Date(maintenant);
+        debutAjout.setSeconds(0, 0);
+        debutAjout.setMinutes(Math.ceil(debutAjout.getMinutes() / 30) * 30);
+      } else {
+        debutAjout.setHours(9, 0, 0, 0);
+      }
+      finModifieeManuellement = false;
+      document.getElementById("formDebut").value = formatForInput(debutAjout);
+      document.getElementById("formFin").value = formatForInput(new Date(debutAjout.getTime() + 60 * 60 * 1000));
       
       surChangementDebut();
       
@@ -1394,6 +1421,12 @@
         responsableFinal = document.getElementById("formResponsableInput").value;
       }
 
+      const intervenantSelection = refIntervenantsObjets.find(i =>
+        String(i.nom || '').trim().toLowerCase() === String(responsableFinal || '').trim().toLowerCase()
+      );
+      const idIntervenantFinal = intervenantSelection ? String(intervenantSelection.id || '').trim() : '';
+      const idsIntervenantsFinal = idIntervenantFinal ? [idIntervenantFinal] : [];
+
       if (!typeFinal.trim() || !responsableFinal.trim()) {
         alert("Merci de renseigner le type et le responsable.");
         return;
@@ -1413,6 +1446,8 @@
         enfantsIds: targetIds,
         type: typeFinal.trim(),
         responsable: responsableFinal.trim(),
+        idIntervenant: idIntervenantFinal,
+        idsIntervenants: idsIntervenantsFinal,
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
@@ -1432,81 +1467,41 @@
     }
 
     /* FEATURES 11 & 12 : Détection temporelle & Conflits intelligent d'enfants / responsable */
-    async function analyserConflitsEtValider(payload) {
-      payloadEnAttente = payload;
-      idsGardesARemplacer = [];
-      ajustementsConflitEnfants = [];
-
-      const typePayload = (payload.type || '').trim().toLowerCase();
-
-      if (typePayload !== 'garde') {
-        executerEnregistrement(payload);
-        return;
-      }
-
-      const btn = document.getElementById("btnSubmit");
-      const texteInitial = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML =
-        '<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Vérification...';
-
-      try {
-        const resultat = await apiPost('analyserConflits', payload);
-
-        btn.disabled = false;
-        btn.innerHTML = texteInitial;
-
-        if (!resultat || resultat.success === false) {
-          throw new Error(resultat && resultat.message
-            ? resultat.message
-            : 'Analyse des conflits impossible.');
-        }
-
-        const conflitsEnfants = resultat.conflitsEnfants || [];
-        const conflitsResponsable = resultat.conflitsResponsable || [];
-
-        idsGardesARemplacer = resultat.idsGardesARemplacer || [];
-        ajustementsConflitEnfants =
-          resultat.ajustementsConflitEnfants || [];
-
-        if (conflitsEnfants.length > 0) {
-          const detailsText = conflitsEnfants.map(c => {
-            const touches = (c.enfantsTouchesNoms || c.enfantsTouchesIds || []).map(id => mapIdToPrenom[id] || id).join(', ');
-            const restants = (c.enfantsRestantsNoms || c.enfantsRestantsIds || []).map(id => mapIdToPrenom[id] || id).join(', ');
-
-            if (restants) {
-              return `• <strong>${touches}</strong> bascule sur la nouvelle garde. <strong>${restants}</strong> reste géré(e) par ${c.responsable || 'l’intervenant actuel'}.`;
-            }
-
-            return `• <strong>${touches}</strong> bascule sur la nouvelle garde. L'ancienne garde gérée par ${c.responsable || 'l’intervenant actuel'} sera supprimée.`;
-          }).join('<br>');
-
-          ouvrirModalConflit(
-            "Ajustement des gardes",
-            `Créneau déjà occupé détecté :<br><br>${detailsText}<br><br>Voulez-vous valider cette réorganisation ?`,
-            "Valider et Réorganiser"
-          );
-          return;
-        }
-
-        if (conflitsResponsable.length > 0) {
-          ouvrirModalConflit(
-            "Superposition de garde",
-            `<strong>${payload.responsable}</strong> a déjà une garde enregistrée sur ce créneau horaire.<br><br>Souhaitez-vous confirmer l'enregistrement ?`,
-            "Confirmer et Enregistrer"
-          );
-          return;
-        }
-
-        executerEnregistrement(payload);
-      } catch (err) {
-        btn.disabled = false;
-        btn.innerHTML = texteInitial;
-        alert("Erreur lors de l'analyse des conflits : " +
-          (err.message || err));
-      }
+    function construireMessageControle(resultat, payload) {
+      const blocs = [];
+      const controle = resultat.controle || {};
+      (resultat.conflitsEnfants || controle.enfantConflits || []).forEach(c => {
+        const ids = c.enfantsTouchesIds || c.enfantsEnConflitIds || [];
+        const noms = c.enfantsTouchés || c.enfantsTouchesNoms || ids.map(id => mapIdToPrenom[id] || id);
+        blocs.push(`<div class="occurrence-warning-line"><span class="badge-danger">ENFANT EN DOUBLE</span> ${noms.join(', ')} : chevauchement avec <strong>${c.titre || c.type || 'un autre événement'}</strong>.</div>`);
+      });
+      (resultat.conflitsResponsable || controle.intervenantConflits || []).forEach(c => blocs.push(`<div class="occurrence-warning-line"><span class="badge-warning">INTERVENANT OCCUPÉ</span> ${c.responsable || payload.responsable || 'Cet intervenant'} est déjà affecté sur un créneau qui se chevauche.</div>`));
+      (resultat.intervenantMultiTaches || controle.intervenantMultiTaches || []).forEach(c => {
+        const taches=(c.evenements||[]).map(e=>`${e.type||'Événement'}${e.titre?' — '+e.titre:''}`).join(' / ');
+        blocs.push(`<div class="occurrence-warning-line"><span class="badge-warning">MULTI-TÂCHES</span> ${c.intervenantNom||c.responsable||payload.responsable||'Cet intervenant'} est affecté simultanément à ${taches||'plusieurs tâches'}.</div>`);
+      });
+      (resultat.doublons || controle.doublons || []).forEach(() => blocs.push('<div class="occurrence-warning-line"><span class="badge-danger">DOUBLON POTENTIEL</span> Un événement identique ou quasi identique existe déjà sur ce créneau.</div>'));
+      return blocs.join('');
     }
 
+    async function analyserConflitsEtValider(payload) {
+      payloadEnAttente=payload; idsGardesARemplacer=[]; ajustementsConflitEnfants=[];
+      const btn=document.getElementById('btnSubmit'), texteInitial=btn.innerHTML;
+      btn.disabled=true; btn.innerHTML='<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Contrôle...';
+      try {
+        const resultat=await apiPost('analyserConflits',payload);
+        btn.disabled=false; btn.innerHTML=texteInitial;
+        if(!resultat||resultat.success===false) throw new Error(resultat?.message||'Contrôle des occurrences impossible.');
+        const message=construireMessageControle(resultat,payload);
+        const hasReorg=resultat.reorganisationDisponible===true&&Array.isArray(resultat.reorganisation)&&resultat.reorganisation.length>0;
+        if(hasReorg){
+          idsGardesARemplacer=resultat.idsGardesARemplacer||[]; ajustementsConflitEnfants=resultat.ajustementsConflitEnfants||[];
+          ouvrirModalConflit('Ajustement des gardes',`${message}<br><br>Les enfants concernés peuvent être réaffectés sans retirer les autres enfants des anciennes gardes.<br><br>Valider cette réorganisation ?`,'Valider et Réorganiser'); return;
+        }
+        if(message){ ouvrirModalConflit('Contrôle des occurrences',`${message}<br><br>Le système signale une superposition mais ne bloque pas automatiquement l’enregistrement.<br><br>Confirmer ?`,'Confirmer et Enregistrer'); return; }
+        executerEnregistrement(payload);
+      } catch(err){ btn.disabled=false; btn.innerHTML=texteInitial; alert('Erreur lors du contrôle des occurrences : '+(err.message||err)); }
+    }
     function ouvrirModalConflit(titre, message, libelleBouton) {
       document.getElementById("conflitTitle").innerText = titre;
       document.getElementById("conflitMessage").innerHTML = message;
