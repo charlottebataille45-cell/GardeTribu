@@ -396,6 +396,21 @@
     let mapIdToPrenom = {};
 
     window.onload = () => {
+      // Les caches des versions précédentes pouvaient contenir l'enveloppe
+      // complète de l'API. On les purge une seule fois pour repartir sur
+      // le contrat tableau de la v4.
+      try {
+        const anciennesCles = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.indexOf('tribu_timeline_') === 0 &&
+              k.indexOf('tribu_timeline_v4_') !== 0) {
+            anciennesCles.push(k);
+          }
+        }
+        anciennesCles.forEach(k => localStorage.removeItem(k));
+      } catch (e) {}
+
       // Sécurité : toutes les modales doivent être fermées au démarrage.
       // Le formulaire ne doit s'ouvrir que via le bouton FAB ou l'édition d'un événement.
       document.getElementById("modalEvt").style.display = "none";
@@ -472,7 +487,7 @@
     }
 
     function cleCacheTimeline(from, to) {
-      return `tribu_timeline_${formatDateISO(from)}_${formatDateISO(to)}`;
+      return `tribu_timeline_v4_${formatDateISO(from)}_${formatDateISO(to)}`;
     }
 
     function lireCacheTimeline(key) {
@@ -499,11 +514,7 @@
     }
 
     function normaliserReponsePlanning(reponse) {
-      // L'API renvoie un objet enveloppe :
-      // { success, status, evenements, evenementEnfants, series, ... }
-      // Le moteur de Timeline, lui, travaille volontairement sur le
-      // tableau des événements. C'est cette distinction qui évite
-      // l'erreur "donneesBrutes.forEach is not a function".
+      // Contrat unique du front : cette fonction retourne TOUJOURS un tableau.
       if (Array.isArray(reponse)) return reponse;
 
       if (reponse && Array.isArray(reponse.evenements)) {
@@ -515,7 +526,7 @@
         return reponse.data.evenements;
       }
 
-      throw new Error("Réponse API planning invalide : tableau evenements absent.");
+      return [];
     }
 
     async function chargerDonnees(options = {}) {
@@ -899,7 +910,21 @@
     function genererOccurrences() {
       const occurrences = [];
 
-      donneesBrutes.forEach(evt => {
+      // Contrat interne strict : donneesBrutes est TOUJOURS un tableau.
+      // Sécurité supplémentaire pour les caches/anciennes versions.
+      let evenements = donneesBrutes;
+      if (!Array.isArray(evenements)) {
+        if (evenements && Array.isArray(evenements.evenements)) {
+          evenements = evenements.evenements;
+        } else if (evenements && evenements.data &&
+                   Array.isArray(evenements.data.evenements)) {
+          evenements = evenements.data.evenements;
+        } else {
+          evenements = [];
+        }
+      }
+
+      evenements.forEach(evt => {
         if (!evt.debut) return;
 
         const dStart = parseDateSecurisee(evt.debut);
