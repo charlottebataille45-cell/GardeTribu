@@ -56,10 +56,6 @@
 
     .badge-upcoming { background: #3B82F6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
     .badge-encours { background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; animation: pulse 2s infinite; }
-    .badge-warning { background:#FEF3C7; color:#92400E; border:1px solid #F59E0B; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
-    .badge-danger { background:#FEE2E2; color:#991B1B; border:1px solid #EF4444; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
-    .event-card.has-occurrence-warning { border-color:#F59E0B; }
-    .occurrence-warning-line { margin-top:6px; font-size:11px; font-weight:700; color:#92400E; display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
 
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
@@ -125,6 +121,14 @@
 
     .spin { animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
+  
+    .context-line { font-size: 11px; color: #64748B; font-weight: 600; margin: 2px 0 4px 2px; }
+    .focus-anchor { scroll-margin-top: 88px; }
+    .conflict-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 7px; border-radius:9px; font-size:10px; font-weight:800; }
+    .conflict-badge.blocking { background:#FEF2F2; color:#B91C1C; border:1px solid #FCA5A5; }
+    .conflict-badge.warning { background:#FFFBEB; color:#92400E; border:1px solid #FCD34D; }
+    .status-line { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+    .multi-day-note { font-size:11px; color:#64748B; font-weight:600; margin-top:4px; }
   </style>
 </head>
 <body>
@@ -140,17 +144,7 @@
       </button>
     </div>
 
-    <div class="week-nav active" id="timelineNav">
-      <button class="week-nav-btn" onclick="naviguerTimeline(-1)">
-        <span class="material-symbols-outlined" style="font-size:14px;">chevron_left</span> Préc.
-      </button>
-      <button class="week-nav-title" id="timelineNavTitle" onclick="revenirAujourdhui()" style="border:0;background:transparent;cursor:pointer;">
-        Aujourd'hui
-      </button>
-      <button class="week-nav-btn" onclick="naviguerTimeline(1)">
-        Suiv. <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
-      </button>
-    </div>
+    <div class="context-line" id="contextLine">Chargement du planning…</div>
 
     <div id="filterPanel" class="filter-panel" style="display: none;">
       <div class="filter-label">Enfants</div>
@@ -231,7 +225,7 @@
         </div>
         <div class="form-group" style="flex: 1;">
           <label for="formFin">FIN *</label>
-          <input type="datetime-local" id="formFin" onchange="marquerFinModifiee()" class="form-control">
+          <input type="datetime-local" id="formFin" class="form-control" onchange="validerControleDates()">
         </div>
       </div>
 
@@ -290,7 +284,8 @@
         <strong>Cet événement appartient à une série récurrente.</strong>
         <div style="margin-top: 6px;">
           <label><input type="radio" name="optSerieAction" value="UNIQUE" checked> Modifier uniquement cette occurrence</label><br>
-          <label><input type="radio" name="optSerieAction" value="SERIE"> Modifier toute la série (horaires inclus)</label>
+          <label><input type="radio" name="optSerieAction" value="ETAPE"> Modifier toutes les occurrences de cette étape</label><br>
+          <label><input type="radio" name="optSerieAction" value="SERIE"> Modifier toute la série (décalage conservé)</label>
         </div>
       </div>
 
@@ -328,6 +323,8 @@
           <input type="radio" name="optSupprSerie" value="UNIQUE" checked> Supprimer uniquement cette occurrence
         </label>
         <label style="display:block; cursor:pointer;">
+          <input type="radio" name="optSupprSerie" value="ETAPE"> Supprimer toutes les occurrences de cette étape</label>
+        <label style="display:block; cursor:pointer; margin-top:8px;">
           <input type="radio" name="optSupprSerie" value="SERIE"> Supprimer toute la série récurrente
         </label>
       </div>
@@ -341,1265 +338,276 @@
 
   <!-- MOTEUR JAVASCRIPT ET LOGIQUE INTELLIGENTE -->
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwQDj9KEekj0b3kXZlQhfuFKZa8p5bNgSkrS-oJJ6yoDpInhN2UxLV-F8xxQ2KspwrNzw/exec";
 
-    const REFERENTIELS_DEFAUT = {
-      "types": ["Garde", "École", "Activité", "Santé", "Transport", "Maison", "Événement", "Autre"],
-      "intervenants": [
-        { "id": "INT001", "nom": "Papy Michel & MamIsa", "type": "famille", "tel1": "0621213979", "tel2": "0618035434", "actif": true },
-        { "id": "INT002", "nom": "Charlotte", "type": "parent", "tel1": "0631456620", "tel2": "", "actif": true },
-        { "id": "INT003", "nom": "Mamie Colette", "type": "grand-parent", "tel1": "0685360175", "tel2": "", "actif": true },
-        { "id": "INT004", "nom": "Mamie Sylvie", "type": "grand-parent", "tel1": "0612173977", "tel2": "", "actif": true },
-        { "id": "INT005", "nom": "Mathieu", "type": "parent", "tel1": "0603194541", "tel2": "", "actif": true },
-        { "id": "INT006", "nom": "Sarah", "type": "parent", "tel1": "", "tel2": "", "actif": true },
-        { "id": "INT007", "nom": "Isabelle", "type": "grand-parent", "tel1": "0603326111", "tel2": "", "actif": true },
-        { "id": "INT008", "nom": "Renaud", "type": "parent", "tel1": "", "tel2": "", "actif": true }
-      ],
-      "periodes": [
-        { "id": "PER001", "nom": "Toussaint", "dateDebut": "2026-10-17", "dateFin": "2026-11-02" },
-        { "id": "PER002", "nom": "Noël", "dateDebut": "2026-12-19", "dateFin": "2027-01-04" },
-        { "id": "PER003", "nom": "Hiver", "dateDebut": "2027-02-20", "dateFin": "2027-03-08" },
-        { "id": "PER004", "nom": "Printemps", "dateDebut": "2027-04-17", "dateFin": "2027-05-03" },
-        { "id": "PER005", "nom": "Pont de l'Ascension", "dateDebut": "2027-05-05", "dateFin": "2027-05-10" },
-        { "id": "PER006", "nom": "Été", "dateDebut": "2027-07-03", "dateFin": "2027-08-31" }
-      ],
-      "enfants": [
-        { "id": "ENF01", "prenom": "Enola", "actif": true, "couleur": "#E91E63", "emoji": "🍒" },
-        { "id": "ENF02", "prenom": "James", "actif": true, "couleur": "#2196F3", "emoji": "🦖" },
-        { "id": "ENF03", "prenom": "Andreas", "actif": true, "couleur": "#4CAF50", "emoji": "⚡" },
-        { "id": "ENF04", "prenom": "Matys", "actif": true, "couleur": "#FF9800", "emoji": "🎮" },
-        { "id": "ENF05", "prenom": "Nino", "actif": true, "couleur": "#9C27B0", "emoji": "🏀" }
-      ]
+let donneesBrutes = [];
+let refs = { enfants: [], types: [], intervenants: [], lieux: [], periodes: [] };
+let enfantsInfo = {};
+let mapIdToPrenom = {};
+let mapIntervenantIdToNom = {};
+let mapLieuIdToNom = {};
+let enfantsModalSelectionnes = [];
+let evenementEnEdition = null;
+let payloadEnAttente = null;
+let analyseEnAttente = null;
+let cacheKey = 'tribu_planning_v6';
+let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
+let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
+let filtrePeriode = localStorage.getItem('tribu_filtrePeriode') || 'Tous';
+
+window.addEventListener('load', initialiser);
+
+function initialiser() {
+  ['modalEvt','modalConflit','modalSuppression'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  chargerReferences();
+  chargerDonnees(true);
+}
+
+function esc(v) {
+  return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+function parseDateSecurisee(v) {
+  if (!v) return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  let s = String(v).trim();
+  if (!s) return null;
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+    const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
+    if (m) return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+  }
+  const d = new Date(s.replace(' ', 'T'));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function formatForInput(d) {
+  const x = d instanceof Date ? d : parseDateSecurisee(d);
+  if (!x) return '';
+  const p = n => String(n).padStart(2,'0');
+  return `${x.getFullYear()}-${p(x.getMonth()+1)}-${p(x.getDate())}T${p(x.getHours())}:${p(x.getMinutes())}`;
+}
+function formatDateFR(d) { return d.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}); }
+function formatHeure(d) { return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }
+function formatRange(a,b) {
+  if (!a) return '';
+  if (!b || a.getTime() === b.getTime()) return formatHeure(a);
+  const sameDay = a.toDateString() === b.toDateString();
+  return sameDay ? `${formatHeure(a)} → ${formatHeure(b)}` : `${formatHeure(a)} → ${b.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})} ${formatHeure(b)}`;
+}
+function dateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function isOverlap(a,b,c,d) { return a < d && c < b; }
+
+function apiJsonp(action, params={}, timeout=20000) {
+  return new Promise((resolve,reject) => {
+    const cb = `gt_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement('script');
+    let timer;
+    const cleanup = () => { clearTimeout(timer); script.remove(); try { delete window[cb]; } catch(e){} };
+    window[cb] = data => { cleanup(); if (!data || data.success === false) reject(new Error(data?.message || 'Erreur API')); else resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('Impossible de joindre l’API Apps Script.')); };
+    timer = setTimeout(() => { cleanup(); reject(new Error('Délai dépassé pour l’API.')); }, timeout);
+    const q = new URLSearchParams({action, callback:cb, _:Date.now(), ...params});
+    script.src = `${API_URL}?${q}`;
+    document.head.appendChild(script);
+  });
+}
+async function apiGet(action, params={}) { return apiJsonp(action, params); }
+async function apiPost(action, payload) { return apiJsonp(action, {payload:JSON.stringify(payload||{})}, 30000); }
+
+function normaliserReponsePlanning(r) {
+  const arr = Array.isArray(r) ? r : (Array.isArray(r?.evenements) ? r.evenements : Array.isArray(r?.data?.evenements) ? r.data.evenements : []);
+  return arr.map(e => {
+    let enfants = e.enfantsIds;
+    if (typeof enfants === 'string') { try { enfants = JSON.parse(enfants); } catch(x) { enfants = enfants.split(',').map(s=>s.trim()).filter(Boolean); } }
+    if (!Array.isArray(enfants)) enfants = [];
+    let idsInt = e.idsIntervenants ?? e.intervenantsIds;
+    if (typeof idsInt === 'string') { try { idsInt = JSON.parse(idsInt); } catch(x) { idsInt = idsInt.split(',').map(s=>s.trim()).filter(Boolean); } }
+    if (!Array.isArray(idsInt)) idsInt = e.idIntervenant ? [e.idIntervenant] : [];
+    return {...e,
+      id:String(e.id ?? e.idEvenement ?? '').trim(),
+      idEvenement:String(e.idEvenement ?? e.id ?? '').trim(),
+      idSerie:String(e.idSerie ?? '').trim(),
+      responsable:String(e.responsable ?? e.responsableTexte ?? '').trim(),
+      responsableTexte:String(e.responsableTexte ?? e.responsable ?? '').trim(),
+      type:String(e.type ?? '').trim(), titre:String(e.titre ?? '').trim(),
+      lieu:String(e.lieu ?? e.lieuTexte ?? '').trim(), lieuTexte:String(e.lieuTexte ?? e.lieu ?? '').trim(),
+      idIntervenant:String(e.idIntervenant ?? idsInt[0] ?? '').trim(),
+      idsIntervenants:idsInt.map(String), intervenantsIds:idsInt.map(String),
+      enfantsIds:enfants.map(String), idPeriode:String(e.idPeriode ?? '').trim(), statut:String(e.statut ?? 'Confirmé'),
+      controleOccurrence:e.controleOccurrence || null
     };
-
-    let donneesBrutes = [];
-    let refEnfants = [];
-    let refTypes = [];
-    let refResponsables = [];
-    let refIntervenantsObjets = [];
-    let refPeriodes = [];
-    
-    let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
-    let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
-    let filtrePeriode = localStorage.getItem('tribu_filtrePeriode') || 'Tous';
-    let filtreTemps = 'Timeline';
-    let timelineAnchorDate = new Date();
-    let timelineWindowStart = null;
-    let timelineWindowEnd = null;
-    let timelineFocusMode = 'nearest';
-    let finModifieeManuellement = false;
-    let chargementPlanningEnCours = null;
-
-    let enfantsModalSelectionnes = [];
-    let payloadEnAttente = null;
-    let idsGardesARemplacer = [];
-    let ajustementsConflitEnfants = [];
-    
-    let enfantsListe = [];
-    let enfantsInfo = {};
-    let mapIdToPrenom = {};
-
-    window.onload = () => {
-      // Les caches des versions précédentes pouvaient contenir l'enveloppe
-      // complète de l'API. On les purge une seule fois pour repartir sur
-      // le contrat tableau de la v4.
-      try {
-        const anciennesCles = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.indexOf('tribu_timeline_') === 0 &&
-              k.indexOf('tribu_timeline_v4_') !== 0) {
-            anciennesCles.push(k);
-          }
-        }
-        anciennesCles.forEach(k => localStorage.removeItem(k));
-      } catch (e) {}
-
-      // Sécurité : toutes les modales doivent être fermées au démarrage.
-      // Le formulaire ne doit s'ouvrir que via le bouton FAB ou l'édition d'un événement.
-      document.getElementById("modalEvt").style.display = "none";
-      document.getElementById("modalConflit").style.display = "none";
-      document.getElementById("modalSuppression").style.display = "none";
-
-      Promise.all([
-        chargerReferences(),
-        chargerDonnees({ initial: true })
-      ]);
-    };
-
-    function parseDateSecurisee(dateStr) {
-      if (!dateStr) return null;
-      const isoStr = String(dateStr).trim().replace(' ', 'T');
-      const d = new Date(isoStr);
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    async function apiGet(action, params = {}) {
-      const query = new URLSearchParams({ action, ...params });
-      const resp = await fetch(`${API_URL}?${query.toString()}`, { cache: 'no-store' });
-      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
-      const data = await resp.json();
-      if (data && data.success === false) throw new Error(data.message || "Erreur API");
-      return data;
-    }
-
-    async function apiPost(action, payload) {
-      const resp = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: action, payload: payload })
-      });
-      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
-      const data = await resp.json();
-      return data;
-    }
-
-    function sauvegarderFiltresLocal() {
-      localStorage.setItem('tribu_filtreEnfant', filtreEnfant);
-      localStorage.setItem('tribu_filtreIntervenant', filtreIntervenant);
-      localStorage.setItem('tribu_filtrePeriode', filtrePeriode);
-    }
-
-    function toggleFilters() {
-      const panel = document.getElementById('filterPanel');
-      const arrow = document.getElementById('arrowFilter');
-      const isHidden = panel.style.display === 'none';
-      panel.style.display = isHidden ? 'block' : 'none';
-      arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
-    }
-
-    function formatDateISO(d) {
-      const x = new Date(d);
-      const y = x.getFullYear();
-      const m = String(x.getMonth() + 1).padStart(2, '0');
-      const j = String(x.getDate()).padStart(2, '0');
-      return `${y}-${m}-${j}`;
-    }
-
-    function calculerFenetreTimeline(anchor) {
-      const a = new Date(anchor);
-      a.setHours(0, 0, 0, 0);
-
-      const from = new Date(a);
-      from.setDate(from.getDate() - 2);
-
-      const to = new Date(a);
-      to.setDate(to.getDate() + 14);
-      to.setHours(23, 59, 59, 999);
-
-      return { from, to };
-    }
-
-    function cleCacheTimeline(from, to) {
-      return `tribu_timeline_v4_${formatDateISO(from)}_${formatDateISO(to)}`;
-    }
-
-    function lireCacheTimeline(key) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        if (!obj || !obj.data) return null;
-        return obj.data;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function ecrireCacheTimeline(key, data) {
-      try {
-        localStorage.setItem(key, JSON.stringify({
-          timestamp: Date.now(),
-          data
-        }));
-      } catch (e) {
-        console.warn('Cache local indisponible', e);
-      }
-    }
-
-    function normaliserReponsePlanning(reponse) {
-      // Contrat unique du front : cette fonction retourne TOUJOURS un tableau.
-      if (Array.isArray(reponse)) return reponse;
-
-      if (reponse && Array.isArray(reponse.evenements)) {
-        return reponse.evenements;
-      }
-
-      if (reponse && reponse.data &&
-          Array.isArray(reponse.data.evenements)) {
-        return reponse.data.evenements;
-      }
-
-      return [];
-    }
-
-    async function chargerDonnees(options = {}) {
-      const fenetre = calculerFenetreTimeline(timelineAnchorDate);
-      timelineWindowStart = fenetre.from;
-      timelineWindowEnd = fenetre.to;
-
-      const key = cleCacheTimeline(fenetre.from, fenetre.to);
-      const cached = lireCacheTimeline(key);
-
-      if (cached) {
-        donneesBrutes = normaliserReponsePlanning(cached);
-        document.getElementById('loader').style.display = 'none';
-        afficherTimeline();
-      } else if (!options.silent) {
-        document.getElementById('loader').style.display = 'block';
-        document.getElementById('timeline').innerHTML = '';
-      }
-
-      const token = `${key}_${Date.now()}`;
-      chargementPlanningEnCours = token;
-
-      try {
-        const reponse = await apiGet('getPlanningData', {
-          from: formatDateISO(fenetre.from),
-          to: formatDateISO(fenetre.to),
-          includeAll: '0',
-          includeRefs: '0'
-        });
-
-        if (chargementPlanningEnCours !== token) return;
-
-        donneesBrutes = normaliserReponsePlanning(reponse);
-        ecrireCacheTimeline(key, donneesBrutes);
-
-        document.getElementById('loader').style.display = 'none';
-        afficherTimeline();
-      } catch (err) {
-        if (cached) {
-          console.warn("Actualisation API échouée, cache conservé :", err);
-          document.getElementById('loader').style.display = 'none';
-          afficherTimeline();
-        } else {
-          document.getElementById('loader').innerText =
-            "Erreur de chargement : " + (err.message || err);
-          document.getElementById('loader').style.display = 'block';
-        }
-      }
-    }
-
-    async function rafraichirPlanningSilencieusement() {
-      await chargerDonnees({ silent: true });
-    }
-
-    function viderCachesTimeline() {
-      try {
-        const aSupprimer = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.indexOf('tribu_timeline_') === 0) aSupprimer.push(k);
-        }
-        aSupprimer.forEach(k => localStorage.removeItem(k));
-      } catch (e) {}
-    }
-
-    async function chargerReferences() {
-      let refs = null;
-
-      try {
-        const resp = await fetch('./referentiels.json');
-        if (resp.ok) refs = await resp.json();
-      } catch (e) {
-        console.warn("Échec du chargement local de referentiels.json");
-      }
-
-      if (!refs) {
-        try {
-          const respRaw = await fetch('https://raw.githubusercontent.com/charlottebataille45-cell/GardeTribu/refs/heads/main/referentiels.json');
-          if (respRaw.ok) refs = await respRaw.json();
-        } catch (e) {
-          console.warn("Échec du chargement GitHub Raw");
-        }
-      }
-
-      if (!refs) {
-        refs = REFERENTIELS_DEFAUT;
-      }
-
-      refEnfants = refs.enfants || [];
-      refTypes = refs.types || [];
-      refIntervenantsObjets = (refs.intervenants || []).filter(i => i.actif === true || i.actif === undefined || i.actif === 'Oui');
-      refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
-      refPeriodes = refs.periodes || [];
-
-      enfantsInfo = {};
-      enfantsListe = [];
-      mapIdToPrenom = {};
-
-      refEnfants.forEach(e => {
-        if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
-          enfantsInfo[e.prenom] = {
-            id: e.id,
-            color: e.couleur || '#64748B',
-            emoji: e.emoji || '👤'
-          };
-          enfantsListe.push(e.prenom);
-          mapIdToPrenom[e.id] = e.prenom;
-        }
-      });
-
-      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-        enfantsModalSelectionnes = [enfantsListe[0]];
-      }
-
-      genererFiltresEnfants();
-      genererSelectorEnfantsModal();
-      majSelectsModal();
-      genererFiltresIntervenants();
-      genererFiltresPeriodes();
-      afficherTimeline();
-    }
-
-    function genererFiltresEnfants() {
-      const container = document.getElementById('childFilters');
-      if (!container) return;
-      
-      let html = `<div class="chip ${filtreEnfant === 'Tous' ? 'active' : ''}" onclick="setChildFilter('Tous')">Tous</div>`;
-      enfantsListe.forEach(prenom => {
-        const info = enfantsInfo[prenom] || { emoji: '👤' };
-        const activeClass = (filtreEnfant === prenom) ? 'active' : '';
-        html += `<div class="chip ${activeClass}" onclick="setChildFilter('${prenom.replace(/'/g, "\\'")}')">${info.emoji} ${prenom}</div>`;
-      });
-      container.innerHTML = html;
-    }
-
-    function genererSelectorEnfantsModal() {
-      const container = document.getElementById('formEnfantSelector');
-      if (!container) return;
-
-      let html = '';
-      enfantsListe.forEach(prenom => {
-        const info = enfantsInfo[prenom] || { emoji: '👤' };
-        html += `<div class="child-chip" data-enfant="${prenom}" onclick="toggleFormEnfant('${prenom.replace(/'/g, "\\'")}')">${info.emoji} ${prenom}</div>`;
-      });
-      html += `<div class="child-chip" data-enfant="Tous" onclick="toggleFormEnfant('Tous')">👥 Tous</div>`;
-      container.innerHTML = html;
-      majRenduPucesModal();
-    }
-
-    function genererFiltresIntervenants() {
-      const container = document.getElementById('intervenantFilters');
-      container.innerHTML = `<div class="chip ${filtreIntervenant === 'Tous' ? 'active' : ''}" onclick="setIntervenantFilter('Tous')">Tous</div>`;
-      
-      refResponsables.forEach(resp => {
-        const activeClass = filtreIntervenant === resp ? 'active' : '';
-        container.innerHTML += `<div class="chip ${activeClass}" onclick="setIntervenantFilter('${resp.replace(/'/g, "\\'")}')">${resp}</div>`;
-      });
-    }
-
-    function genererFiltresPeriodes() {
-      const container = document.getElementById('periodeFilters');
-      container.innerHTML = `
-        <div class="chip ${filtrePeriode === 'Tous' ? 'active' : ''}" onclick="setPeriodeFilter('Tous')">Toutes</div>
-        <div class="chip ${filtrePeriode === 'HORS_VACANCES' ? 'active' : ''}" onclick="setPeriodeFilter('HORS_VACANCES')">Hors vacances</div>
-      `;
-      
-      refPeriodes.forEach(p => {
-        const activeClass = filtrePeriode === p.id ? 'active' : '';
-        container.innerHTML += `<div class="chip ${activeClass}" onclick="setPeriodeFilter('${p.id}')">${p.nom}</div>`;
-      });
-    }
-
-    function reinitialiserFiltres() {
-      filtreEnfant = 'Tous';
-      filtreIntervenant = 'Tous';
-      filtrePeriode = 'Tous';
-      sauvegarderFiltresLocal();
-      genererFiltresEnfants();
-      genererFiltresIntervenants();
-      genererFiltresPeriodes();
-      revenirAujourdhui();
-    }
-
-    function majSelectsModal() {
-      const selectType = document.getElementById('formTypeSelect');
-      selectType.innerHTML = '<option value="">-- Choisir --</option>';
-      refTypes.forEach(t => {
-        selectType.innerHTML += `<option value="${t}">${t}</option>`;
-      });
-      selectType.innerHTML += '<option value="NOUVEAU">+ Ajouter un type...</option>';
-
-      const selectResp = document.getElementById('formResponsableSelect');
-      selectResp.innerHTML = '<option value="">-- Choisir --</option>';
-      refResponsables.forEach(r => {
-        selectResp.innerHTML += `<option value="${r}">${r}</option>`;
-      });
-      selectResp.innerHTML += '<option value="NOUVEAU">+ Ajouter un responsable...</option>';
-
-      const selectPeriode = document.getElementById('formPeriodeSelect');
-      selectPeriode.innerHTML = '<option value="">-- Hors vacances --</option>';
-      refPeriodes.forEach(p => {
-        selectPeriode.innerHTML += `<option value="${p.id}">${p.nom}</option>`;
-      });
-    }
-
-    function formatForInput(dateObj) {
-      if (!dateObj) return "";
-      const d = parseDateSecurisee(dateObj);
-      if (!d) return "";
-
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
-
-    function toggleFormEnfant(enfant) {
-      if (enfant === 'Tous') {
-        enfantsModalSelectionnes = [...enfantsListe];
-      } else {
-        if (enfantsModalSelectionnes.length === enfantsListe.length) {
-          enfantsModalSelectionnes = [];
-        }
-        const index = enfantsModalSelectionnes.indexOf(enfant);
-        if (index > -1) {
-          enfantsModalSelectionnes.splice(index, 1);
-        } else {
-          enfantsModalSelectionnes.push(enfant);
-        }
-      }
-      if (enfantsModalSelectionnes.length === 0 && enfantsListe.length > 0) {
-        enfantsModalSelectionnes = [enfantsListe[0]];
-      }
-      majRenduPucesModal();
-    }
-
-    function majRenduPucesModal() {
-      document.querySelectorAll('#formEnfantSelector .child-chip').forEach(chip => {
-        const enf = chip.getAttribute('data-enfant');
-        const estSelect = (enf === 'Tous' && enfantsModalSelectionnes.length === enfantsListe.length) || enfantsModalSelectionnes.includes(enf);
-        
-        chip.classList.toggle('selected', estSelect);
-        if (estSelect) {
-          const couleur = enfantsInfo[enf] ? enfantsInfo[enf].color : 'var(--text-main)';
-          chip.style.backgroundColor = couleur;
-        } else {
-          chip.style.backgroundColor = '#F8FAFC';
-        }
-      });
-    }
-
-    /* FEATURE 9 : Gestion récurrence UI */
-    function toggleRecurrenceOpt(e) {
-      if (e && e.target && e.target.id === 'chkRecurent') {
-      } else if (e) {
-        const chk = document.getElementById('chkRecurent');
-        chk.checked = !chk.checked;
-      }
-      
-      const chkVal = document.getElementById('chkRecurent').checked;
-      document.getElementById('recurrenceFields').style.display = chkVal ? 'block' : 'none';
-      
-      if (chkVal && !document.getElementById('formRecurFin').value) {
-        const dDeb = parseDateSecurisee(document.getElementById('formDebut').value) || new Date();
-        dDeb.setMonth(dDeb.getMonth() + 1);
-        document.getElementById('formRecurFin').value = dDeb.toISOString().split('T')[0];
-      }
-    }
-
-    function surChangementDebut() {
-      const debutStr = document.getElementById("formDebut").value;
-      if (!debutStr) return;
-      
-      document.getElementById("formDate").value = debutStr.split('T')[0];
-      
-      const d = parseDateSecurisee(debutStr);
-      const finInput = document.getElementById("formFin");
-      const finStr = finInput.value;
-      
-      if (!finStr || parseDateSecurisee(finStr) <= d) {
-        const nouvelleFin = new Date(d.getTime() + (60 * 60 * 1000));
-        finInput.value = formatForInput(nouvelleFin);
-      }
-      validerControleDates();
-    }
-
-    function validerControleDates() {
-      const debutVal = document.getElementById("formDebut").value;
-      const finVal = document.getElementById("formFin").value;
-      const errorMsg = document.getElementById("dateError");
-      const btnSubmit = document.getElementById("btnSubmit");
-
-      if (debutVal && finVal) {
-        const d = parseDateSecurisee(debutVal);
-        const f = parseDateSecurisee(finVal);
-        if (f <= d) {
-          errorMsg.style.display = "flex";
-          btnSubmit.disabled = true;
-          document.getElementById("formFin").classList.add("is-invalid");
-          return false;
-        }
-      }
-      
-      document.getElementById("formFin").classList.remove("is-invalid");
-      errorMsg.style.display = "none";
-      btnSubmit.disabled = false;
-      return true;
-    }
-
-    function marquerFinModifiee() {
-      finModifieeManuellement = true;
-      validerControleDates();
-    }
-
-    function gererTypeSelect() {
-      const val = document.getElementById('formTypeSelect').value;
-      const input = document.getElementById('formTypeInput');
-      if (val === 'NOUVEAU') {
-        input.style.display = 'block';
-        input.value = '';
-      } else {
-        input.style.display = 'none';
-        input.value = val;
-      }
-    }
-
-    function gererResponsableSelect() {
-      const val = document.getElementById('formResponsableSelect').value;
-      const input = document.getElementById('formResponsableInput');
-      
-      if (val === 'NOUVEAU') {
-        input.style.display = 'block';
-        input.value = '';
-      } else {
-        input.style.display = 'none';
-        input.value = val;
-      }
-    }
-
-    function setChildFilter(enfant) {
-      filtreEnfant = enfant;
-      sauvegarderFiltresLocal();
-      genererFiltresEnfants();
-      afficherTimeline();
-    }
-
-    function setIntervenantFilter(intervenant) {
-      filtreIntervenant = intervenant;
-      sauvegarderFiltresLocal();
-      genererFiltresIntervenants();
-      afficherTimeline();
-    }
-
-    function setPeriodeFilter(periodeId) {
-      filtrePeriode = periodeId;
-      sauvegarderFiltresLocal();
-      genererFiltresPeriodes();
-      afficherTimeline();
-    }
-
-    function naviguerTimeline(direction) {
-      const d = new Date(timelineAnchorDate);
-      d.setDate(d.getDate() + (direction * 7));
-      d.setHours(0, 0, 0, 0);
-      timelineAnchorDate = d;
-      timelineFocusMode = 'nearest';
-      chargerDonnees();
-    }
-
-    function revenirAujourdhui() {
-      timelineAnchorDate = new Date();
-      timelineAnchorDate.setHours(0, 0, 0, 0);
-      timelineFocusMode = 'nearest';
-      chargerDonnees();
-    }
-
-    /* FEATURE 9 : Découpage des événements multi-jours et séries récurrentes */
-    function genererOccurrences() {
-      const occurrences = [];
-
-      // Contrat interne strict : donneesBrutes est TOUJOURS un tableau.
-      // Sécurité supplémentaire pour les caches/anciennes versions.
-      let evenements = donneesBrutes;
-      if (!Array.isArray(evenements)) {
-        if (evenements && Array.isArray(evenements.evenements)) {
-          evenements = evenements.evenements;
-        } else if (evenements && evenements.data &&
-                   Array.isArray(evenements.data.evenements)) {
-          evenements = evenements.data.evenements;
-        } else {
-          evenements = [];
-        }
-      }
-
-      evenements.forEach(evt => {
-        if (!evt.debut) return;
-
-        const dStart = parseDateSecurisee(evt.debut);
-        const dEnd = evt.fin ? parseDateSecurisee(evt.fin) : parseDateSecurisee(evt.debut);
-
-        if (!dStart) return;
-
-        let prenoms = [];
-        if (Array.isArray(evt.enfantsIds)) {
-          prenoms = evt.enfantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-        } else if (typeof evt.enfantsIds === 'string') {
-          prenoms = evt.enfantsIds.split(',').map(id => mapIdToPrenom[id.trim()]).filter(Boolean);
-        }
-
-        let dayCursor = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
-        const dayEnd = dEnd 
-          ? new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate())
-          : new Date(dayCursor);
-
-        let count = 0;
-        while (dayCursor <= dayEnd && count < 30) {
-          occurrences.push({
-            ...evt,
-            enfantsPrenoms: prenoms,
-            occurrenceDate: new Date(dayCursor),
-            isMultiDay: dayEnd.getTime() > new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate()).getTime(),
-            dStart: dStart,
-            dEnd: dEnd,
-            enfants: prenoms.length > 0 ? prenoms : (enfantsListe.length > 0 ? [enfantsListe[0]] : [])
-          });
-          dayCursor.setDate(dayCursor.getDate() + 1);
-          count++;
-        }
-      });
-
-      return occurrences;
-    }
-
-    function genererGradientBarre(enfants) {
-      const cols = enfants.map(e => enfantsInfo[e] ? enfantsInfo[e].color : '#64748B');
-      if (cols.length === 0) return 'background-color: #64748B;';
-      if (cols.length === 1) return `background-color: ${cols[0]};`;
-      return `background: linear-gradient(to bottom, ${cols.join(', ')});`;
-    }
-
-    function genererBadgesEnfants(enfants) {
-      if (!enfants || enfants.length === 0) return '';
-      
-      return `<div class="enfants-badges-container">` + 
-        enfants.map(e => {
-          const info = enfantsInfo[e] || { color: '#64748B', emoji: '👤' };
-          return `<span class="badge-enfant" style="background-color: ${info.color}15; color: ${info.color}; border: 1px solid ${info.color}40;">
-            ${info.emoji} ${e}
-          </span>`;
-        }).join('') +
-        `</div>`;
-    }
-
-    function nettoyerNumero(tel) {
-      return tel ? String(tel).replace(/\s+/g, '') : '';
-    }
-
-    function genererBadgesControleOccurrence(occ) {
-      const c = occ.controleOccurrence || {};
-      const out = [];
-      if (occ.enfants && occ.enfants.length > 1) out.push('<span class="badge-warning">Multi-enfants</span>');
-      if ((c.enfantConflits || []).length) out.push('<span class="badge-danger">⚠ Enfant</span>');
-      if ((c.intervenantConflits || []).length || (c.intervenantMultiTaches || []).length) out.push('<span class="badge-warning">⚠ Intervenant</span>');
-      if ((c.doublons || []).length) out.push('<span class="badge-danger">⚠ Doublon</span>');
-      return out.join('');
-    }
-
-    /* AFFICHAGE DU PLANNING EN CARTE & CRÉNEAUX INTERNES */
-    function afficherTimeline() {
-      const container = document.getElementById('timeline');
-      container.innerHTML = '';
-
-      const maintenant = new Date();
-      const fenetre = calculerFenetreTimeline(timelineAnchorDate);
-      timelineWindowStart = fenetre.from;
-      timelineWindowEnd = fenetre.to;
-
-      const optsNav = { day: 'numeric', month: 'short' };
-      const labelFrom = fenetre.from.toLocaleDateString('fr-FR', optsNav);
-      const labelTo = fenetre.to.toLocaleDateString('fr-FR', optsNav);
-      const anchorEstAujourdhui =
-        formatDateISO(timelineAnchorDate) === formatDateISO(new Date());
-
-      const navTitle = document.getElementById('timelineNavTitle');
-      if (navTitle) {
-        navTitle.innerText = anchorEstAujourdhui
-          ? "Aujourd'hui"
-          : `${labelFrom} → ${labelTo}`;
-      }
-
-      const occurrences = genererOccurrences();
-
-      const occurrencesFiltrees = occurrences.filter(occ => {
-        if (filtreEnfant !== 'Tous') {
-          const match = occ.enfants.some(e =>
-            e.toLowerCase() === filtreEnfant.toLowerCase()
-          );
-          if (!match) return false;
-        }
-
-        if (filtreIntervenant !== 'Tous' &&
-            occ.responsable !== filtreIntervenant) return false;
-
-        if (filtrePeriode === 'HORS_VACANCES' && occ.idPeriode) return false;
-        if (filtrePeriode !== 'Tous' &&
-            filtrePeriode !== 'HORS_VACANCES' &&
-            occ.idPeriode !== filtrePeriode) return false;
-
-        const occDate = occ.occurrenceDate;
-        return occDate >= timelineWindowStart &&
-               occDate <= timelineWindowEnd;
-      });
-
-      occurrencesFiltrees.sort((a, b) => {
-        if (a.occurrenceDate.getTime() !== b.occurrenceDate.getTime()) {
-          return a.occurrenceDate.getTime() - b.occurrenceDate.getTime();
-        }
-        return a.dStart.getTime() - b.dStart.getTime();
-      });
-
-      if (occurrencesFiltrees.length === 0) {
-        container.innerHTML =
-          '<div style="text-align:center; padding:40px; color:#64748B;">' +
-          'Aucun événement ne correspond à vos filtres.</div>';
-        return;
-      }
-
-      const groupesParJour = {};
-      occurrencesFiltrees.forEach(occ => {
-        const keyJour =
-          `${occ.occurrenceDate.getFullYear()}-${String(occ.occurrenceDate.getMonth()+1).padStart(2,'0')}-${String(occ.occurrenceDate.getDate()).padStart(2,'0')}`;
-        if (!groupesParJour[keyJour]) groupesParJour[keyJour] = [];
-        groupesParJour[keyJour].push(occ);
-      });
-
-      let focusElement = null;
-      let evenementEnCoursTrouve = false;
-      let evenementProchainTrouve = false;
-      const joursAbrev = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
-
-      Object.keys(groupesParJour).forEach(keyJour => {
-        const listeJour = groupesParJour[keyJour];
-        const nbEvtsJour = listeJour.length;
-        const dRef = listeJour[0].occurrenceDate;
-
-        const headerCont = document.createElement('div');
-        headerCont.className = 'date-header-container';
-
-        const headerTitle = document.createElement('div');
-        headerTitle.className = 'date-header';
-        headerTitle.innerText =
-          dRef.toLocaleDateString('fr-FR', {
-            weekday:'long', day:'numeric', month:'long', year:'numeric'
-          }).toUpperCase();
-
-        const headerCount = document.createElement('div');
-        headerCount.className = 'date-count-badge';
-        headerCount.innerText =
-          `${nbEvtsJour} créneau${nbEvtsJour > 1 ? 'x' : ''}`;
-
-        headerCont.appendChild(headerTitle);
-        headerCont.appendChild(headerCount);
-        container.appendChild(headerCont);
-
-        const groupesResp = [];
-        const respMap = new Map();
-
-        listeJour.forEach(occ => {
-          const keyGroup = `${(occ.idIntervenant || occ.responsable || '').toLowerCase()}`;
-
-          if (!respMap.has(keyGroup)) {
-            const item = {
-              responsable: occ.responsable,
-              idIntervenant: occ.idIntervenant || '',
-              creneaux: []
-            };
-            respMap.set(keyGroup, item);
-            groupesResp.push(item);
-          }
-
-          respMap.get(keyGroup).creneaux.push(occ);
-        });
-
-        groupesResp.forEach(groupe => {
-          const tousEnfants = [];
-          groupe.creneaux.forEach(c => {
-            c.enfants.forEach(e => {
-              if (!tousEnfants.includes(e)) tousEnfants.push(e);
-            });
-          });
-
-          const styleBarre = genererGradientBarre(tousEnfants);
-          const card = document.createElement('div');
-          card.className = 'event-card';
-          if (groupe.creneaux.some(c => {
-            const ctrl = c.controleOccurrence || {};
-            return (ctrl.enfantConflits || []).length || (ctrl.intervenantConflits || []).length || (ctrl.intervenantMultiTaches || []).length || (ctrl.doublons || []).length;
-          })) card.classList.add('has-occurrence-warning');
-
-          const objResp = refIntervenantsObjets.find(i =>
-            i.nom.toLowerCase() === (groupe.responsable || '').toLowerCase()
-          );
-
-          let actionsTelHtml = '';
-          if (objResp) {
-            const num1 = nettoyerNumero(objResp.tel1);
-            const num2 = nettoyerNumero(objResp.tel2);
-
-            if (num1 || num2) {
-              actionsTelHtml +=
-                `<div class="action-links-container" onclick="event.stopPropagation();">`;
-
-              if (num1) {
-                actionsTelHtml += `<a href="tel:${num1}" class="action-btn-phone">📞 Appel</a>`;
-                actionsTelHtml += `<a href="sms:${num1}" class="action-btn-phone">💬 SMS</a>`;
-              }
-              if (num2) {
-                actionsTelHtml += `<a href="tel:${num2}" class="action-btn-phone">📞 Appel 2</a>`;
-                actionsTelHtml += `<a href="sms:${num2}" class="action-btn-phone">💬 SMS 2</a>`;
-              }
-
-              actionsTelHtml += `</div>`;
-            }
-          }
-
-          let subSlotsHtml = '';
-          let hasEncoursGroup = false;
-
-          groupe.creneaux.forEach(occ => {
-            let heureTexte = '';
-
-            if (occ.isMultiDay) {
-              const jourDeb = joursAbrev[occ.dStart.getDay()];
-              const hDeb =
-                String(occ.dStart.getHours()).padStart(2,'0') + 'h' +
-                String(occ.dStart.getMinutes()).padStart(2,'0');
-              const jourFin = joursAbrev[occ.dEnd.getDay()];
-              const hFin =
-                String(occ.dEnd.getHours()).padStart(2,'0') + 'h' +
-                String(occ.dEnd.getMinutes()).padStart(2,'0');
-              heureTexte = `${jourDeb} ${hDeb} ➔ ${jourFin} ${hFin}`;
-            } else {
-              const hDeb =
-                String(occ.dStart.getHours()).padStart(2,'0') + 'h' +
-                String(occ.dStart.getMinutes()).padStart(2,'0');
-              const hFin =
-                String(occ.dEnd.getHours()).padStart(2,'0') + 'h' +
-                String(occ.dEnd.getMinutes()).padStart(2,'0');
-              heureTexte = `${hDeb} ➔ ${hFin}`;
-            }
-
-            const estEnCours =
-              maintenant >= occ.dStart && maintenant <= occ.dEnd;
-            const estFutur = occ.dStart > maintenant;
-
-            if (estEnCours) {
-              hasEncoursGroup = true;
-              if (!evenementEnCoursTrouve) {
-                evenementEnCoursTrouve = true;
-                focusElement = card;
-              }
-            }
-
-            let badgeSub = '';
-            if (estEnCours) {
-              badgeSub = '<span class="badge-encours">En cours</span>';
-            } else if (!evenementEnCoursTrouve &&
-                       !evenementProchainTrouve &&
-                       estFutur) {
-              evenementProchainTrouve = true;
-              focusElement = card;
-              badgeSub = '<span class="badge-upcoming">Prochain</span>';
-            } else if (!evenementEnCoursTrouve &&
-                       !evenementProchainTrouve &&
-                       timelineFocusMode === 'nearest' &&
-                       occ.dStart >= timelineAnchorDate) {
-              evenementProchainTrouve = true;
-              focusElement = card;
-              badgeSub = '<span class="badge-upcoming">Prochain</span>';
-            }
-
-            const subBadgesEnfants = genererBadgesEnfants(occ.enfants);
-            const subTitre = occ.titre
-              ? `<div class="sub-slot-title">${occ.titre}</div>` : '';
-            const subLieu = occ.lieu
-              ? `<div class="sub-slot-location"><span class="material-symbols-outlined" style="font-size:14px;">location_on</span> ${occ.lieu}</div>`
-              : '';
-
-            subSlotsHtml += `
-              <div class="sub-slot-item" onclick="event.stopPropagation(); editerEvenement('${occ.id}')">
-                <div class="sub-slot-header">
-                  <span class="event-time-pill">
-                    <span class="material-symbols-outlined" style="font-size:14px;">schedule</span>
-                    ${heureTexte}
-                  </span>
-                  ${subBadgesEnfants}
-                  <span class="event-type-badge">${occ.type || 'Autre'}</span>
-                  ${genererBadgesControleOccurrence(occ)}
-                  ${badgeSub}
-                </div>
-                <div class="sub-slot-body">
-                  ${subTitre}
-                  ${subLieu}
-                </div>
-                <div class="sub-slot-footer">
-                  <span class="edit-icon-btn">
-                    <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
-                  </span>
-                </div>
-              </div>`;
-          });
-
-          if (hasEncoursGroup) {
-            card.classList.add('highlight-encours');
-          }
-
-          card.innerHTML = `
-            <div class="event-color-bar" style="${styleBarre}"></div>
-            <div class="event-content">
-              <div class="event-header">
-                <div class="event-resp">
-                  <span class="material-symbols-outlined" style="font-size:18px; color:#64748B;">person</span>
-                  <span>${groupe.responsable}</span>
-                </div>
-                <span class="event-type-badge">${groupe.creneaux.length} tâche${groupe.creneaux.length > 1 ? 's' : ''}</span>
-              </div>
-              ${actionsTelHtml}
-              <div>${subSlotsHtml}</div>
-            </div>`;
-
-          container.appendChild(card);
-        });
-      });
-
-      if (focusElement) {
-        setTimeout(() => {
-          try {
-            focusElement.classList.add('focus-anchor');
-            focusElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
-          } catch (e) {}
-        }, 120);
-      }
-    }
-
-    function ouvrirModal() {
-      document.getElementById("modalTitle").innerText = "Nouvel Événement";
-      document.getElementById("formId").value = "";
-      document.getElementById("formIdSerie").value = "";
-      
-      if (filtreEnfant !== 'Tous' && enfantsListe.includes(filtreEnfant)) {
-        enfantsModalSelectionnes = [filtreEnfant];
-      } else if (enfantsListe.length > 0) {
-        enfantsModalSelectionnes = [enfantsListe[0]];
-      } else {
-        enfantsModalSelectionnes = [];
-      }
-      majRenduPucesModal();
-
-      document.getElementById("chkRecurent").checked = false;
-      document.getElementById("recurrenceFields").style.display = "none";
-      document.getElementById("secRecurrence").style.display = "block";
-      document.getElementById("secOptionSerie").style.display = "none";
-
-      const selectType = document.getElementById("formTypeSelect");
-      const defaultType = refTypes.includes("Garde") ? "Garde" : (refTypes[0] || "");
-      selectType.value = defaultType;
-      document.getElementById("formTypeInput").value = defaultType;
-      document.getElementById("formTypeInput").style.display = "none";
-      
-      const selectResp = document.getElementById("formResponsableSelect");
-      selectResp.value = "";
-      document.getElementById("formResponsableInput").value = "";
-      document.getElementById("formResponsableInput").style.display = "none";
-      
-      document.getElementById("formTitre").value = "";
-      document.getElementById("formLieu").value = "";
-      document.getElementById("formDetails").value = "";
-      document.getElementById("formPeriodeSelect").value = "";
-      
-      let debutAjout = new Date(timelineAnchorDate);
-      const maintenant = new Date();
-      if (formatDateISO(timelineAnchorDate) === formatDateISO(maintenant)) {
-        debutAjout = new Date(maintenant);
-        debutAjout.setSeconds(0, 0);
-        debutAjout.setMinutes(Math.ceil(debutAjout.getMinutes() / 30) * 30);
-      } else {
-        debutAjout.setHours(9, 0, 0, 0);
-      }
-      finModifieeManuellement = false;
-      document.getElementById("formDebut").value = formatForInput(debutAjout);
-      document.getElementById("formFin").value = formatForInput(new Date(debutAjout.getTime() + 60 * 60 * 1000));
-      
-      surChangementDebut();
-      
-      document.getElementById("btnDelete").style.display = "none";
-      document.getElementById("modalEvt").style.display = "flex";
-    }
-
-    function fermerModal() {
-      document.getElementById("modalEvt").style.display = "none";
-    }
-
-    /* FEATURE 10 : Modification événement & gestion idSerie */
-    function editerEvenement(id) {
-      const evt = donneesBrutes.find(e => String(e.id).trim() === String(id).trim());
-      if (!evt) return;
-
-      document.getElementById("modalTitle").innerText = "Modifier l'événement";
-      document.getElementById("formId").value = evt.id;
-      document.getElementById("formIdSerie").value = evt.idSerie || "";
-      
-      let prenomsEvt = [];
-      if (Array.isArray(evt.enfantsIds)) {
-        prenomsEvt = evt.enfantsIds.map(idEnf => mapIdToPrenom[idEnf]).filter(Boolean);
-      } else if (typeof evt.enfantsIds === 'string') {
-        prenomsEvt = evt.enfantsIds.split(',').map(idEnf => mapIdToPrenom[idEnf.trim()]).filter(Boolean);
-      }
-
-      enfantsModalSelectionnes = prenomsEvt.length > 0 ? prenomsEvt : (enfantsListe.length > 0 ? [enfantsListe[0]] : []);
-      majRenduPucesModal();
-
-      document.getElementById("secRecurrence").style.display = "none";
-      if (evt.idSerie) {
-        document.getElementById("secOptionSerie").style.display = "block";
-      } else {
-        document.getElementById("secOptionSerie").style.display = "none";
-      }
-
-      const selectType = document.getElementById("formTypeSelect");
-      const inputType = document.getElementById("formTypeInput");
-      const typeVal = (evt.type || "").trim();
-      const matchType = refTypes.find(t => t.trim().toLowerCase() === typeVal.toLowerCase());
-      if (matchType) {
-        selectType.value = matchType;
-        inputType.style.display = "none";
-        inputType.value = matchType;
-      } else {
-        selectType.value = "NOUVEAU";
-        inputType.style.display = "block";
-        inputType.value = typeVal;
-      }
-
-      const selectResp = document.getElementById("formResponsableSelect");
-      const inputResp = document.getElementById("formResponsableInput");
-      const respVal = (evt.responsable || "").trim();
-      const matchResp = refResponsables.find(r => r.trim().toLowerCase() === respVal.toLowerCase());
-      if (matchResp) {
-        selectResp.value = matchResp;
-        inputResp.style.display = "none";
-        inputResp.value = matchResp;
-      } else {
-        selectResp.value = "NOUVEAU";
-        inputResp.style.display = "block";
-        inputResp.value = respVal;
-      }
-
-      document.getElementById("formTitre").value = evt.titre || "";
-      finModifieeManuellement = true;
-      document.getElementById("formDebut").value = formatForInput(evt.debut);
-      document.getElementById("formFin").value = formatForInput(evt.fin);
-      document.getElementById("formDate").value = evt.date ? String(evt.date).split('T')[0] : (evt.debut ? String(evt.debut).split('T')[0] : "");
-      document.getElementById("formLieu").value = evt.lieu || "";
-      document.getElementById("formDetails").value = evt.details || "";
-      document.getElementById("formPeriodeSelect").value = evt.idPeriode || "";
-      
-      validerControleDates();
-
-      document.getElementById("btnDelete").style.display = "block";
-      document.getElementById("modalEvt").style.display = "flex";
-    }
-
-    function soumettre() {
-      if (!validerControleDates()) return;
-
-      let typeFinal = document.getElementById("formTypeSelect").value;
-      if (typeFinal === 'NOUVEAU' || typeFinal === '') {
-        typeFinal = document.getElementById("formTypeInput").value;
-      }
-
-      let responsableFinal = document.getElementById("formResponsableSelect").value;
-      if (responsableFinal === 'NOUVEAU' || responsableFinal === '') {
-        responsableFinal = document.getElementById("formResponsableInput").value;
-      }
-
-      const intervenantSelection = refIntervenantsObjets.find(i =>
-        String(i.nom || '').trim().toLowerCase() === String(responsableFinal || '').trim().toLowerCase()
-      );
-      const idIntervenantFinal = intervenantSelection ? String(intervenantSelection.id || '').trim() : '';
-      const idsIntervenantsFinal = idIntervenantFinal ? [idIntervenantFinal] : [];
-
-      if (!typeFinal.trim() || !responsableFinal.trim()) {
-        alert("Merci de renseigner le type et le responsable.");
-        return;
-      }
-
-      const modeModif = document.querySelector('input[name="optSerieAction"]:checked') 
-        ? document.querySelector('input[name="optSerieAction"]:checked').value 
-        : 'UNIQUE';
-
-      const targetIds = enfantsModalSelectionnes.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
-
-      const payload = {
-        id: document.getElementById("formId").value,
-        idSerie: document.getElementById("formIdSerie").value,
-        modeModifSerie: modeModif,
-        date: document.getElementById("formDate").value,
-        enfantsIds: targetIds,
-        type: typeFinal.trim(),
-        responsable: responsableFinal.trim(),
-        idIntervenant: idIntervenantFinal,
-        idsIntervenants: idsIntervenantsFinal,
-        titre: document.getElementById("formTitre").value,
-        debut: document.getElementById("formDebut").value,
-        fin: document.getElementById("formFin").value,
-        lieu: document.getElementById("formLieu").value,
-        details: document.getElementById("formDetails").value,
-        idPeriode: document.getElementById("formPeriodeSelect").value,
-        statut: "Confirmé",
-        isRecurent: document.getElementById("chkRecurent").checked,
-        intervalleRecurrence: document.getElementById("formRecurIntervalle").value,
-        uniteRecurrence: document.getElementById("formRecurUnite").value,
-        dateFinRecurrence: document.getElementById("formRecurFin").value,
-        idsGardesASupprimer: [],
-        ajustementsConflitEnfants: []
-      };
-
-      analyserConflitsEtValider(payload);
-    }
-
-    /* FEATURES 11 & 12 : Détection temporelle & Conflits intelligent d'enfants / responsable */
-    function construireMessageControle(resultat, payload) {
-      const blocs = [];
-      const controle = resultat.controle || {};
-      (resultat.conflitsEnfants || controle.enfantConflits || []).forEach(c => {
-        const ids = c.enfantsTouchesIds || c.enfantsEnConflitIds || [];
-        const noms = c.enfantsTouchés || c.enfantsTouchesNoms || ids.map(id => mapIdToPrenom[id] || id);
-        blocs.push(`<div class="occurrence-warning-line"><span class="badge-danger">ENFANT EN DOUBLE</span> ${noms.join(', ')} : chevauchement avec <strong>${c.titre || c.type || 'un autre événement'}</strong>.</div>`);
-      });
-      (resultat.conflitsResponsable || controle.intervenantConflits || []).forEach(c => blocs.push(`<div class="occurrence-warning-line"><span class="badge-warning">INTERVENANT OCCUPÉ</span> ${c.responsable || payload.responsable || 'Cet intervenant'} est déjà affecté sur un créneau qui se chevauche.</div>`));
-      (resultat.intervenantMultiTaches || controle.intervenantMultiTaches || []).forEach(c => {
-        const taches=(c.evenements||[]).map(e=>`${e.type||'Événement'}${e.titre?' — '+e.titre:''}`).join(' / ');
-        blocs.push(`<div class="occurrence-warning-line"><span class="badge-warning">MULTI-TÂCHES</span> ${c.intervenantNom||c.responsable||payload.responsable||'Cet intervenant'} est affecté simultanément à ${taches||'plusieurs tâches'}.</div>`);
-      });
-      (resultat.doublons || controle.doublons || []).forEach(() => blocs.push('<div class="occurrence-warning-line"><span class="badge-danger">DOUBLON POTENTIEL</span> Un événement identique ou quasi identique existe déjà sur ce créneau.</div>'));
-      return blocs.join('');
-    }
-
-    async function analyserConflitsEtValider(payload) {
-      payloadEnAttente=payload; idsGardesARemplacer=[]; ajustementsConflitEnfants=[];
-      const btn=document.getElementById('btnSubmit'), texteInitial=btn.innerHTML;
-      btn.disabled=true; btn.innerHTML='<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Contrôle...';
-      try {
-        const resultat=await apiPost('analyserConflits',payload);
-        btn.disabled=false; btn.innerHTML=texteInitial;
-        if(!resultat||resultat.success===false) throw new Error(resultat?.message||'Contrôle des occurrences impossible.');
-        const message=construireMessageControle(resultat,payload);
-        const hasReorg=resultat.reorganisationDisponible===true&&Array.isArray(resultat.reorganisation)&&resultat.reorganisation.length>0;
-        if(hasReorg){
-          idsGardesARemplacer=resultat.idsGardesARemplacer||[]; ajustementsConflitEnfants=resultat.ajustementsConflitEnfants||[];
-          ouvrirModalConflit('Ajustement des gardes',`${message}<br><br>Les enfants concernés peuvent être réaffectés sans retirer les autres enfants des anciennes gardes.<br><br>Valider cette réorganisation ?`,'Valider et Réorganiser'); return;
-        }
-        if(message){ ouvrirModalConflit('Contrôle des occurrences',`${message}<br><br>Le système signale une superposition mais ne bloque pas automatiquement l’enregistrement.<br><br>Confirmer ?`,'Confirmer et Enregistrer'); return; }
-        executerEnregistrement(payload);
-      } catch(err){ btn.disabled=false; btn.innerHTML=texteInitial; alert('Erreur lors du contrôle des occurrences : '+(err.message||err)); }
-    }
-    function ouvrirModalConflit(titre, message, libelleBouton) {
-      document.getElementById("conflitTitle").innerText = titre;
-      document.getElementById("conflitMessage").innerHTML = message;
-      document.getElementById("btnConflitAction").innerText = libelleBouton;
-      document.getElementById("modalConflit").style.display = "flex";
-    }
-
-    function fermerModalConflit() {
-      document.getElementById("modalConflit").style.display = "none";
-    }
-
-    function confirmerConflitEtEnregistrer() {
-      if (payloadEnAttente) {
-        payloadEnAttente.idsGardesASupprimer = idsGardesARemplacer;
-        payloadEnAttente.ajustementsConflitEnfants = ajustementsConflitEnfants;
-        fermerModalConflit();
-        executerEnregistrement(payloadEnAttente);
-      }
-    }
-
-    async function executerEnregistrement(payload) {
-      const btn = document.getElementById("btnSubmit");
-      btn.innerHTML = `<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Enregistrement...`;
-      btn.disabled = true;
-
-      try {
-        const res = await apiPost('sauvegarderEvenement', payload);
-        btn.innerHTML = "Enregistrer";
-        btn.disabled = false;
-
-        if (res && res.success === false) {
-          alert("Erreur d'enregistrement : " + res.message);
-          return;
-        }
-
-        fermerModal();
-        viderCachesTimeline();
-        timelineFocusMode = 'nearest';
-        await chargerDonnees({ silent: true });
-      } catch(err) {
-        btn.innerHTML = "Enregistrer";
-        btn.disabled = false;
-        alert("Erreur serveur : " + err);
-      }
-    }
-
-    /* FEATURE 10 : Suppression d'une occurrence ou de la série */
-    function supprimer() {
-      const id = document.getElementById("formId").value;
-      const idSerie = document.getElementById("formIdSerie").value;
-      if (!id) return;
-
-      const msg = document.getElementById("supprModalMessage");
-      const serieOpts = document.getElementById("supprSerieOptions");
-
-      if (idSerie) {
-        msg.innerHTML = "Cet événement fait partie d'une série récurrente.<br>Que souhaitez-vous supprimer ?";
-        serieOpts.style.display = "block";
-      } else {
-        msg.innerHTML = "Voulez-vous vraiment supprimer cet événement ?";
-        serieOpts.style.display = "none";
-      }
-
-      document.getElementById("modalSuppression").style.display = "flex";
-    }
-
-    function fermerModalSuppression() {
-      document.getElementById("modalSuppression").style.display = "none";
-    }
-
-    async function confirmerSuppressionEffective() {
-      const id = document.getElementById("formId").value;
-      const idSerie = document.getElementById("formIdSerie").value;
-
-      let modeSuppr = 'UNIQUE';
-      if (idSerie) {
-        const optionCochee = document.querySelector('input[name="optSupprSerie"]:checked');
-        if (optionCochee) modeSuppr = optionCochee.value;
-      }
-
-      fermerModalSuppression();
-
-      const btn = document.getElementById("btnDelete");
-      btn.innerText = "Suppression...";
-      btn.disabled = true;
-
-      try {
-        await apiPost('supprimerLigne', { id: id, modeSupprSerie: modeSuppr });
-        fermerModal();
-        btn.innerText = "Supprimer cet événement";
-        btn.disabled = false;
-        chargerDonnees();
-      } catch(err) {
-        alert("Erreur lors de la suppression : " + err);
-        btn.innerText = "Supprimer cet événement";
-        btn.disabled = false;
-      }
-    }
-  </script>
+  }).filter(e => e.id || e.debut);
+}
+
+async function chargerReferences() {
+  try {
+    const r = await fetch('./referentiels.json',{cache:'no-store'});
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    refs = await r.json();
+  } catch(e) {
+    refs = {types:['Garde','École','Activité','Santé','Transport','Maison','Événement','Autre'], intervenants:[], enfants:[], lieux:[], periodes:[]};
+  }
+  refs.enfants = refs.enfants || []; refs.types = refs.types || []; refs.intervenants = refs.intervenants || []; refs.lieux = refs.lieux || []; refs.periodes = refs.periodes || [];
+  enfantsInfo = {}; mapIdToPrenom = {}; mapIntervenantIdToNom = {}; mapLieuIdToNom = {};
+  refs.enfants.filter(e=>e.actif !== false && e.actif !== 'Non').forEach(e => { enfantsInfo[e.prenom]={id:e.id,color:e.couleur||'#64748B',emoji:e.emoji||'👤'}; mapIdToPrenom[e.id]=e.prenom; });
+  refs.intervenants.filter(i=>i.actif !== false && i.actif !== 'Non').forEach(i => { mapIntervenantIdToNom[i.id]=i.nom; });
+  refs.lieux.forEach(l => { mapLieuIdToNom[l.id]=l.nom; });
+  genererFiltres(); majSelectsModal();
+}
+
+function sauvegarderFiltres() {
+  localStorage.setItem('tribu_filtreEnfant',filtreEnfant); localStorage.setItem('tribu_filtreIntervenant',filtreIntervenant); localStorage.setItem('tribu_filtrePeriode',filtrePeriode);
+}
+function toggleFilters() { const p=document.getElementById('filterPanel'), a=document.getElementById('arrowFilter'); const show=p.style.display==='none'; p.style.display=show?'block':'none'; a.innerText=show?'expand_less':'expand_more'; }
+function genererFiltres() {
+  const c=document.getElementById('childFilters'); c.innerHTML='<div class="chip '+(filtreEnfant==='Tous'?'active':'')+'" onclick="setChildFilter(\'Tous\')">Tous</div>' + refs.enfants.filter(e=>e.actif!==false&&e.actif!=='Non').map(e=>`<div class="chip ${filtreEnfant===e.id?'active':''}" onclick="setChildFilter('${esc(e.id)}')">${esc(e.emoji||'👤')} ${esc(e.prenom)}</div>`).join('');
+  const i=document.getElementById('intervenantFilters'); i.innerHTML='<div class="chip '+(filtreIntervenant==='Tous'?'active':'')+'" onclick="setIntervenantFilter(\'Tous\')">Tous</div>' + refs.intervenants.filter(x=>x.actif!==false&&x.actif!=='Non').map(x=>`<div class="chip ${filtreIntervenant===x.id?'active':''}" onclick="setIntervenantFilter('${esc(x.id)}')">${esc(x.nom)}</div>`).join('');
+  const p=document.getElementById('periodeFilters'); p.innerHTML='<div class="chip '+(filtrePeriode==='Tous'?'active':'')+'" onclick="setPeriodeFilter(\'Tous\')">Toutes</div><div class="chip '+(filtrePeriode==='HORS_VACANCES'?'active':'')+'" onclick="setPeriodeFilter(\'HORS_VACANCES\')">Hors vacances</div>' + refs.periodes.map(x=>`<div class="chip ${filtrePeriode===x.id?'active':''}" onclick="setPeriodeFilter('${esc(x.id)}')">${esc(x.nom||x.libelle||x.id)}</div>`).join('');
+}
+function setChildFilter(v){filtreEnfant=v;sauvegarderFiltres();genererFiltres();afficherTimeline();}
+function setIntervenantFilter(v){filtreIntervenant=v;sauvegarderFiltres();genererFiltres();afficherTimeline();}
+function setPeriodeFilter(v){filtrePeriode=v;sauvegarderFiltres();genererFiltres();afficherTimeline();}
+function reinitialiserFiltres(){filtreEnfant='Tous';filtreIntervenant='Tous';filtrePeriode='Tous';sauvegarderFiltres();genererFiltres();afficherTimeline();}
+function setTimeFilter(){ /* conservé pour compatibilité : la vue unique ne change plus */ }
+function naviguerSemaine(){ /* supprimé de l’UX */ }
+
+async function chargerDonnees(instantane=false) {
+  const loader=document.getElementById('loader');
+  if (instantane) {
+    try { const c=JSON.parse(localStorage.getItem(cacheKey)||'null'); if(Array.isArray(c)){donneesBrutes=normaliserReponsePlanning(c); afficherTimeline(); loader.style.display='none';} } catch(e){}
+  }
+  if (!donneesBrutes.length) loader.style.display='block';
+  try {
+    const now=new Date(); const from=new Date(now); from.setDate(from.getDate()-45); from.setHours(0,0,0,0);
+    const to=new Date(now); to.setMonth(to.getMonth()+12); to.setHours(23,59,59,999);
+    const r=await apiGet('getPlanningData',{from:formatForInput(from),to:formatForInput(to),includeRefs:'0'});
+    donneesBrutes=normaliserReponsePlanning(r); localStorage.setItem(cacheKey,JSON.stringify(donneesBrutes));
+    loader.style.display='none'; afficherTimeline();
+  } catch(e) {
+    loader.innerText='Erreur de chargement : '+e.message; loader.style.display='block';
+  }
+}
+
+function evenementPasseOuFutur(e){const now=new Date(); const s=parseDateSecurisee(e.debut), f=parseDateSecurisee(e.fin)||s; return {start:s,end:f,current:s&&f&&s<=now&&now<f,future:s&&s>now,past:f&&f<now};}
+function filtreOk(e){
+  if(filtreEnfant!=='Tous' && !(e.enfantsIds||[]).includes(filtreEnfant)) return false;
+  if(filtreIntervenant!=='Tous' && !(e.idsIntervenants||[]).includes(filtreIntervenant) && e.idIntervenant!==filtreIntervenant) return false;
+  if(filtrePeriode!=='Tous' && String(e.idPeriode||'')!==filtrePeriode) return false;
+  return true;
+}
+
+function genererOccurrences(){
+  // Une occurrence = une ligne BDD_Evenements. Un événement multi-jours reste UNE carte.
+  return donneesBrutes.filter(e=>e.debut && filtreOk(e)).map(e=>{
+    const s=parseDateSecurisee(e.debut), f=parseDateSecurisee(e.fin)||s;
+    const enfants=(e.enfantsIds||[]).map(id=>mapIdToPrenom[id]).filter(Boolean);
+    const state=evenementPasseOuFutur(e);
+    return {...e,dStart:s,dEnd:f,enfantsPrenoms:enfants,enfants:enfants, ...state};
+  }).filter(e=>e.dStart).sort((a,b)=>a.dStart-b.dStart);
+}
+
+function statusBadges(e){
+  const c=e.controleOccurrence; if(!c) return '';
+  let out='';
+  (c.conflits||[]).forEach(x=>{ if(x.type==='ENFANT') out+='<span class="conflict-badge blocking">⚠ Enfant</span>'; else if(x.type==='INTERVENANT') out+='<span class="conflict-badge warning">⚠ Intervenant</span>'; else if(x.type==='DOUBLON') out+='<span class="conflict-badge blocking">⚠ Doublon</span>'; });
+  return out?`<div class="status-line">${out}</div>`:'';
+}
+function enfantsBadges(enfants){return `<div class="enfants-badges-container">${(enfants||[]).map(n=>{const x=enfantsInfo[n]||{emoji:'👤',color:'#64748B'};return `<span class="badge-enfant" style="background:${x.color}15;color:${x.color};border:1px solid ${x.color}40">${x.emoji} ${esc(n)}</span>`}).join('')}</div>`;}
+function telLiens(intervenantId){const x=refs.intervenants.find(i=>i.id===intervenantId); if(!x) return ''; const nums=[x.telephone,x.telephone2,x.tel,x.tel2].filter(Boolean); if(!nums.length)return ''; return nums.map((n,k)=>{const t=String(n).replace(/\s+/g,'');return `<a class="action-btn-phone" href="tel:${esc(t)}">📞 ${k?'Appel 2':'Appel'}</a><a class="action-btn-phone" href="sms:${esc(t)}">💬 ${k?'SMS 2':'SMS'}</a>`}).join('');}
+
+function afficherTimeline(){
+  const c=document.getElementById('timeline'); c.innerHTML='';
+  const events=genererOccurrences();
+  const active=events.find(e=>e.current); const upcoming=events.find(e=>e.future);
+  document.getElementById('contextLine').innerText=active?`En cours : ${formatHeure(active.dStart)} · ${active.titre||active.type||'Événement'}`:upcoming?`Prochain : ${formatDateFR(upcoming.dStart)} · ${formatHeure(upcoming.dStart)}`:'Aucun événement à venir sur la période chargée.';
+  if(!events.length){c.innerHTML='<div style="text-align:center;color:#64748B;padding:50px 15px;">Aucun événement correspondant aux filtres.</div>';return;}
+  const groups={}; events.forEach(e=>{const k=dateKey(e.dStart);(groups[k]||(groups[k]=[])).push(e)});
+  let focusEl=null;
+  Object.keys(groups).sort().forEach(k=>{
+    const list=groups[k]; const h=document.createElement('div'); h.className='date-header-container'; h.innerHTML=`<div class="date-header">${esc(formatDateFR(list[0].dStart))}</div><span class="date-count-badge">${list.length} créneau${list.length>1?'x':''}</span>`; c.appendChild(h);
+    list.forEach(e=>{
+      const card=document.createElement('div'); card.className='event-card '+(e.current?'highlight-encours':e===upcoming?'highlight-upcoming':'')+' focus-anchor'; card.dataset.id=e.id;
+      if((e.current||e===upcoming)&&!focusEl) focusEl=card;
+      const info=e.idsIntervenants?.length?mapIntervenantIdToNom[e.idsIntervenants[0]]:e.responsable; const children=e.enfantsPrenoms||[];
+      const color=children.length===1?(enfantsInfo[children[0]]?.color||'#64748B'):'#64748B';
+      const badge=e.current?'<span class="badge-encours">En cours</span>':e===upcoming?'<span class="badge-upcoming">Prochain</span>':'';
+      const multi=e.dEnd&&e.dStart.toDateString()!==e.dEnd.toDateString()?`<div class="multi-day-note">📅 Se termine ${formatDateFR(e.dEnd)} à ${formatHeure(e.dEnd)}</div>`:'';
+      card.innerHTML=`<div class="event-color-bar" style="background:${color}"></div><div class="event-content"><div class="event-header"><div class="event-resp">👤 ${esc(info||'Responsable non renseigné')}</div><div style="display:flex;gap:5px;align-items:center"><span class="event-type-badge">${esc(e.type||'Autre')}</span>${badge}</div></div><div class="action-links-container">${telLiens(e.idsIntervenants?.[0]||e.idIntervenant)}</div><div class="sub-slot-item" onclick="editerEvenement('${esc(e.id)}')"><div class="sub-slot-header"><span class="event-time-pill">schedule ${esc(formatRange(e.dStart,e.dEnd))}</span>${enfantsBadges(children)}</div><div class="sub-slot-body">${e.titre?`<div class="sub-slot-title">${esc(e.titre)}</div>`:''}${e.lieu?`<div class="sub-slot-location">📍 ${esc(e.lieu)}</div>`:''}</div><div class="sub-slot-footer"><div style="font-size:12px;color:#64748B">${e.details?esc(e.details):''}</div><span class="edit-icon-btn">✎</span></div></div>${statusBadges(e)}</div>`;
+      c.appendChild(card);
+    });
+  });
+  if(focusEl) setTimeout(()=>{document.querySelectorAll('.focus-anchor').forEach(x=>x.classList.remove('focus-anchor'));focusEl.classList.add('focus-anchor');const r=focusEl.getBoundingClientRect();const header=document.querySelector('header');const top=window.scrollY+r.top-(header?.getBoundingClientRect().height||0)-8;window.scrollTo({top:Math.max(0,top),behavior:'smooth'});},180);
+}
+
+function genererSelectorEnfantsModal(){
+  const c=document.getElementById('formEnfantSelector'); c.innerHTML='';
+  const all=document.createElement('div'); all.className='child-chip'; all.innerText='Tous'; all.onclick=()=>{enfantsModalSelectionnes=refs.enfants.filter(e=>e.actif!==false&&e.actif!=='Non').map(e=>e.prenom);majRenduPucesModal()}; c.appendChild(all);
+  refs.enfants.filter(e=>e.actif!==false&&e.actif!=='Non').forEach(e=>{const b=document.createElement('div');b.className='child-chip';b.dataset.prenom=e.prenom;b.innerText=`${e.emoji||'👤'} ${e.prenom}`;b.onclick=()=>toggleFormEnfant(e.prenom);c.appendChild(b)}); majRenduPucesModal();
+}
+function toggleFormEnfant(n){if(enfantsModalSelectionnes.includes(n)) enfantsModalSelectionnes=enfantsModalSelectionnes.filter(x=>x!==n); else enfantsModalSelectionnes.push(n);majRenduPucesModal();}
+function majRenduPucesModal(){document.querySelectorAll('#formEnfantSelector .child-chip').forEach(b=>{const n=b.dataset.prenom;b.classList.toggle('selected',n&&enfantsModalSelectionnes.includes(n)); if(n){const x=enfantsInfo[n];if(x)b.style.background=x.color;b.style.color=n&&enfantsModalSelectionnes.includes(n)?'#fff':'';}})}
+function majSelectsModal(){
+  const t=document.getElementById('formTypeSelect'); if(t){t.innerHTML='<option value="">-- Choisir --</option>'+refs.types.map(x=>`<option value="${esc(typeof x==='string'?x:(x.nom||x.libelle||x.id))}">${esc(typeof x==='string'?x:(x.nom||x.libelle||x.id))}</option>`).join('')+'<option value="NOUVEAU">+ Ajouter un type...</option>';}
+  const r=document.getElementById('formResponsableSelect'); if(r){r.innerHTML='<option value="">-- Choisir --</option>'+refs.intervenants.filter(x=>x.actif!==false&&x.actif!=='Non').map(x=>`<option value="${esc(x.nom)}" data-id="${esc(x.id)}">${esc(x.nom)}</option>`).join('')+'<option value="NOUVEAU">+ Ajouter...</option>';}
+  const p=document.getElementById('formPeriodeSelect'); if(p){p.innerHTML='<option value="">-- Hors vacances --</option>'+refs.periodes.map(x=>`<option value="${esc(x.id)}">${esc(x.nom||x.libelle||x.id)}</option>`).join('');}
+}
+function gererTypeSelect(){const v=document.getElementById('formTypeSelect').value;const i=document.getElementById('formTypeInput');i.style.display=v==='NOUVEAU'?'block':'none';if(v!=='NOUVEAU')i.value=v;}
+function gererResponsableSelect(){const v=document.getElementById('formResponsableSelect').value;const i=document.getElementById('formResponsableInput');i.style.display=v==='NOUVEAU'?'block':'none';if(v!=='NOUVEAU')i.value=v;}
+function toggleRecurrenceOpt(e){const chk=document.getElementById('chkRecurent');if(e&&e.target&&e.target!==chk&&e.currentTarget!==chk){chk.checked=!chk.checked}document.getElementById('recurrenceFields').style.display=chk.checked?'block':'none';}
+function surChangementDebut(){const s=document.getElementById('formDebut').value;if(s&&!document.getElementById('formId').value){const d=new Date(s);d.setHours(d.getHours()+1);document.getElementById('formFin').value=formatForInput(d)}validerControleDates()}
+function validerControleDates(){const a=parseDateSecurisee(document.getElementById('formDebut').value),b=parseDateSecurisee(document.getElementById('formFin').value),bad=!a||!b||b<=a;document.getElementById('dateError').style.display=bad?'flex':'none';return !bad;}
+
+function ouvrirModal(){
+  evenementEnEdition=null; document.getElementById('modalTitle').innerText='Nouvel Événement';
+  ['formId','formIdSerie','formTitre','formLieu','formDetails','formDate','formRecurFin'].forEach(id=>document.getElementById(id).value='');
+  const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());document.getElementById('formDebut').value=formatForInput(now);const f=new Date(now);f.setHours(f.getHours()+1);document.getElementById('formFin').value=formatForInput(f);
+  document.getElementById('formTypeSelect').value='';document.getElementById('formTypeInput').style.display='none';document.getElementById('formResponsableSelect').value='';document.getElementById('formResponsableInput').style.display='none';document.getElementById('formPeriodeSelect').value='';document.getElementById('chkRecurent').checked=false;document.getElementById('recurrenceFields').style.display='none';document.getElementById('secOptionSerie').style.display='none';document.getElementById('btnDelete').style.display='none';
+  enfantsModalSelectionnes=[];genererSelectorEnfantsModal();document.getElementById('modalEvt').style.display='flex';
+}
+function fermerModal(){document.getElementById('modalEvt').style.display='none';}
+function editerEvenement(id){
+  const e=donneesBrutes.find(x=>String(x.id)===String(id));if(!e)return;evenementEnEdition=e;document.getElementById('modalTitle').innerText='Modifier l’événement';
+  document.getElementById('formId').value=e.id;document.getElementById('formIdSerie').value=e.idSerie||'';document.getElementById('formTitre').value=e.titre||'';document.getElementById('formDebut').value=formatForInput(e.debut);document.getElementById('formFin').value=formatForInput(e.fin);document.getElementById('formLieu').value=e.lieu||'';document.getElementById('formDetails').value=e.details||'';document.getElementById('formPeriodeSelect').value=e.idPeriode||'';
+  const typeKnown=refs.types.some(x=>(typeof x==='string'?x:(x.nom||x.libelle||x.id))===e.type);document.getElementById('formTypeSelect').value=typeKnown?e.type:'NOUVEAU';document.getElementById('formTypeInput').value=e.type||'';document.getElementById('formTypeInput').style.display=typeKnown?'none':'block';
+  const int=refs.intervenants.find(x=>x.id===e.idIntervenant)||refs.intervenants.find(x=>x.nom===e.responsable);if(int){document.getElementById('formResponsableSelect').value=int.nom;document.getElementById('formResponsableInput').style.display='none'}else{document.getElementById('formResponsableSelect').value='NOUVEAU';document.getElementById('formResponsableInput').value=e.responsable||'';document.getElementById('formResponsableInput').style.display='block'}
+  enfantsModalSelectionnes=(e.enfantsIds||[]).map(x=>mapIdToPrenom[x]).filter(Boolean);genererSelectorEnfantsModal();document.getElementById('chkRecurent').checked=false;document.getElementById('recurrenceFields').style.display='none';document.getElementById('secOptionSerie').style.display=e.idSerie?'block':'none';document.getElementById('btnDelete').style.display='block';validerControleDates();document.getElementById('modalEvt').style.display='flex';
+}
+function collectPayload(){
+  let type=document.getElementById('formTypeSelect').value; if(type==='NOUVEAU'||!type) type=document.getElementById('formTypeInput').value;
+  let resp=document.getElementById('formResponsableSelect').value; if(resp==='NOUVEAU'||!resp) resp=document.getElementById('formResponsableInput').value;
+  const opt=document.querySelector('input[name="optSerieAction"]:checked');
+  const ints=refs.intervenants.filter(i=>i.nom===resp).map(i=>i.id);
+  return {id:document.getElementById('formId').value,idSerie:document.getElementById('formIdSerie').value,modeModifSerie:opt?.value||'UNIQUE',enfantsIds:enfantsModalSelectionnes.map(n=>enfantsInfo[n]?.id).filter(Boolean),type:String(type||'').trim(),responsable:String(resp||'').trim(),idIntervenant:ints[0]||'',idsIntervenants:ints,titre:document.getElementById('formTitre').value.trim(),debut:document.getElementById('formDebut').value,fin:document.getElementById('formFin').value,lieu:document.getElementById('formLieu').value.trim(),idLieu:(evenementEnEdition?.idLieu||''),details:document.getElementById('formDetails').value.trim(),idPeriode:document.getElementById('formPeriodeSelect').value,statut:'Confirmé',isRecurent:document.getElementById('chkRecurent').checked,intervalleRecurrence:document.getElementById('formRecurIntervalle').value,uniteRecurrence:document.getElementById('formRecurUnite').value,dateFinRecurrence:document.getElementById('formRecurFin').value,confirmerConflits:false};
+}
+async function soumettre(){
+  if(!validerControleDates()){return} const p=collectPayload();
+  if(!p.enfantsIds.length){alert('Sélectionne au moins un enfant.');return} if(!p.type||!p.responsable){alert('Merci de renseigner le type et le responsable.');return}
+  payloadEnAttente=p; await demanderAnalyseEtSauvegarde(false);
+}
+async function demanderAnalyseEtSauvegarde(confirmer){
+  try{
+    const r=await apiPost('analyserConflits',{...payloadEnAttente,confirmerConflits:confirmer});
+    if(r.requiresConfirmation){analyseEnAttente=r;ouvrirModalConflit(r);return}
+    if(r.success===false){alert(r.message||'Erreur de validation');return}
+    if(confirmer) payloadEnAttente.confirmerConflits=true;
+    await executerEnregistrement(payloadEnAttente);
+  }catch(e){alert('Erreur de contrôle : '+e.message)}
+}
+function ouvrirModalConflit(r){
+  document.getElementById('conflitTitle').innerText=r.analysis?.title||'Contrôle des occurrences';
+  const a=r.analysis||{}; let html=`<div>${esc(a.message||'Des chevauchements ont été détectés.')}</div>`;
+  if(a.conflits?.length) html+='<ul style="margin:10px 0 0 18px">'+a.conflits.map(x=>`<li><strong>${esc(x.libelle||x.type)}</strong> ${esc(x.detail||'')}</li>`).join('')+'</ul>';
+  if(a.plan?.length) html+='<div style="margin-top:12px"><strong>Réorganisation proposée :</strong><ul style="margin:6px 0 0 18px">'+a.plan.map(x=>`<li>${esc(x.actionTexte||'Ajustement')}</li>`).join('')+'</ul></div>';
+  document.getElementById('conflitMessage').innerHTML=html;document.getElementById('btnConflitAction').innerText=a.actionLabel||'Confirmer et enregistrer';document.getElementById('modalConflit').style.display='flex';
+}
+function fermerModalConflit(){document.getElementById('modalConflit').style.display='none';}
+async function confirmerConflitEtEnregistrer(){fermerModalConflit();payloadEnAttente.confirmerConflits=true;await demanderAnalyseEtSauvegarde(true);}
+async function executerEnregistrement(p){const b=document.getElementById('btnSubmit');b.disabled=true;b.innerText='Enregistrement…';try{const r=await apiPost('sauvegarderEvenement',p);if(!r.success)throw new Error(r.message||'Enregistrement impossible');fermerModal();localStorage.removeItem(cacheKey);await chargerDonnees(false)}catch(e){alert('Erreur d’enregistrement : '+e.message)}finally{b.disabled=false;b.innerText='Enregistrer'}}
+function supprimer(){const id=document.getElementById('formId').value,idSerie=document.getElementById('formIdSerie').value;if(!id)return;document.getElementById('supprModalMessage').innerHTML=idSerie?'Cet événement appartient à une série. Choisis ce que tu veux supprimer.':'Voulez-vous vraiment supprimer cet événement ?';document.getElementById('supprSerieOptions').style.display=idSerie?'block':'none';document.getElementById('modalSuppression').style.display='flex';}
+function fermerModalSuppression(){document.getElementById('modalSuppression').style.display='none';}
+async function confirmerSuppressionEffective(){const id=document.getElementById('formId').value;const idSerie=document.getElementById('formIdSerie').value;let mode='UNIQUE';if(idSerie){mode=document.querySelector('input[name="optSupprSerie"]:checked')?.value||'UNIQUE'}fermerModalSuppression();try{const r=await apiPost('supprimerLigne',{id,modeSupprSerie:mode});if(!r.success)throw new Error(r.message||'Suppression impossible');fermerModal();localStorage.removeItem(cacheKey);await chargerDonnees(false)}catch(e){alert('Erreur de suppression : '+e.message)}}
+</script>
 </body>
 </html>
