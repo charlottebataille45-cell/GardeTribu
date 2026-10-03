@@ -397,8 +397,8 @@
       document.getElementById("modalConflit").style.display = "none";
       document.getElementById("modalSuppression").style.display = "none";
 
-      chargerReferences();
       chargerDonnees();
+      chargerReferences();
     };
 
     function parseDateSecurisee(dateStr) {
@@ -408,19 +408,20 @@
       return isNaN(d.getTime()) ? null : d;
     }
 
-    async function apiGet(action, params = {}) {
-      const qs = new URLSearchParams({ action, ...params });
+    async function apiGet(action, params = {}, timeoutMs = 12000) {
+      const query = new URLSearchParams({ action, ...params });
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 15000);
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const resp = await fetch(`${API_URL}?${qs.toString()}`, { cache: 'no-store', signal: controller.signal });
-        if (!resp.ok) throw new Error(`Erreur réseau de l'API Apps Script (${resp.status})`);
+        const resp = await fetch(`${API_URL}?${query.toString()}`, { signal: controller.signal, cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Erreur réseau API (${resp.status})`);
         const data = await resp.json();
         if (data && data.success === false) throw new Error(data.message || 'Erreur API');
         return data;
-      } finally {
-        clearTimeout(timer);
-      }
+      } catch (e) {
+        if (e.name === 'AbortError') throw new Error('L’API met trop de temps à répondre.');
+        throw e;
+      } finally { clearTimeout(timer); }
     }
 
     async function apiPost(action, payload) {
@@ -448,65 +449,98 @@
       arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
     }
 
-    function obtenirFenetreCourante() {
-      const now = new Date();
-      if (filtreTemps === 'Jour') {
-        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        return { from: formatDateAPI(d), to: formatDateAPI(d) };
-      }
-      if (filtreTemps === 'Tous') return { includeAll: '1' };
-      const day = now.getDay() || 7;
-      const from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1 + offsetSemaines * 7);
-      const to = new Date(from);
-      to.setDate(to.getDate() + 6);
-      return { from: formatDateAPI(from), to: formatDateAPI(to) };
-    }
-
-    function formatDateAPI(d) {
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
-
-    function normaliserDonneesPlanning(reponse) {
-      const evenements = Array.isArray(reponse) ? reponse : (reponse && Array.isArray(reponse.evenements) ? reponse.evenements : []);
-      const liens = Array.isArray(reponse?.evenementEnfants) ? reponse.evenementEnfants : [];
+    function normaliserReponsePlanning(reponse) {
+      const liste = Array.isArray(reponse) ? reponse : (reponse && Array.isArray(reponse.evenements) ? reponse.evenements : []);
+      const liens = reponse && Array.isArray(reponse.evenementEnfants) ? reponse.evenementEnfants : [];
       const enfantsParEvt = {};
       liens.forEach(l => {
-        const id = String(l.idEvenement || l.ID_Evenement || '').trim();
-        const enf = String(l.idEnfant || l.ID_Enfant || '').trim();
-        if (id && enf) (enfantsParEvt[id] ||= []).push(enf);
+        const idEvt = String(l.idEvenement ?? l.ID_Evenement ?? l.id ?? '').trim();
+        const idEnf = String(l.idEnfant ?? l.ID_Enfant ?? '').trim();
+        if (!idEvt || !idEnf) return;
+        (enfantsParEvt[idEvt] ||= []).push(idEnf);
       });
-      return evenements.map(evt => {
-        const id = String(evt.id || evt.idEvenement || evt.ID_Evenement || '').trim();
-        let enfantsIds = Array.isArray(evt.enfantsIds) ? evt.enfantsIds.map(String) : (enfantsParEvt[id] || []);
-        if (typeof evt.enfantsIds === 'string') {
-          try { enfantsIds = JSON.parse(evt.enfantsIds); } catch (_) { enfantsIds = evt.enfantsIds.split(',').map(s=>s.trim()).filter(Boolean); }
-        }
-        return { ...evt, id, idEvenement: id, idSerie: evt.idSerie || '', responsable: evt.responsable || evt.responsableTexte || '', lieu: evt.lieu || evt.lieuTexte || '', enfantsIds };
-      }).filter(e => e.id || e.debut);
+      return liste.map(evt => {
+        const id = String(evt.id ?? evt.idEvenement ?? evt.ID_Evenement ?? '').trim();
+        const enfantsIds = Array.isArray(evt.enfantsIds) && evt.enfantsIds.length ? evt.enfantsIds.map(String) : (enfantsParEvt[id] || []);
+        return { ...evt, id, idEvenement: id, idSerie: String(evt.idSerie ?? evt.ID_Serie ?? ''),
+          responsable: evt.responsable ?? evt.responsableTexte ?? evt.Responsable ?? '',
+          intervenant: evt.intervenant ?? evt.responsableTexte ?? evt.responsable ?? '',
+          idIntervenant: evt.idIntervenant ?? '', intervenantsIds: evt.intervenantsIds ?? evt.idsIntervenants ?? [],
+          lieu: evt.lieu ?? evt.lieuTexte ?? '', idLieu: evt.idLieu ?? '', enfantsIds,
+          raw: evt.raw ?? null };
+      }).filter(e => e.id);
     }
 
-    async function chargerDonnees({silencieux=false} = {}) {
-      const loader = document.getElementById('loader');
-      if (!silencieux) loader.style.display = 'block';
+    function cleFenetreCourante() {
+      const now = new Date();
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (filtreTemps === 'Jour') return `jour_${d.toISOString().slice(0,10)}`;
+      if (filtreTemps === 'Tous') return 'tout';
+      const day = d.getDay() || 7;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - day + 1 + offsetSemaines * 7);
+      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+      return `semaine_${monday.toISOString().slice(0,10)}_${sunday.toISOString().slice(0,10)}`;
+    }
+
+    function bornesFenetre() {
+      const now = new Date();
+      const jour = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (filtreTemps === 'Jour') {
+        const key = jour.toISOString().slice(0,10);
+        return { from: key, to: key };
+      }
+      if (filtreTemps === 'Tous') return { includeAll: '1' };
+      const day = jour.getDay() || 7;
+      const from = new Date(jour); from.setDate(jour.getDate() - day + 1 + offsetSemaines * 7);
+      const to = new Date(from); to.setDate(from.getDate() + 6);
+      return { from: from.toISOString().slice(0,10), to: to.toISOString().slice(0,10) };
+    }
+
+    function lireCacheLocalPlanning(cle) {
       try {
-        const fenetre = obtenirFenetreCourante();
-        const reponse = await apiGet('getPlanningData', fenetre);
-        donneesBrutes = normaliserDonneesPlanning(reponse);
-        try { localStorage.setItem('tribu_cachePlanning', JSON.stringify({ ts: Date.now(), data: reponse })); } catch (_) {}
+        const raw = localStorage.getItem('tribu_planning_' + cle);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj || !Array.isArray(obj.evenements)) return null;
+        return obj;
+      } catch (_) { return null; }
+    }
+
+    function ecrireCacheLocalPlanning(cle, data) {
+      if (cle === 'tout') return;
+      try {
+        localStorage.setItem('tribu_planning_' + cle, JSON.stringify({
+          evenements: data.evenements || [], evenementEnfants: data.evenementEnfants || [], series: data.series || [], savedAt: Date.now()
+        }));
+      } catch (_) { /* quota mobile : le cache reste simplement désactivé */ }
+    }
+
+    async function chargerDonnees(options = {}) {
+      const loader = document.getElementById('loader');
+      const cle = cleFenetreCourante();
+      const cached = !options.force ? lireCacheLocalPlanning(cle) : null;
+      if (cached) {
+        donneesBrutes = normaliserReponsePlanning(cached);
         loader.style.display = 'none';
         afficherTimeline();
-      } catch(err) {
-        try {
-          const cache = JSON.parse(localStorage.getItem('tribu_cachePlanning') || 'null');
-          if (cache?.data) {
-            donneesBrutes = normaliserDonneesPlanning(cache.data);
-            loader.style.display = 'none';
-            afficherTimeline();
-            return;
-          }
-        } catch (_) {}
-        loader.innerText = "Erreur de chargement : " + (err.message || err);
+      } else if (!options.silent) {
         loader.style.display = 'block';
+        loader.innerText = 'Chargement du planning...';
+      }
+
+      try {
+        const data = await apiGet('getPlanningData', bornesFenetre());
+        donneesBrutes = normaliserReponsePlanning(data);
+        ecrireCacheLocalPlanning(cle, data);
+        loader.style.display = 'none';
+        afficherTimeline();
+      } catch (err) {
+        if (!cached) {
+          loader.style.display = 'block';
+          loader.innerText = 'Erreur de chargement : ' + err.message;
+          document.getElementById('timeline').innerHTML = '<div style="text-align:center;padding:30px;color:#64748B;">Impossible de charger le planning.<br><button class="chip" style="margin-top:10px" onclick="chargerDonnees({force:true})">Réessayer</button></div>';
+        }
       }
     }
 
@@ -805,29 +839,20 @@
       afficherTimeline();
     }
 
-    function setTimeFilter(temps) {
+    async function setTimeFilter(temps) {
       filtreTemps = temps;
       offsetSemaines = 0;
       sauvegarderFiltresLocal();
-      
       document.querySelectorAll('#timeFilters .chip').forEach(chip => {
         chip.classList.toggle('active', chip.innerText.includes(temps === 'Jour' ? "Aujourd'hui" : temps === 'Semaine' ? "semaine" : "Tout"));
       });
-
-      const weekNav = document.getElementById('weekNav');
-      if (temps === 'Semaine') {
-        weekNav.classList.add('active');
-      } else {
-        weekNav.classList.remove('active');
-      }
-
-      chargerDonnees();
+      document.getElementById('weekNav').classList.toggle('active', temps === 'Semaine');
+      await chargerDonnees();
     }
 
-    function naviguerSemaine(direction) {
+    async function naviguerSemaine(direction) {
       offsetSemaines += direction;
-      if (filtreTemps !== 'Semaine') filtreTemps = 'Semaine';
-      chargerDonnees();
+      await chargerDonnees();
     }
 
     /* FEATURE 9 : Découpage des événements multi-jours et séries récurrentes */
@@ -1289,112 +1314,35 @@
     }
 
     /* FEATURES 11 & 12 : Détection temporelle & Conflits intelligent d'enfants / responsable */
-    function analyserConflitsEtValider(payload) {
+    async function analyserConflitsEtValider(payload) {
       payloadEnAttente = payload;
       idsGardesARemplacer = [];
       ajustementsConflitEnfants = [];
-
-      const typePayload = (payload.type || "").trim().toLowerCase();
-      if (typePayload !== "garde") {
-        executerEnregistrement(payload);
-        return;
+      if ((payload.type || '').trim().toLowerCase() !== 'garde') {
+        executerEnregistrement(payload); return;
       }
-
-      const startNouveau = parseDateSecurisee(payload.debut);
-      const endNouveau = parseDateSecurisee(payload.fin);
-
-      if (!startNouveau || !endNouveau) {
-        executerEnregistrement(payload);
-        return;
-      }
-
-      let conflitsEnfants = [];
-      let conflitsResponsable = [];
-
-      const payloadEnfantsIds = (payload.enfantsIds || []).map(id => String(id).trim());
-
-      donneesBrutes.forEach(evt => {
-        if (String(evt.id).trim() === String(payload.id).trim()) return;
-
-        const typeExistant = (evt.type || "").trim().toLowerCase();
-        if (typeExistant !== "garde") return;
-
-        const startExistant = parseDateSecurisee(evt.debut);
-        const endExistant = parseDateSecurisee(evt.fin);
-
-        if (!startExistant || !endExistant) return;
-
-        // Détection de la superposition d'horaires
-        if (startNouveau < endExistant && endNouveau > startExistant) {
-          
-          let evtEnfantsIds = [];
-          if (Array.isArray(evt.enfantsIds)) {
-            evtEnfantsIds = evt.enfantsIds.map(id => String(id).trim());
-          } else if (typeof evt.enfantsIds === 'string') {
-            evtEnfantsIds = evt.enfantsIds.split(',').map(id => id.trim());
-          }
-
-          const enfantsEnConflitIds = evtEnfantsIds.filter(id => payloadEnfantsIds.includes(id));
-
-          if (enfantsEnConflitIds.length > 0) {
-            const enfantsEnConflitPrenoms = enfantsEnConflitIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-            const enfantsRestantsIds = evtEnfantsIds.filter(id => !payloadEnfantsIds.includes(id));
-            const enfantsRestantsPrenoms = enfantsRestantsIds.map(id => mapIdToPrenom[id]).filter(Boolean);
-
-            conflitsEnfants.push({
-              id: evt.id,
-              enfantsTouchés: enfantsEnConflitPrenoms,
-              enfantsRestants: enfantsRestantsPrenoms,
-              responsable: evt.responsable
-            });
-          }
-
-          if (evt.responsable && evt.responsable.trim().toLowerCase() === (payload.responsable || "").trim().toLowerCase()) {
-            conflitsResponsable.push(evt);
-          }
+      try {
+        const res = await apiPost('analyserConflits', payload);
+        if (res && res.success === false) { alert(res.message || 'Erreur lors de l’analyse des conflits.'); return; }
+        const enfants = res.conflitsEnfants || [];
+        const responsables = res.conflitsResponsable || [];
+        idsGardesARemplacer = res.idsGardesARemplacer || [];
+        ajustementsConflitEnfants = res.ajustementsConflitEnfants || [];
+        if (enfants.length) {
+          const details = enfants.map(c => c.enfantsRestantsIds?.length
+            ? `• <strong>${(c.enfantsTouchés || []).join(', ')}</strong> bascule(nt) sur la nouvelle garde. Les autres enfants restent sur la garde de <strong>${c.responsable || ''}</strong>.`
+            : `• <strong>${(c.enfantsTouchés || []).join(', ')}</strong> bascule(nt) sur la nouvelle garde. L'ancienne garde de <strong>${c.responsable || ''}</strong> sera supprimée.`).join('<br>');
+          ouvrirModalConflit('Ajustement des gardes', `Créneau déjà occupé détecté :<br><br>${details}<br><br>Voulez-vous valider cette réorganisation ?`, 'Valider et Réorganiser');
+          return;
         }
-      });
-
-      // FEATURE 11 : Réorganisation automatique des enfants en garde
-      if (conflitsEnfants.length > 0) {
-        conflitsEnfants.forEach(c => {
-          if (c.enfantsRestants.length === 0) {
-            idsGardesARemplacer.push(c.id);
-          } else {
-            const restantsIds = c.enfantsRestants.map(p => enfantsInfo[p] ? enfantsInfo[p].id : null).filter(Boolean);
-            ajustementsConflitEnfants.push({
-              id: c.id,
-              nouveauxEnfantsIds: restantsIds
-            });
-          }
-        });
-
-        const detailsText = conflitsEnfants.map(c => {
-          if (c.enfantsRestants.length > 0) {
-            return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. <strong>${c.enfantsRestants.join(', ')}</strong> reste géré(e) par ${c.responsable}.`;
-          }
-          return `• <strong>${c.enfantsTouchés.join(', ')}</strong> bascule sur la nouvelle garde. L'ancienne garde gérée par ${c.responsable} sera supprimée.`;
-        }).join('<br>');
-        
-        ouvrirModalConflit(
-          "Ajustement des gardes",
-          `Créneau déjà occupé détecté :<br><br>${detailsText}<br><br>Voulez-vous valider cette réorganisation ?`,
-          "Valider et Réorganiser"
-        );
-        return;
+        if (responsables.length) {
+          ouvrirModalConflit('Superposition de garde', `<strong>${payload.responsable}</strong> a déjà une garde sur ce créneau.<br><br>Souhaitez-vous confirmer l'enregistrement ?`, 'Confirmer et Enregistrer');
+          return;
+        }
+        executerEnregistrement(payload);
+      } catch (err) {
+        alert('Impossible d’analyser les conflits : ' + err.message);
       }
-
-      // FEATURE 12 : Superposition de responsable
-      if (conflitsResponsable.length > 0) {
-        ouvrirModalConflit(
-          "Superposition de garde",
-          `<strong>${payload.responsable}</strong> a déjà une garde enregistrée sur ce créneau horaire.<br><br>Souhaitez-vous confirmer l'enregistrement ?`,
-          "Confirmer et Enregistrer"
-        );
-        return;
-      }
-
-      executerEnregistrement(payload);
     }
 
     function ouvrirModalConflit(titre, message, libelleBouton) {
@@ -1433,7 +1381,7 @@
         }
 
         fermerModal();
-        chargerDonnees();
+        chargerDonnees({force:true});
         chargerReferences();
       } catch(err) {
         btn.innerHTML = "Enregistrer";
@@ -1487,7 +1435,7 @@
         fermerModal();
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
-        chargerDonnees();
+        chargerDonnees({force:true});
       } catch(err) {
         alert("Erreur lors de la suppression : " + err);
         btn.innerText = "Supprimer cet événement";
