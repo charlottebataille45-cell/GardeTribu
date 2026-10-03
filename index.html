@@ -136,16 +136,16 @@
       </button>
     </div>
 
-    <div class="filters-row" id="timeFilters">
-      <div class="chip time-filter active" onclick="setTimeFilter('Semaine')">Cette semaine</div>
-      <div class="chip time-filter" onclick="setTimeFilter('Jour')">Aujourd'hui</div>
-      <div class="chip time-filter" onclick="setTimeFilter('Tous')">Tout le planning</div>
-    </div>
-
-    <div class="week-nav active" id="weekNav">
-      <button class="week-nav-btn" onclick="naviguerSemaine(-1)"><span class="material-symbols-outlined" style="font-size:14px;">chevron_left</span> Préc.</button>
-      <span class="week-nav-title" id="weekNavTitle">Cette semaine</span>
-      <button class="week-nav-btn" onclick="naviguerSemaine(1)">Suiv. <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span></button>
+    <div class="week-nav active" id="timelineNav">
+      <button class="week-nav-btn" onclick="naviguerTimeline(-1)">
+        <span class="material-symbols-outlined" style="font-size:14px;">chevron_left</span> Préc.
+      </button>
+      <button class="week-nav-title" id="timelineNavTitle" onclick="revenirAujourdhui()" style="border:0;background:transparent;cursor:pointer;">
+        Aujourd'hui
+      </button>
+      <button class="week-nav-btn" onclick="naviguerTimeline(1)">
+        Suiv. <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+      </button>
     </div>
 
     <div id="filterPanel" class="filter-panel" style="display: none;">
@@ -227,7 +227,7 @@
         </div>
         <div class="form-group" style="flex: 1;">
           <label for="formFin">FIN *</label>
-          <input type="datetime-local" id="formFin" class="form-control" onchange="validerControleDates()">
+          <input type="datetime-local" id="formFin" onchange="marquerFinModifiee()" class="form-control">
         </div>
       </div>
 
@@ -378,8 +378,13 @@
     let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
     let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
     let filtrePeriode = localStorage.getItem('tribu_filtrePeriode') || 'Tous';
-    let filtreTemps = localStorage.getItem('tribu_filtreTemps') || 'Semaine';
-    let offsetSemaines = 0;
+    let filtreTemps = 'Timeline';
+    let timelineAnchorDate = new Date();
+    let timelineWindowStart = null;
+    let timelineWindowEnd = null;
+    let timelineFocusMode = 'nearest';
+    let finModifieeManuellement = false;
+    let chargementPlanningEnCours = null;
 
     let enfantsModalSelectionnes = [];
     let payloadEnAttente = null;
@@ -397,8 +402,10 @@
       document.getElementById("modalConflit").style.display = "none";
       document.getElementById("modalSuppression").style.display = "none";
 
-      chargerDonnees();
-      chargerReferences();
+      Promise.all([
+        chargerReferences(),
+        chargerDonnees({ initial: true })
+      ]);
     };
 
     function parseDateSecurisee(dateStr) {
@@ -408,37 +415,30 @@
       return isNaN(d.getTime()) ? null : d;
     }
 
-    async function apiGet(action, params = {}, timeoutMs = 12000) {
+    async function apiGet(action, params = {}) {
       const query = new URLSearchParams({ action, ...params });
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const resp = await fetch(`${API_URL}?${query.toString()}`, { signal: controller.signal, cache: 'no-store' });
-        if (!resp.ok) throw new Error(`Erreur réseau API (${resp.status})`);
-        const data = await resp.json();
-        if (data && data.success === false) throw new Error(data.message || 'Erreur API');
-        return data;
-      } catch (e) {
-        if (e.name === 'AbortError') throw new Error('L’API met trop de temps à répondre.');
-        throw e;
-      } finally { clearTimeout(timer); }
+      const resp = await fetch(`${API_URL}?${query.toString()}`, { cache: 'no-store' });
+      if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
+      const data = await resp.json();
+      if (data && data.success === false) throw new Error(data.message || "Erreur API");
+      return data;
     }
 
     async function apiPost(action, payload) {
-      const resp = await fetch(`${API_URL}?action=${action}`, {
+      const resp = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: action, payload: payload })
       });
       if (!resp.ok) throw new Error("Erreur réseau de l'API Apps Script");
-      return await resp.json();
+      const data = await resp.json();
+      return data;
     }
 
     function sauvegarderFiltresLocal() {
       localStorage.setItem('tribu_filtreEnfant', filtreEnfant);
       localStorage.setItem('tribu_filtreIntervenant', filtreIntervenant);
       localStorage.setItem('tribu_filtrePeriode', filtrePeriode);
-      localStorage.setItem('tribu_filtreTemps', filtreTemps);
     }
 
     function toggleFilters() {
@@ -449,99 +449,130 @@
       arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
     }
 
-    function normaliserReponsePlanning(reponse) {
-      const liste = Array.isArray(reponse) ? reponse : (reponse && Array.isArray(reponse.evenements) ? reponse.evenements : []);
-      const liens = reponse && Array.isArray(reponse.evenementEnfants) ? reponse.evenementEnfants : [];
-      const enfantsParEvt = {};
-      liens.forEach(l => {
-        const idEvt = String(l.idEvenement ?? l.ID_Evenement ?? l.id ?? '').trim();
-        const idEnf = String(l.idEnfant ?? l.ID_Enfant ?? '').trim();
-        if (!idEvt || !idEnf) return;
-        (enfantsParEvt[idEvt] ||= []).push(idEnf);
-      });
-      return liste.map(evt => {
-        const id = String(evt.id ?? evt.idEvenement ?? evt.ID_Evenement ?? '').trim();
-        const enfantsIds = Array.isArray(evt.enfantsIds) && evt.enfantsIds.length ? evt.enfantsIds.map(String) : (enfantsParEvt[id] || []);
-        return { ...evt, id, idEvenement: id, idSerie: String(evt.idSerie ?? evt.ID_Serie ?? ''),
-          responsable: evt.responsable ?? evt.responsableTexte ?? evt.Responsable ?? '',
-          intervenant: evt.intervenant ?? evt.responsableTexte ?? evt.responsable ?? '',
-          idIntervenant: evt.idIntervenant ?? '', intervenantsIds: evt.intervenantsIds ?? evt.idsIntervenants ?? [],
-          lieu: evt.lieu ?? evt.lieuTexte ?? '', idLieu: evt.idLieu ?? '', enfantsIds,
-          raw: evt.raw ?? null };
-      }).filter(e => e.id);
+    function formatDateISO(d) {
+      const x = new Date(d);
+      const y = x.getFullYear();
+      const m = String(x.getMonth() + 1).padStart(2, '0');
+      const j = String(x.getDate()).padStart(2, '0');
+      return `${y}-${m}-${j}`;
     }
 
-    function cleFenetreCourante() {
-      const now = new Date();
-      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      if (filtreTemps === 'Jour') return `jour_${d.toISOString().slice(0,10)}`;
-      if (filtreTemps === 'Tous') return 'tout';
-      const day = d.getDay() || 7;
-      const monday = new Date(d);
-      monday.setDate(d.getDate() - day + 1 + offsetSemaines * 7);
-      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-      return `semaine_${monday.toISOString().slice(0,10)}_${sunday.toISOString().slice(0,10)}`;
+    function calculerFenetreTimeline(anchor) {
+      const a = new Date(anchor);
+      a.setHours(0, 0, 0, 0);
+
+      const from = new Date(a);
+      from.setDate(from.getDate() - 2);
+
+      const to = new Date(a);
+      to.setDate(to.getDate() + 14);
+      to.setHours(23, 59, 59, 999);
+
+      return { from, to };
     }
 
-    function bornesFenetre() {
-      const now = new Date();
-      const jour = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      if (filtreTemps === 'Jour') {
-        const key = jour.toISOString().slice(0,10);
-        return { from: key, to: key };
-      }
-      if (filtreTemps === 'Tous') return { includeAll: '1' };
-      const day = jour.getDay() || 7;
-      const from = new Date(jour); from.setDate(jour.getDate() - day + 1 + offsetSemaines * 7);
-      const to = new Date(from); to.setDate(from.getDate() + 6);
-      return { from: from.toISOString().slice(0,10), to: to.toISOString().slice(0,10) };
+    function cleCacheTimeline(from, to) {
+      return `tribu_timeline_${formatDateISO(from)}_${formatDateISO(to)}`;
     }
 
-    function lireCacheLocalPlanning(cle) {
+    function lireCacheTimeline(key) {
       try {
-        const raw = localStorage.getItem('tribu_planning_' + cle);
+        const raw = localStorage.getItem(key);
         if (!raw) return null;
         const obj = JSON.parse(raw);
-        if (!obj || !Array.isArray(obj.evenements)) return null;
-        return obj;
-      } catch (_) { return null; }
+        if (!obj || !obj.data) return null;
+        return obj.data;
+      } catch (e) {
+        return null;
+      }
     }
 
-    function ecrireCacheLocalPlanning(cle, data) {
-      if (cle === 'tout') return;
+    function ecrireCacheTimeline(key, data) {
       try {
-        localStorage.setItem('tribu_planning_' + cle, JSON.stringify({
-          evenements: data.evenements || [], evenementEnfants: data.evenementEnfants || [], series: data.series || [], savedAt: Date.now()
+        localStorage.setItem(key, JSON.stringify({
+          timestamp: Date.now(),
+          data
         }));
-      } catch (_) { /* quota mobile : le cache reste simplement désactivé */ }
+      } catch (e) {
+        console.warn('Cache local indisponible', e);
+      }
+    }
+
+    function normaliserReponsePlanning(reponse) {
+      if (Array.isArray(reponse)) return reponse;
+
+      if (reponse && Array.isArray(reponse.evenements)) {
+        return reponse;
+      }
+
+      if (reponse && reponse.data && Array.isArray(reponse.data.evenements)) {
+        return reponse.data;
+      }
+
+      throw new Error("Réponse API planning invalide.");
     }
 
     async function chargerDonnees(options = {}) {
-      const loader = document.getElementById('loader');
-      const cle = cleFenetreCourante();
-      const cached = !options.force ? lireCacheLocalPlanning(cle) : null;
+      const fenetre = calculerFenetreTimeline(timelineAnchorDate);
+      timelineWindowStart = fenetre.from;
+      timelineWindowEnd = fenetre.to;
+
+      const key = cleCacheTimeline(fenetre.from, fenetre.to);
+      const cached = lireCacheTimeline(key);
+
       if (cached) {
         donneesBrutes = normaliserReponsePlanning(cached);
-        loader.style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
         afficherTimeline();
       } else if (!options.silent) {
-        loader.style.display = 'block';
-        loader.innerText = 'Chargement du planning...';
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('timeline').innerHTML = '';
       }
 
+      const token = `${key}_${Date.now()}`;
+      chargementPlanningEnCours = token;
+
       try {
-        const data = await apiGet('getPlanningData', bornesFenetre());
-        donneesBrutes = normaliserReponsePlanning(data);
-        ecrireCacheLocalPlanning(cle, data);
-        loader.style.display = 'none';
+        const reponse = await apiGet('getPlanningData', {
+          from: formatDateISO(fenetre.from),
+          to: formatDateISO(fenetre.to),
+          includeAll: '0',
+          includeRefs: '0'
+        });
+
+        if (chargementPlanningEnCours !== token) return;
+
+        donneesBrutes = normaliserReponsePlanning(reponse);
+        ecrireCacheTimeline(key, donneesBrutes);
+
+        document.getElementById('loader').style.display = 'none';
         afficherTimeline();
       } catch (err) {
-        if (!cached) {
-          loader.style.display = 'block';
-          loader.innerText = 'Erreur de chargement : ' + err.message;
-          document.getElementById('timeline').innerHTML = '<div style="text-align:center;padding:30px;color:#64748B;">Impossible de charger le planning.<br><button class="chip" style="margin-top:10px" onclick="chargerDonnees({force:true})">Réessayer</button></div>';
+        if (cached) {
+          console.warn("Actualisation API échouée, cache conservé :", err);
+          document.getElementById('loader').style.display = 'none';
+          afficherTimeline();
+        } else {
+          document.getElementById('loader').innerText =
+            "Erreur de chargement : " + (err.message || err);
+          document.getElementById('loader').style.display = 'block';
         }
       }
+    }
+
+    async function rafraichirPlanningSilencieusement() {
+      await chargerDonnees({ silent: true });
+    }
+
+    function viderCachesTimeline() {
+      try {
+        const aSupprimer = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.indexOf('tribu_timeline_') === 0) aSupprimer.push(k);
+        }
+        aSupprimer.forEach(k => localStorage.removeItem(k));
+      } catch (e) {}
     }
 
     async function chargerReferences() {
@@ -655,13 +686,11 @@
       filtreEnfant = 'Tous';
       filtreIntervenant = 'Tous';
       filtrePeriode = 'Tous';
-      filtreTemps = 'Semaine';
-      offsetSemaines = 0;
       sauvegarderFiltresLocal();
       genererFiltresEnfants();
       genererFiltresIntervenants();
       genererFiltresPeriodes();
-      setTimeFilter('Semaine');
+      revenirAujourdhui();
     }
 
     function majSelectsModal() {
@@ -793,6 +822,11 @@
       return true;
     }
 
+    function marquerFinModifiee() {
+      finModifieeManuellement = true;
+      validerControleDates();
+    }
+
     function gererTypeSelect() {
       const val = document.getElementById('formTypeSelect').value;
       const input = document.getElementById('formTypeInput');
@@ -839,20 +873,20 @@
       afficherTimeline();
     }
 
-    async function setTimeFilter(temps) {
-      filtreTemps = temps;
-      offsetSemaines = 0;
-      sauvegarderFiltresLocal();
-      document.querySelectorAll('#timeFilters .chip').forEach(chip => {
-        chip.classList.toggle('active', chip.innerText.includes(temps === 'Jour' ? "Aujourd'hui" : temps === 'Semaine' ? "semaine" : "Tout"));
-      });
-      document.getElementById('weekNav').classList.toggle('active', temps === 'Semaine');
-      await chargerDonnees();
+    function naviguerTimeline(direction) {
+      const d = new Date(timelineAnchorDate);
+      d.setDate(d.getDate() + (direction * 7));
+      d.setHours(0, 0, 0, 0);
+      timelineAnchorDate = d;
+      timelineFocusMode = 'nearest';
+      chargerDonnees();
     }
 
-    async function naviguerSemaine(direction) {
-      offsetSemaines += direction;
-      await chargerDonnees();
+    function revenirAujourdhui() {
+      timelineAnchorDate = new Date();
+      timelineAnchorDate.setHours(0, 0, 0, 0);
+      timelineFocusMode = 'nearest';
+      chargerDonnees();
     }
 
     /* FEATURE 9 : Découpage des événements multi-jours et séries récurrentes */
@@ -926,42 +960,46 @@
     function afficherTimeline() {
       const container = document.getElementById('timeline');
       container.innerHTML = '';
-      
-      const maintenant = new Date();
-      const maintenantDebutJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
 
-      const jourSemaine = maintenantDebutJour.getDay() || 7; 
-      const debutSemaine = new Date(maintenantDebutJour);
-      debutSemaine.setDate(maintenantDebutJour.getDate() - jourSemaine + 1 + (offsetSemaines * 7));
-      
-      const finSemaine = new Date(debutSemaine);
-      finSemaine.setDate(finSemaine.getDate() + 6);
-      finSemaine.setHours(23,59,59,999);
+      const maintenant = new Date();
+      const fenetre = calculerFenetreTimeline(timelineAnchorDate);
+      timelineWindowStart = fenetre.from;
+      timelineWindowEnd = fenetre.to;
 
       const optsNav = { day: 'numeric', month: 'short' };
-      const labelSemaine = offsetSemaines === 0 ? "Cette semaine" : `${debutSemaine.toLocaleDateString('fr-FR', optsNav)} - ${finSemaine.toLocaleDateString('fr-FR', optsNav)}`;
-      document.getElementById('weekNavTitle').innerText = labelSemaine;
+      const labelFrom = fenetre.from.toLocaleDateString('fr-FR', optsNav);
+      const labelTo = fenetre.to.toLocaleDateString('fr-FR', optsNav);
+      const anchorEstAujourdhui =
+        formatDateISO(timelineAnchorDate) === formatDateISO(new Date());
+
+      const navTitle = document.getElementById('timelineNavTitle');
+      if (navTitle) {
+        navTitle.innerText = anchorEstAujourdhui
+          ? "Aujourd'hui"
+          : `${labelFrom} → ${labelTo}`;
+      }
 
       const occurrences = genererOccurrences();
 
       const occurrencesFiltrees = occurrences.filter(occ => {
         if (filtreEnfant !== 'Tous') {
-          const match = occ.enfants.some(e => e.toLowerCase() === filtreEnfant.toLowerCase());
+          const match = occ.enfants.some(e =>
+            e.toLowerCase() === filtreEnfant.toLowerCase()
+          );
           if (!match) return false;
         }
-        
-        if (filtreIntervenant !== 'Tous' && occ.responsable !== filtreIntervenant) return false;
+
+        if (filtreIntervenant !== 'Tous' &&
+            occ.responsable !== filtreIntervenant) return false;
 
         if (filtrePeriode === 'HORS_VACANCES' && occ.idPeriode) return false;
-        if (filtrePeriode !== 'Tous' && filtrePeriode !== 'HORS_VACANCES' && occ.idPeriode !== filtrePeriode) return false;
+        if (filtrePeriode !== 'Tous' &&
+            filtrePeriode !== 'HORS_VACANCES' &&
+            occ.idPeriode !== filtrePeriode) return false;
 
-        const occTime = occ.occurrenceDate.getTime();
-        if (filtreTemps === 'Jour') {
-          return occTime === maintenantDebutJour.getTime();
-        } else if (filtreTemps === 'Semaine') {
-          return occTime >= debutSemaine.getTime() && occTime <= finSemaine.getTime();
-        }
-        return true;
+        const occDate = occ.occurrenceDate;
+        return occDate >= timelineWindowStart &&
+               occDate <= timelineWindowEnd;
       });
 
       occurrencesFiltrees.sort((a, b) => {
@@ -972,39 +1010,44 @@
       });
 
       if (occurrencesFiltrees.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 40px; color: #64748B;">Aucun événement ne correspond à vos filtres.</div>';
+        container.innerHTML =
+          '<div style="text-align:center; padding:40px; color:#64748B;">' +
+          'Aucun événement ne correspond à vos filtres.</div>';
         return;
       }
 
       const groupesParJour = {};
       occurrencesFiltrees.forEach(occ => {
-        const keyJour = occ.occurrenceDate.toISOString().split('T')[0];
+        const keyJour =
+          `${occ.occurrenceDate.getFullYear()}-${String(occ.occurrenceDate.getMonth()+1).padStart(2,'0')}-${String(occ.occurrenceDate.getDate()).padStart(2,'0')}`;
         if (!groupesParJour[keyJour]) groupesParJour[keyJour] = [];
         groupesParJour[keyJour].push(occ);
       });
 
-      let premierProchainElement = null;
-      let trouveProchain = false;
-      const joursAbrev = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
+      let focusElement = null;
+      let evenementEnCoursTrouve = false;
+      let evenementProchainTrouve = false;
+      const joursAbrev = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
 
       Object.keys(groupesParJour).forEach(keyJour => {
         const listeJour = groupesParJour[keyJour];
         const nbEvtsJour = listeJour.length;
-
         const dRef = listeJour[0].occurrenceDate;
-        const optionsDate = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        const dateHeaderStr = dRef.toLocaleDateString('fr-FR', optionsDate).toUpperCase();
 
         const headerCont = document.createElement('div');
         headerCont.className = 'date-header-container';
-        
+
         const headerTitle = document.createElement('div');
         headerTitle.className = 'date-header';
-        headerTitle.innerText = dateHeaderStr;
+        headerTitle.innerText =
+          dRef.toLocaleDateString('fr-FR', {
+            weekday:'long', day:'numeric', month:'long', year:'numeric'
+          }).toUpperCase();
 
         const headerCount = document.createElement('div');
         headerCount.className = 'date-count-badge';
-        headerCount.innerText = `${nbEvtsJour} créneau${nbEvtsJour > 1 ? 'x' : ''}`;
+        headerCount.innerText =
+          `${nbEvtsJour} créneau${nbEvtsJour > 1 ? 'x' : ''}`;
 
         headerCont.appendChild(headerTitle);
         headerCont.appendChild(headerCount);
@@ -1014,7 +1057,9 @@
         const respMap = new Map();
 
         listeJour.forEach(occ => {
-          const keyGroup = `${(occ.responsable || '').toLowerCase()}_${(occ.type || '').toLowerCase()}`;
+          const keyGroup =
+            `${(occ.responsable || '').toLowerCase()}_${(occ.type || '').toLowerCase()}`;
+
           if (!respMap.has(keyGroup)) {
             const item = {
               responsable: occ.responsable,
@@ -1024,6 +1069,7 @@
             respMap.set(keyGroup, item);
             groupesResp.push(item);
           }
+
           respMap.get(keyGroup).creneaux.push(occ);
         });
 
@@ -1036,18 +1082,22 @@
           });
 
           const styleBarre = genererGradientBarre(tousEnfants);
-
           const card = document.createElement('div');
           card.className = 'event-card';
 
-          const objResp = refIntervenantsObjets.find(i => i.nom.toLowerCase() === (groupe.responsable || '').toLowerCase());
+          const objResp = refIntervenantsObjets.find(i =>
+            i.nom.toLowerCase() === (groupe.responsable || '').toLowerCase()
+          );
+
           let actionsTelHtml = '';
           if (objResp) {
             const num1 = nettoyerNumero(objResp.tel1);
             const num2 = nettoyerNumero(objResp.tel2);
 
             if (num1 || num2) {
-              actionsTelHtml += `<div class="action-links-container" onclick="event.stopPropagation();">`;
+              actionsTelHtml +=
+                `<div class="action-links-container" onclick="event.stopPropagation();">`;
+
               if (num1) {
                 actionsTelHtml += `<a href="tel:${num1}" class="action-btn-phone">📞 Appel</a>`;
                 actionsTelHtml += `<a href="sms:${num1}" class="action-btn-phone">💬 SMS</a>`;
@@ -1056,6 +1106,7 @@
                 actionsTelHtml += `<a href="tel:${num2}" class="action-btn-phone">📞 Appel 2</a>`;
                 actionsTelHtml += `<a href="sms:${num2}" class="action-btn-phone">💬 SMS 2</a>`;
               }
+
               actionsTelHtml += `</div>`;
             }
           }
@@ -1064,41 +1115,72 @@
           let hasEncoursGroup = false;
 
           groupe.creneaux.forEach(occ => {
-            let heureTexte = "";
+            let heureTexte = '';
+
             if (occ.isMultiDay) {
               const jourDeb = joursAbrev[occ.dStart.getDay()];
-              const hDeb = occ.dStart.getHours().toString().padStart(2,'0') + 'h' + occ.dStart.getMinutes().toString().padStart(2,'0');
+              const hDeb =
+                String(occ.dStart.getHours()).padStart(2,'0') + 'h' +
+                String(occ.dStart.getMinutes()).padStart(2,'0');
               const jourFin = joursAbrev[occ.dEnd.getDay()];
-              const hFin = occ.dEnd.getHours().toString().padStart(2,'0') + 'h' + occ.dEnd.getMinutes().toString().padStart(2,'0');
+              const hFin =
+                String(occ.dEnd.getHours()).padStart(2,'0') + 'h' +
+                String(occ.dEnd.getMinutes()).padStart(2,'0');
               heureTexte = `${jourDeb} ${hDeb} ➔ ${jourFin} ${hFin}`;
             } else {
-              const hDeb = occ.dStart.getHours().toString().padStart(2,'0') + 'h' + occ.dStart.getMinutes().toString().padStart(2,'0');
-              const hFin = occ.dEnd.getHours().toString().padStart(2,'0') + 'h' + occ.dEnd.getMinutes().toString().padStart(2,'0');
+              const hDeb =
+                String(occ.dStart.getHours()).padStart(2,'0') + 'h' +
+                String(occ.dStart.getMinutes()).padStart(2,'0');
+              const hFin =
+                String(occ.dEnd.getHours()).padStart(2,'0') + 'h' +
+                String(occ.dEnd.getMinutes()).padStart(2,'0');
               heureTexte = `${hDeb} ➔ ${hFin}`;
             }
 
-            const estEnCours = (maintenant >= occ.dStart && maintenant <= occ.dEnd);
+            const estEnCours =
+              maintenant >= occ.dStart && maintenant <= occ.dEnd;
             const estFutur = occ.dStart > maintenant;
 
-            if (estEnCours) hasEncoursGroup = true;
+            if (estEnCours) {
+              hasEncoursGroup = true;
+              if (!evenementEnCoursTrouve) {
+                evenementEnCoursTrouve = true;
+                focusElement = card;
+              }
+            }
 
             let badgeSub = '';
             if (estEnCours) {
               badgeSub = '<span class="badge-encours">En cours</span>';
-            } else if (filtreTemps !== 'Jour' && !trouveProchain && estFutur) {
-              trouveProchain = true;
-              premierProchainElement = card;
+            } else if (!evenementEnCoursTrouve &&
+                       !evenementProchainTrouve &&
+                       estFutur) {
+              evenementProchainTrouve = true;
+              focusElement = card;
+              badgeSub = '<span class="badge-upcoming">Prochain</span>';
+            } else if (!evenementEnCoursTrouve &&
+                       !evenementProchainTrouve &&
+                       timelineFocusMode === 'nearest' &&
+                       occ.dStart >= timelineAnchorDate) {
+              evenementProchainTrouve = true;
+              focusElement = card;
               badgeSub = '<span class="badge-upcoming">Prochain</span>';
             }
 
             const subBadgesEnfants = genererBadgesEnfants(occ.enfants);
-            const subTitre = occ.titre ? `<div class="sub-slot-title">${occ.titre}</div>` : '';
-            const subLieu = occ.lieu ? `<div class="sub-slot-location"><span class="material-symbols-outlined" style="font-size:14px;">location_on</span> ${occ.lieu}</div>` : '';
+            const subTitre = occ.titre
+              ? `<div class="sub-slot-title">${occ.titre}</div>` : '';
+            const subLieu = occ.lieu
+              ? `<div class="sub-slot-location"><span class="material-symbols-outlined" style="font-size:14px;">location_on</span> ${occ.lieu}</div>`
+              : '';
 
             subSlotsHtml += `
               <div class="sub-slot-item" onclick="event.stopPropagation(); editerEvenement('${occ.id}')">
                 <div class="sub-slot-header">
-                  <span class="event-time-pill"><span class="material-symbols-outlined" style="font-size:14px;">schedule</span> ${heureTexte}</span>
+                  <span class="event-time-pill">
+                    <span class="material-symbols-outlined" style="font-size:14px;">schedule</span>
+                    ${heureTexte}
+                  </span>
                   ${subBadgesEnfants}
                   ${badgeSub}
                 </div>
@@ -1107,10 +1189,11 @@
                   ${subLieu}
                 </div>
                 <div class="sub-slot-footer">
-                  <span class="edit-icon-btn"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></span>
+                  <span class="edit-icon-btn">
+                    <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                  </span>
                 </div>
-              </div>
-            `;
+              </div>`;
           });
 
           if (hasEncoursGroup) {
@@ -1122,26 +1205,29 @@
             <div class="event-content">
               <div class="event-header">
                 <div class="event-resp">
-                  <span class="material-symbols-outlined" style="font-size:18px; color: #64748B;">person</span> 
+                  <span class="material-symbols-outlined" style="font-size:18px; color:#64748B;">person</span>
                   <span>${groupe.responsable}</span>
                 </div>
                 <span class="event-type-badge">${groupe.type}</span>
               </div>
               ${actionsTelHtml}
-              <div>
-                ${subSlotsHtml}
-              </div>
-            </div>
-          `;
+              <div>${subSlotsHtml}</div>
+            </div>`;
 
           container.appendChild(card);
         });
       });
 
-      if (filtreTemps === 'Tous' && premierProchainElement) {
+      if (focusElement) {
         setTimeout(() => {
-          premierProchainElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+          try {
+            focusElement.classList.add('focus-anchor');
+            focusElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          } catch (e) {}
+        }, 120);
       }
     }
 
@@ -1250,6 +1336,7 @@
       }
 
       document.getElementById("formTitre").value = evt.titre || "";
+      finModifieeManuellement = true;
       document.getElementById("formDebut").value = formatForInput(evt.debut);
       document.getElementById("formFin").value = formatForInput(evt.fin);
       document.getElementById("formDate").value = evt.date ? String(evt.date).split('T')[0] : (evt.debut ? String(evt.debut).split('T')[0] : "");
@@ -1318,30 +1405,74 @@
       payloadEnAttente = payload;
       idsGardesARemplacer = [];
       ajustementsConflitEnfants = [];
-      if ((payload.type || '').trim().toLowerCase() !== 'garde') {
-        executerEnregistrement(payload); return;
+
+      const typePayload = (payload.type || '').trim().toLowerCase();
+
+      if (typePayload !== 'garde') {
+        executerEnregistrement(payload);
+        return;
       }
+
+      const btn = document.getElementById("btnSubmit");
+      const texteInitial = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML =
+        '<span class="material-symbols-outlined spin" style="font-size:18px;">progress_activity</span> Vérification...';
+
       try {
-        const res = await apiPost('analyserConflits', payload);
-        if (res && res.success === false) { alert(res.message || 'Erreur lors de l’analyse des conflits.'); return; }
-        const enfants = res.conflitsEnfants || [];
-        const responsables = res.conflitsResponsable || [];
-        idsGardesARemplacer = res.idsGardesARemplacer || [];
-        ajustementsConflitEnfants = res.ajustementsConflitEnfants || [];
-        if (enfants.length) {
-          const details = enfants.map(c => c.enfantsRestantsIds?.length
-            ? `• <strong>${(c.enfantsTouchés || []).join(', ')}</strong> bascule(nt) sur la nouvelle garde. Les autres enfants restent sur la garde de <strong>${c.responsable || ''}</strong>.`
-            : `• <strong>${(c.enfantsTouchés || []).join(', ')}</strong> bascule(nt) sur la nouvelle garde. L'ancienne garde de <strong>${c.responsable || ''}</strong> sera supprimée.`).join('<br>');
-          ouvrirModalConflit('Ajustement des gardes', `Créneau déjà occupé détecté :<br><br>${details}<br><br>Voulez-vous valider cette réorganisation ?`, 'Valider et Réorganiser');
+        const resultat = await apiPost('analyserConflits', payload);
+
+        btn.disabled = false;
+        btn.innerHTML = texteInitial;
+
+        if (!resultat || resultat.success === false) {
+          throw new Error(resultat && resultat.message
+            ? resultat.message
+            : 'Analyse des conflits impossible.');
+        }
+
+        const conflitsEnfants = resultat.conflitsEnfants || [];
+        const conflitsResponsable = resultat.conflitsResponsable || [];
+
+        idsGardesARemplacer = resultat.idsGardesARemplacer || [];
+        ajustementsConflitEnfants =
+          resultat.ajustementsConflitEnfants || [];
+
+        if (conflitsEnfants.length > 0) {
+          const detailsText = conflitsEnfants.map(c => {
+            const touches = (c.enfantsTouchesNoms || c.enfantsTouchesIds || []).map(id => mapIdToPrenom[id] || id).join(', ');
+            const restants = (c.enfantsRestantsNoms || c.enfantsRestantsIds || []).map(id => mapIdToPrenom[id] || id).join(', ');
+
+            if (restants) {
+              return `• <strong>${touches}</strong> bascule sur la nouvelle garde. <strong>${restants}</strong> reste géré(e) par ${c.responsable || 'l’intervenant actuel'}.`;
+            }
+
+            return `• <strong>${touches}</strong> bascule sur la nouvelle garde. L'ancienne garde gérée par ${c.responsable || 'l’intervenant actuel'} sera supprimée.`;
+          }).join('<br>');
+
+          ouvrirModalConflit(
+            "Ajustement des gardes",
+            `Créneau déjà occupé détecté :<br><br>${detailsText}<br><br>Voulez-vous valider cette réorganisation ?`,
+            "Valider et Réorganiser"
+          );
           return;
         }
-        if (responsables.length) {
-          ouvrirModalConflit('Superposition de garde', `<strong>${payload.responsable}</strong> a déjà une garde sur ce créneau.<br><br>Souhaitez-vous confirmer l'enregistrement ?`, 'Confirmer et Enregistrer');
+
+        if (conflitsResponsable.length > 0) {
+          ouvrirModalConflit(
+            "Superposition de garde",
+            `<strong>${payload.responsable}</strong> a déjà une garde enregistrée sur ce créneau horaire.<br><br>Souhaitez-vous confirmer l'enregistrement ?`,
+            "Confirmer et Enregistrer"
+          );
           return;
         }
+
         executerEnregistrement(payload);
       } catch (err) {
-        alert('Impossible d’analyser les conflits : ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = texteInitial;
+        alert("Erreur lors de l'analyse des conflits : " +
+          (err.message || err));
       }
     }
 
@@ -1381,8 +1512,9 @@
         }
 
         fermerModal();
-        chargerDonnees({force:true});
-        chargerReferences();
+        viderCachesTimeline();
+        timelineFocusMode = 'nearest';
+        await chargerDonnees({ silent: true });
       } catch(err) {
         btn.innerHTML = "Enregistrer";
         btn.disabled = false;
@@ -1435,7 +1567,7 @@
         fermerModal();
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
-        chargerDonnees({force:true});
+        chargerDonnees();
       } catch(err) {
         alert("Erreur lors de la suppression : " + err);
         btn.innerText = "Supprimer cet événement";
