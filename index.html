@@ -499,17 +499,23 @@
     }
 
     function normaliserReponsePlanning(reponse) {
+      // L'API renvoie un objet enveloppe :
+      // { success, status, evenements, evenementEnfants, series, ... }
+      // Le moteur de Timeline, lui, travaille volontairement sur le
+      // tableau des événements. C'est cette distinction qui évite
+      // l'erreur "donneesBrutes.forEach is not a function".
       if (Array.isArray(reponse)) return reponse;
 
       if (reponse && Array.isArray(reponse.evenements)) {
-        return reponse;
+        return reponse.evenements;
       }
 
-      if (reponse && reponse.data && Array.isArray(reponse.data.evenements)) {
-        return reponse.data;
+      if (reponse && reponse.data &&
+          Array.isArray(reponse.data.evenements)) {
+        return reponse.data.evenements;
       }
 
-      throw new Error("Réponse API planning invalide.");
+      throw new Error("Réponse API planning invalide : tableau evenements absent.");
     }
 
     async function chargerDonnees(options = {}) {
