@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐢 La Tribu – Agenda familial · V2</title>
+  <title>🐢 La Tribu – Agenda familial</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <style>
@@ -397,11 +397,8 @@
       document.getElementById("modalConflit").style.display = "none";
       document.getElementById("modalSuppression").style.display = "none";
 
-      // V2 : l'interface est initialisée immédiatement avec les référentiels embarqués.
-      // Le réseau ne bloque plus l'affichage initial sur téléphone.
-      appliquerReferentielsAPI(REFERENTIELS_DEFAUT);
       chargerDonnees();
-      chargerReferencesEnArrierePlan();
+      chargerReferences();
     };
 
     function parseDateSecurisee(dateStr) {
@@ -412,19 +409,16 @@
     }
 
     async function apiGet(action, params = {}) {
-      const query = new URLSearchParams({ action, ...params }).toString();
+      const query = new URLSearchParams({ action, ...params });
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000);
+      const timer = setTimeout(() => controller.abort(), 12000);
       try {
-        const resp = await fetch(`${API_URL}?${query}`, { signal: controller.signal, cache: 'no-store' });
-        if (!resp.ok) throw new Error(`API Apps Script HTTP ${resp.status}`);
-        return await resp.json();
-      } catch (e) {
-        if (e.name === 'AbortError') throw new Error("L'API met trop de temps à répondre");
-        throw e;
-      } finally {
-        clearTimeout(timer);
-      }
+        const resp = await fetch(`${API_URL}?${query.toString()}`, { signal: controller.signal, cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Erreur HTTP ${resp.status}`);
+        const json = await resp.json();
+        if (json && json.success === false) throw new Error(json.message || 'Erreur API');
+        return json;
+      } finally { clearTimeout(timer); }
     }
 
     async function apiPost(action, payload) {
@@ -452,281 +446,63 @@
       arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
     }
 
-    // =====================================================================
-    // API / CACHE TEMPOREL — le téléphone ne charge jamais tout le planning
-    // sauf si l'utilisateur choisit explicitement « Tout le planning ».
-    // =====================================================================
-    const cachePlanning = new Map();
-    let chargementEnCours = null;
-    let derniereReponseAPI = null;
-
-    function normaliserEvenementFront(evt, liens) {
-      if (!evt || typeof evt !== 'object') return null;
-
-      const id = String(evt.id ?? evt.idEvenement ?? '').trim();
-      if (!id) return null;
-
-      let enfantsIds = Array.isArray(evt.enfantsIds)
-        ? evt.enfantsIds.map(String).map(v => v.trim()).filter(Boolean)
-        : [];
-
-      if (!enfantsIds.length && Array.isArray(liens)) {
-        enfantsIds = liens
-          .filter(l => String(l.idEvenement ?? l.ID_Evenement ?? '').trim() === id)
-          .map(l => String(l.idEnfant ?? l.ID_Enfant ?? '').trim())
-          .filter(Boolean);
-      }
-
-      const normalise = {
-        ...evt,
-        id,
-        idEvenement: id,
-        idSerie: String(evt.idSerie ?? evt.ID_Serie ?? '').trim(),
-        type: String(evt.type ?? evt.Type ?? '').trim(),
-        responsable: String(evt.responsable ?? evt.responsableTexte ?? evt.Responsable ?? '').trim(),
-        responsableTexte: String(evt.responsableTexte ?? evt.responsable ?? evt.Responsable ?? '').trim(),
-        titre: String(evt.titre ?? evt.Titre ?? '').trim(),
-        debut: evt.debut ?? evt.Debut ?? null,
-        fin: evt.fin ?? evt.Fin ?? null,
-        lieu: String(evt.lieu ?? evt.lieuTexte ?? evt.Lieu ?? '').trim(),
-        lieuTexte: String(evt.lieuTexte ?? evt.lieu ?? evt.Lieu ?? '').trim(),
-        details: String(evt.details ?? evt.Details ?? '').trim(),
-        idPeriode: String(evt.idPeriode ?? evt.ID_Periode ?? '').trim(),
-        statut: String(evt.statut ?? evt.Statut ?? 'Confirmé').trim(),
-        idIntervenant: String(evt.idIntervenant ?? evt.ID_Intervenant ?? '').trim(),
-        idsIntervenants: Array.isArray(evt.idsIntervenants)
-          ? evt.idsIntervenants.map(String).map(v => v.trim()).filter(Boolean)
-          : [],
-        idLieu: String(evt.idLieu ?? evt.ID_Lieu ?? '').trim(),
-        enfantsIds,
-        raw: evt.raw ?? null
-      };
-
-      if (!normalise.idsIntervenants.length && normalise.idIntervenant) {
-        normalise.idsIntervenants = [normalise.idIntervenant];
-      }
-
-      return normalise;
-    }
-
-    function normaliserReponsePlanning(reponse) {
-      if (Array.isArray(reponse)) {
-        return {
-          evenements: reponse.map(e => normaliserEvenementFront(e, [])).filter(Boolean),
-          evenementEnfants: [],
-          series: [],
-          referentiels: null,
-          raw: reponse
-        };
-      }
-
+    function normaliserPlanningAPI(reponse) {
+      const evenements = Array.isArray(reponse) ? reponse : (Array.isArray(reponse?.evenements) ? reponse.evenements : []);
       const liens = Array.isArray(reponse?.evenementEnfants) ? reponse.evenementEnfants : [];
-      const evenements = Array.isArray(reponse?.evenements)
-        ? reponse.evenements.map(e => normaliserEvenementFront(e, liens)).filter(Boolean)
-        : [];
-
-      return {
-        success: reponse?.success !== false,
-        evenements,
-        evenementEnfants: liens,
-        series: Array.isArray(reponse?.series) ? reponse.series : [],
-        referentiels: reponse?.referentiels || null,
-        filtre: reponse?.filtre || null,
-        totalDisponible: Number(reponse?.totalDisponible ?? evenements.length),
-        totalVisible: Number(reponse?.totalVisible ?? evenements.length),
-        raw: reponse
-      };
+      const parEvt = {};
+      liens.forEach(l => {
+        const idEvt = String(l.idEvenement ?? l.ID_Evenement ?? l.id ?? '').trim();
+        const idEnf = String(l.idEnfant ?? l.ID_Enfant ?? '').trim();
+        if (!idEvt || !idEnf) return;
+        (parEvt[idEvt] ||= []).push(idEnf);
+      });
+      return evenements.map(e => {
+        const id = String(e.id ?? e.idEvenement ?? e.ID_Evenement ?? '').trim();
+        const enfantsIds = Array.isArray(e.enfantsIds) ? e.enfantsIds.map(String) : (parEvt[id] || []);
+        return { ...e, id, idSerie: String(e.idSerie ?? e.ID_Serie ?? '').trim(),
+          responsable: e.responsable ?? e.responsableTexte ?? e.intervenant ?? '',
+          lieu: e.lieu ?? e.lieuTexte ?? '',
+          idIntervenant: e.idIntervenant ?? '',
+          idsIntervenants: e.idsIntervenants ?? e.intervenantsIds ?? [],
+          enfantsIds };
+      }).filter(e => e.id);
     }
 
-    function calculerFenetrePlanning() {
+    function clePeriodePlanning() {
       const maintenant = new Date();
-      const debutJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
-
-      if (filtreTemps === 'Tous') {
-        return { from: '', to: '', includeAll: true, key: 'ALL' };
-      }
-
-      if (filtreTemps === 'Jour') {
-        const finJour = new Date(debutJour);
-        finJour.setHours(23, 59, 59, 999);
-        return {
-          from: formaterDateAPI(debutJour),
-          to: formaterDateAPI(finJour),
-          includeAll: false,
-          key: `DAY_${formaterDateAPI(debutJour)}`
-        };
-      }
-
-      const jourSemaine = debutJour.getDay() || 7;
-      const debut = new Date(debutJour);
-      debut.setDate(debut.getDate() - jourSemaine + 1 + offsetSemaines * 7);
-      const fin = new Date(debut);
-      fin.setDate(fin.getDate() + 6);
-      fin.setHours(23, 59, 59, 999);
-
-      return {
-        from: formaterDateAPI(debut),
-        to: formaterDateAPI(fin),
-        includeAll: false,
-        key: `WEEK_${formaterDateAPI(debut)}`
-      };
+      const debut = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
+      const jour = debut.getDay() || 7;
+      debut.setDate(debut.getDate() - jour + 1 + (offsetSemaines * 7));
+      const fin = new Date(debut); fin.setDate(fin.getDate() + 6);
+      return { from: debut.toISOString().slice(0,10), to: fin.toISOString().slice(0,10), key: `${debut.toISOString().slice(0,10)}_${fin.toISOString().slice(0,10)}` };
     }
 
-    function formaterDateAPI(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const j = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${j}`;
-    }
-
-    const CACHE_LOCAL_PREFIX = 'gardetribu_planning_v2_';
-    const CACHE_LOCAL_TTL_MS = 30 * 60 * 1000;
-
-    function chargerCacheLocalPlanning(key) {
-      try {
-        const raw = localStorage.getItem(CACHE_LOCAL_PREFIX + key);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        if (!obj || !obj.data) return null;
-        if (Date.now() - Number(obj.ts || 0) > CACHE_LOCAL_TTL_MS) return obj.data;
-        return obj.data;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function enregistrerCacheLocalPlanning(key, data) {
-      try {
-        localStorage.setItem(CACHE_LOCAL_PREFIX + key, JSON.stringify({ ts: Date.now(), data }));
-      } catch (e) {
-        // Le cache local est facultatif : une saturation ne doit jamais bloquer l'application.
-      }
-    }
-
-    function afficherCachePlanning(cache) {
-      if (!cache || !Array.isArray(cache.evenements)) return false;
-      cachePlanning.set(cache.filtre?.key || 'LOCAL', cache);
-      derniereReponseAPI = cache;
-      donneesBrutes = cache.evenements.slice();
-      if (cache.referentiels) appliquerReferentielsAPI(cache.referentiels);
-      document.getElementById('loader').style.display = 'none';
-      afficherTimeline();
-      return true;
-    }
-
-    async function chargerReferencesEnArrierePlan() {
-      try {
-        const refs = await apiGet('getReferentiels');
-        if (refs?.success && refs.referentiels) appliquerReferentielsAPI(refs.referentiels);
-      } catch (e) {
-        console.warn('Référentiels distants indisponibles : utilisation du référentiel embarqué.');
-      }
-    }
-
-    async function chargerDonnees(force = false) {
-      const fenetre = calculerFenetrePlanning();
+    async function chargerDonnees() {
       const loader = document.getElementById('loader');
-      const timeline = document.getElementById('timeline');
-
-      if (!force && cachePlanning.has(fenetre.key)) {
-        afficherCachePlanning(cachePlanning.get(fenetre.key));
-        // Le cache mémoire est instantané ; on ne refait pas d'appel réseau.
-        return;
-      }
-
-      if (!force) {
-        const cacheLocal = chargerCacheLocalPlanning(fenetre.key);
-        if (cacheLocal) {
-          afficherCachePlanning(cacheLocal);
-          // Affichage immédiat, puis rafraîchissement silencieux en arrière-plan.
-          setTimeout(() => chargerDonnees(true).catch(() => {}), 0);
-          return cacheLocal;
-        }
-      }
-
-      if (chargementEnCours) return chargementEnCours;
-
-      loader.style.display = 'block';
-      loader.innerText = 'Chargement…';
-      timeline.innerHTML = '';
-
-      chargementEnCours = (async () => {
+      const cacheKey = 'tribu_planning_' + clePeriodePlanning().key;
+      const cache = localStorage.getItem(cacheKey);
+      if (cache) {
         try {
-          const params = {};
-          if (fenetre.from) params.from = fenetre.from;
-          if (fenetre.to) params.to = fenetre.to;
-          if (fenetre.includeAll) params.includeAll = '1';
-          // V2 : les référentiels embarqués sont disponibles immédiatement.
-          // L'API de planning ne les renvoie plus à chaque requête.
-          params.includeRefs = '0';
-
-          const reponse = await apiGet('getPlanningData', params);
-          const normalisee = normaliserReponsePlanning(reponse);
-
-          if (normalisee.success === false) {
-            throw new Error(reponse?.message || 'API Apps Script : réponse en erreur');
-          }
-
-          normalisee.filtre = { ...(normalisee.filtre || {}), key: fenetre.key };
-          cachePlanning.set(fenetre.key, normalisee);
-          enregistrerCacheLocalPlanning(fenetre.key, normalisee);
-          derniereReponseAPI = normalisee;
-          donneesBrutes = normalisee.evenements.slice();
-
-          if (normalisee.referentiels) {
-            appliquerReferentielsAPI(normalisee.referentiels);
-          }
-
+          donneesBrutes = normaliserPlanningAPI(JSON.parse(cache));
           loader.style.display = 'none';
           afficherTimeline();
-          return normalisee;
-        } catch (err) {
-          console.error('Erreur chargement planning :', err);
-          loader.innerHTML = `Erreur de chargement : ${echapperHTML(err.message || err)}<br><button onclick="chargerDonnees(true)" style="margin-top:10px;padding:8px 12px;border-radius:8px;border:1px solid #CBD5E1;background:white;">Réessayer</button>`;
-          throw err;
-        } finally {
-          chargementEnCours = null;
-        }
-      })();
-
-      return chargementEnCours;
-    }
-
-    function appliquerReferentielsAPI(refs) {
-      if (!refs || typeof refs !== 'object') return;
-      if (Array.isArray(refs.enfants)) refEnfants = refs.enfants;
-      if (Array.isArray(refs.types)) refTypes = refs.types;
-      if (Array.isArray(refs.intervenants)) refIntervenantsObjets = refs.intervenants.filter(i => i.actif === true || i.actif === undefined || i.actif === 'Oui');
-      if (Array.isArray(refs.periodes)) refPeriodes = refs.periodes;
-
-      refResponsables = refIntervenantsObjets.map(i => i.nom).filter(Boolean);
-      enfantsInfo = {};
-      enfantsListe = [];
-      mapIdToPrenom = {};
-
-      refEnfants.forEach(e => {
-        if (e.actif === true || e.actif === 'Oui' || e.actif === '' || e.actif === undefined) {
-          enfantsInfo[e.prenom] = { id: e.id, color: e.couleur || '#64748B', emoji: e.emoji || '👤' };
-          enfantsListe.push(e.prenom);
-          mapIdToPrenom[e.id] = e.prenom;
-        }
-      });
-
-      genererFiltresEnfants();
-      genererSelectorEnfantsModal();
-      majSelectsModal();
-      genererFiltresIntervenants();
-      genererFiltresPeriodes();
+        } catch (_) {}
+      } else {
+        loader.style.display = 'block';
+      }
+      try {
+        const plage = clePeriodePlanning();
+        const reponse = await apiGet('getPlanningData', { from: plage.from, to: plage.to });
+        donneesBrutes = normaliserPlanningAPI(reponse);
+        localStorage.setItem(cacheKey, JSON.stringify(reponse));
+        loader.style.display = 'none';
+        afficherTimeline();
+      } catch(err) {
+        if (!cache) loader.innerText = err.name === 'AbortError' ? 'Le chargement prend trop de temps. Réessaie.' : 'Erreur de chargement : ' + err.message;
+      }
     }
 
     async function chargerReferences() {
-      // L'API fournit désormais les référentiels avec les données : pas de second
-      // aller-retour réseau si la réponse API les contient.
-      if (derniereReponseAPI && derniereReponseAPI.referentiels) {
-        appliquerReferentielsAPI(derniereReponseAPI.referentiels);
-        return;
-      }
-
       let refs = null;
 
       try {
@@ -780,7 +556,7 @@
       majSelectsModal();
       genererFiltresIntervenants();
       genererFiltresPeriodes();
-      if (donneesBrutes.length) afficherTimeline();
+      afficherTimeline();
     }
 
     function genererFiltresEnfants() {
@@ -1021,27 +797,35 @@
       afficherTimeline();
     }
 
-    async function setTimeFilter(temps) {
+    function setTimeFilter(temps) {
       filtreTemps = temps;
       offsetSemaines = 0;
       sauvegarderFiltresLocal();
+      
       document.querySelectorAll('#timeFilters .chip').forEach(chip => {
         chip.classList.toggle('active', chip.innerText.includes(temps === 'Jour' ? "Aujourd'hui" : temps === 'Semaine' ? "semaine" : "Tout"));
       });
-      document.getElementById('weekNav').classList.toggle('active', temps === 'Semaine');
-      await chargerDonnees(false);
+
+      const weekNav = document.getElementById('weekNav');
+      if (temps === 'Semaine') {
+        weekNav.classList.add('active');
+      } else {
+        weekNav.classList.remove('active');
+      }
+
+      afficherTimeline();
     }
 
-    async function naviguerSemaine(direction) {
+    function naviguerSemaine(direction) {
       offsetSemaines += direction;
-      await chargerDonnees(false);
+      afficherTimeline();
     }
 
     /* FEATURE 9 : Découpage des événements multi-jours et séries récurrentes */
     function genererOccurrences() {
       const occurrences = [];
 
-      (Array.isArray(donneesBrutes) ? donneesBrutes : []).forEach(evt => {
+      donneesBrutes.forEach(evt => {
         if (!evt.debut) return;
 
         const dStart = parseDateSecurisee(evt.debut);
@@ -1166,6 +950,7 @@
       });
 
       let premierProchainElement = null;
+      let premierElementEnCours = null;
       let trouveProchain = false;
       const joursAbrev = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
 
@@ -1262,7 +1047,10 @@
             const estEnCours = (maintenant >= occ.dStart && maintenant <= occ.dEnd);
             const estFutur = occ.dStart > maintenant;
 
-            if (estEnCours) hasEncoursGroup = true;
+            if (estEnCours) {
+              hasEncoursGroup = true;
+              if (!premierElementEnCours) premierElementEnCours = card;
+            }
 
             let badgeSub = '';
             if (estEnCours) {
@@ -1270,6 +1058,7 @@
             } else if (filtreTemps !== 'Jour' && !trouveProchain && estFutur) {
               trouveProchain = true;
               premierProchainElement = card;
+              card.classList.add('highlight-upcoming');
               badgeSub = '<span class="badge-upcoming">Prochain</span>';
             }
 
@@ -1320,10 +1109,11 @@
         });
       });
 
-      if (filtreTemps === 'Tous' && premierProchainElement) {
+      const elementFocus = premierElementEnCours || premierProchainElement;
+      if (elementFocus && (filtreTemps === 'Tous' || filtreTemps === 'Semaine')) {
         setTimeout(() => {
-          premierProchainElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+          elementFocus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 250);
       }
     }
 
@@ -1453,13 +1243,10 @@
         typeFinal = document.getElementById("formTypeInput").value;
       }
 
-      const responsableSelect = document.getElementById("formResponsableSelect").value;
-      let responsableFinal = responsableSelect;
+      let responsableFinal = document.getElementById("formResponsableSelect").value;
       if (responsableFinal === 'NOUVEAU' || responsableFinal === '') {
         responsableFinal = document.getElementById("formResponsableInput").value;
       }
-      const intervenantObj = refIntervenantsObjets.find(i => String(i.nom).trim().toLowerCase() === String(responsableFinal).trim().toLowerCase());
-      const idIntervenantFinal = intervenantObj ? String(intervenantObj.id || '').trim() : '';
 
       if (!typeFinal.trim() || !responsableFinal.trim()) {
         alert("Merci de renseigner le type et le responsable.");
@@ -1480,8 +1267,6 @@
         enfantsIds: targetIds,
         type: typeFinal.trim(),
         responsable: responsableFinal.trim(),
-        idIntervenant: idIntervenantFinal,
-        idsIntervenants: idIntervenantFinal ? [idIntervenantFinal] : [],
         titre: document.getElementById("formTitre").value,
         debut: document.getElementById("formDebut").value,
         fin: document.getElementById("formFin").value,
@@ -1501,30 +1286,8 @@
     }
 
     /* FEATURES 11 & 12 : Détection temporelle & Conflits intelligent d'enfants / responsable */
-    async function analyserConflitsEtValider(payload) {
+    function analyserConflitsEtValider(payload) {
       payloadEnAttente = payload;
-
-      // Si l'utilisateur crée/modifie un événement hors de la fenêtre actuellement
-      // affichée, on charge uniquement sa fenêtre avant de calculer les conflits.
-      const dPayload = parseDateSecurisee(payload.debut);
-      if (dPayload && filtreTemps !== 'Tous') {
-        const datePayload = formaterDateAPI(dPayload);
-        const fenetre = calculerFenetrePlanning();
-        if (!fenetre.from || datePayload < fenetre.from || datePayload > fenetre.to) {
-          const ancienOffset = offsetSemaines;
-          const ancienFiltre = filtreTemps;
-          const jourSemaine = dPayload.getDay() || 7;
-          const debutCible = new Date(dPayload.getFullYear(), dPayload.getMonth(), dPayload.getDate());
-          debutCible.setDate(debutCible.getDate() - jourSemaine + 1);
-          const debutActuel = new Date();
-          const js = debutActuel.getDay() || 7;
-          debutActuel.setDate(debutActuel.getDate() - js + 1);
-          offsetSemaines = Math.round((debutCible - debutActuel) / 604800000);
-          await chargerDonnees(true);
-          offsetSemaines = ancienOffset;
-          filtreTemps = ancienFiltre;
-        }
-      }
       idsGardesARemplacer = [];
       ajustementsConflitEnfants = [];
 
@@ -1547,7 +1310,7 @@
 
       const payloadEnfantsIds = (payload.enfantsIds || []).map(id => String(id).trim());
 
-      (Array.isArray(donneesBrutes) ? donneesBrutes : []).forEach(evt => {
+      donneesBrutes.forEach(evt => {
         if (String(evt.id).trim() === String(payload.id).trim()) return;
 
         const typeExistant = (evt.type || "").trim().toLowerCase();
@@ -1667,8 +1430,8 @@
         }
 
         fermerModal();
-        cachePlanning.clear();
-        await chargerDonnees(true);
+        chargerDonnees();
+        chargerReferences();
       } catch(err) {
         btn.innerHTML = "Enregistrer";
         btn.disabled = false;
@@ -1721,8 +1484,7 @@
         fermerModal();
         btn.innerText = "Supprimer cet événement";
         btn.disabled = false;
-        cachePlanning.clear();
-        await chargerDonnees(true);
+        chargerDonnees();
       } catch(err) {
         alert("Erreur lors de la suppression : " + err);
         btn.innerText = "Supprimer cet événement";
