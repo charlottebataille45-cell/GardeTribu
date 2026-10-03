@@ -397,8 +397,8 @@
       document.getElementById("modalConflit").style.display = "none";
       document.getElementById("modalSuppression").style.display = "none";
 
-      chargerDonnees();
       chargerReferences();
+      chargerDonnees();
     };
 
     function parseDateSecurisee(dateStr) {
@@ -409,16 +409,18 @@
     }
 
     async function apiGet(action, params = {}) {
-      const query = new URLSearchParams({ action, ...params });
+      const qs = new URLSearchParams({ action, ...params });
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 12000);
+      const timer = setTimeout(() => controller.abort(), 15000);
       try {
-        const resp = await fetch(`${API_URL}?${query.toString()}`, { signal: controller.signal, cache: 'no-store' });
-        if (!resp.ok) throw new Error(`Erreur HTTP ${resp.status}`);
-        const json = await resp.json();
-        if (json && json.success === false) throw new Error(json.message || 'Erreur API');
-        return json;
-      } finally { clearTimeout(timer); }
+        const resp = await fetch(`${API_URL}?${qs.toString()}`, { cache: 'no-store', signal: controller.signal });
+        if (!resp.ok) throw new Error(`Erreur réseau de l'API Apps Script (${resp.status})`);
+        const data = await resp.json();
+        if (data && data.success === false) throw new Error(data.message || 'Erreur API');
+        return data;
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
     async function apiPost(action, payload) {
@@ -446,59 +448,65 @@
       arrow.innerText = isHidden ? 'expand_less' : 'expand_more';
     }
 
-    function normaliserPlanningAPI(reponse) {
-      const evenements = Array.isArray(reponse) ? reponse : (Array.isArray(reponse?.evenements) ? reponse.evenements : []);
-      const liens = Array.isArray(reponse?.evenementEnfants) ? reponse.evenementEnfants : [];
-      const parEvt = {};
-      liens.forEach(l => {
-        const idEvt = String(l.idEvenement ?? l.ID_Evenement ?? l.id ?? '').trim();
-        const idEnf = String(l.idEnfant ?? l.ID_Enfant ?? '').trim();
-        if (!idEvt || !idEnf) return;
-        (parEvt[idEvt] ||= []).push(idEnf);
-      });
-      return evenements.map(e => {
-        const id = String(e.id ?? e.idEvenement ?? e.ID_Evenement ?? '').trim();
-        const enfantsIds = Array.isArray(e.enfantsIds) ? e.enfantsIds.map(String) : (parEvt[id] || []);
-        return { ...e, id, idSerie: String(e.idSerie ?? e.ID_Serie ?? '').trim(),
-          responsable: e.responsable ?? e.responsableTexte ?? e.intervenant ?? '',
-          lieu: e.lieu ?? e.lieuTexte ?? '',
-          idIntervenant: e.idIntervenant ?? '',
-          idsIntervenants: e.idsIntervenants ?? e.intervenantsIds ?? [],
-          enfantsIds };
-      }).filter(e => e.id);
-    }
-
-    function clePeriodePlanning() {
-      const maintenant = new Date();
-      const debut = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
-      const jour = debut.getDay() || 7;
-      debut.setDate(debut.getDate() - jour + 1 + (offsetSemaines * 7));
-      const fin = new Date(debut); fin.setDate(fin.getDate() + 6);
-      return { from: debut.toISOString().slice(0,10), to: fin.toISOString().slice(0,10), key: `${debut.toISOString().slice(0,10)}_${fin.toISOString().slice(0,10)}` };
-    }
-
-    async function chargerDonnees() {
-      const loader = document.getElementById('loader');
-      const cacheKey = 'tribu_planning_' + clePeriodePlanning().key;
-      const cache = localStorage.getItem(cacheKey);
-      if (cache) {
-        try {
-          donneesBrutes = normaliserPlanningAPI(JSON.parse(cache));
-          loader.style.display = 'none';
-          afficherTimeline();
-        } catch (_) {}
-      } else {
-        loader.style.display = 'block';
+    function obtenirFenetreCourante() {
+      const now = new Date();
+      if (filtreTemps === 'Jour') {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return { from: formatDateAPI(d), to: formatDateAPI(d) };
       }
+      if (filtreTemps === 'Tous') return { includeAll: '1' };
+      const day = now.getDay() || 7;
+      const from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1 + offsetSemaines * 7);
+      const to = new Date(from);
+      to.setDate(to.getDate() + 6);
+      return { from: formatDateAPI(from), to: formatDateAPI(to) };
+    }
+
+    function formatDateAPI(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function normaliserDonneesPlanning(reponse) {
+      const evenements = Array.isArray(reponse) ? reponse : (reponse && Array.isArray(reponse.evenements) ? reponse.evenements : []);
+      const liens = Array.isArray(reponse?.evenementEnfants) ? reponse.evenementEnfants : [];
+      const enfantsParEvt = {};
+      liens.forEach(l => {
+        const id = String(l.idEvenement || l.ID_Evenement || '').trim();
+        const enf = String(l.idEnfant || l.ID_Enfant || '').trim();
+        if (id && enf) (enfantsParEvt[id] ||= []).push(enf);
+      });
+      return evenements.map(evt => {
+        const id = String(evt.id || evt.idEvenement || evt.ID_Evenement || '').trim();
+        let enfantsIds = Array.isArray(evt.enfantsIds) ? evt.enfantsIds.map(String) : (enfantsParEvt[id] || []);
+        if (typeof evt.enfantsIds === 'string') {
+          try { enfantsIds = JSON.parse(evt.enfantsIds); } catch (_) { enfantsIds = evt.enfantsIds.split(',').map(s=>s.trim()).filter(Boolean); }
+        }
+        return { ...evt, id, idEvenement: id, idSerie: evt.idSerie || '', responsable: evt.responsable || evt.responsableTexte || '', lieu: evt.lieu || evt.lieuTexte || '', enfantsIds };
+      }).filter(e => e.id || e.debut);
+    }
+
+    async function chargerDonnees({silencieux=false} = {}) {
+      const loader = document.getElementById('loader');
+      if (!silencieux) loader.style.display = 'block';
       try {
-        const plage = clePeriodePlanning();
-        const reponse = await apiGet('getPlanningData', { from: plage.from, to: plage.to });
-        donneesBrutes = normaliserPlanningAPI(reponse);
-        localStorage.setItem(cacheKey, JSON.stringify(reponse));
+        const fenetre = obtenirFenetreCourante();
+        const reponse = await apiGet('getPlanningData', fenetre);
+        donneesBrutes = normaliserDonneesPlanning(reponse);
+        try { localStorage.setItem('tribu_cachePlanning', JSON.stringify({ ts: Date.now(), data: reponse })); } catch (_) {}
         loader.style.display = 'none';
         afficherTimeline();
       } catch(err) {
-        if (!cache) loader.innerText = err.name === 'AbortError' ? 'Le chargement prend trop de temps. Réessaie.' : 'Erreur de chargement : ' + err.message;
+        try {
+          const cache = JSON.parse(localStorage.getItem('tribu_cachePlanning') || 'null');
+          if (cache?.data) {
+            donneesBrutes = normaliserDonneesPlanning(cache.data);
+            loader.style.display = 'none';
+            afficherTimeline();
+            return;
+          }
+        } catch (_) {}
+        loader.innerText = "Erreur de chargement : " + (err.message || err);
+        loader.style.display = 'block';
       }
     }
 
@@ -813,12 +821,13 @@
         weekNav.classList.remove('active');
       }
 
-      afficherTimeline();
+      chargerDonnees();
     }
 
     function naviguerSemaine(direction) {
       offsetSemaines += direction;
-      afficherTimeline();
+      if (filtreTemps !== 'Semaine') filtreTemps = 'Semaine';
+      chargerDonnees();
     }
 
     /* FEATURE 9 : Découpage des événements multi-jours et séries récurrentes */
@@ -950,7 +959,6 @@
       });
 
       let premierProchainElement = null;
-      let premierElementEnCours = null;
       let trouveProchain = false;
       const joursAbrev = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
 
@@ -1047,10 +1055,7 @@
             const estEnCours = (maintenant >= occ.dStart && maintenant <= occ.dEnd);
             const estFutur = occ.dStart > maintenant;
 
-            if (estEnCours) {
-              hasEncoursGroup = true;
-              if (!premierElementEnCours) premierElementEnCours = card;
-            }
+            if (estEnCours) hasEncoursGroup = true;
 
             let badgeSub = '';
             if (estEnCours) {
@@ -1058,7 +1063,6 @@
             } else if (filtreTemps !== 'Jour' && !trouveProchain && estFutur) {
               trouveProchain = true;
               premierProchainElement = card;
-              card.classList.add('highlight-upcoming');
               badgeSub = '<span class="badge-upcoming">Prochain</span>';
             }
 
@@ -1109,11 +1113,10 @@
         });
       });
 
-      const elementFocus = premierElementEnCours || premierProchainElement;
-      if (elementFocus && (filtreTemps === 'Tous' || filtreTemps === 'Semaine')) {
+      if (filtreTemps === 'Tous' && premierProchainElement) {
         setTimeout(() => {
-          elementFocus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 250);
+          premierProchainElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
       }
     }
 
