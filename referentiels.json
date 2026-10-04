@@ -72,6 +72,32 @@
       "email": ""
     }
   ],
+  "lieux": [
+    {
+      "id": "LIEU001",
+      "nom": "Domicile"
+    },
+    {
+      "id": "LIEU002",
+      "nom": "Chez Papy Michel & MamIsa"
+    },
+    {
+      "id": "LIEU003",
+      "nom": "Chez Mamie Colette"
+    },
+    {
+      "id": "LIEU004",
+      "nom": "Chez Mamie Sylvie"
+    },
+    {
+      "id": "LIEU005",
+      "nom": "Chez Maman (James)"
+    },
+    {
+      "id": "LIEU006",
+      "nom": "Centre de loisirs"
+    }
+  ],
   "periodes": [
     {
       "id": "PER001",
