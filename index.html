@@ -25,23 +25,16 @@
     .btn-toggle-filters { background: #F1F5F9; border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; cursor: pointer; transition: background 0.2s; }
     .btn-toggle-filters:hover { background: #E2E8F0; }
 
-    .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 8px 0 4px 2px; }
+    .filter-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 8px 0 4px 2px; letter-spacing: 0.3px; }
     .filters-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 6px; }
     .filters-row::-webkit-scrollbar { display: none; }
     
     .chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); white-space: nowrap; transition: all 0.2s ease; user-select: none; }
     .chip:hover { border-color: var(--text-main); color: var(--text-main); }
     .chip.active { background: #1E293B; color: white; border-color: #1E293B; }
-    .chip.time-filter { border-style: solid; background: #F1F5F9; color: #475569; border-color: transparent; }
-    .chip.time-filter.active { background: #E2E8F0; color: #0F172A; font-weight: 700; border: 1px solid #CBD5E1; }
 
     .filter-panel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
     .btn-reset-filters { margin-top: 8px; width: 100%; padding: 6px 12px; background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
-
-    .week-nav { display: none; align-items: center; justify-content: space-between; background: #F1F5F9; border-radius: 12px; padding: 6px 10px; margin-top: 6px; }
-    .week-nav.active { display: flex; }
-    .week-nav-btn { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 2px; color: var(--text-main); }
-    .week-nav-title { font-size: 12px; font-weight: 700; color: var(--text-main); }
 
     .timeline-container { padding: 12px 16px; max-width: 600px; margin: 0 auto; }
     
@@ -49,7 +42,7 @@
     .date-header { font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
     .date-count-badge { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 
-    /* CARTE ÉVÉNEMENT & STRUCTURE APPLICATION */
+    /* CARTE ÉVÉNEMENT */
     .event-card { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); position: relative; }
     .event-card.highlight-upcoming { border: 2px solid #3B82F6; background: #EFF6FF; }
     .event-card.highlight-encours { border: 2px solid #10B981; background: #F0FDF4; }
@@ -86,42 +79,48 @@
     .sub-slot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
     .edit-icon-btn { font-size: 16px; color: #94A3B8; display: flex; align-items: center; }
 
-    /* BOUTON D'AJOUT FAB */
+    /* BOUTON FAB */
     .fab { position: fixed; bottom: 25px; right: 25px; background: #0F172A; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,0.25); cursor: pointer; border: none; z-index: 100; transition: transform 0.2s; }
     .fab:hover { transform: scale(1.06); }
 
-    /* MODALE (Masquée par défaut) */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
-    .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
+    /* MODALES */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
+    .modal { background: var(--card); width: 100%; max-width: 520px; border-radius: 24px 24px 0 0; padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 -10px 25px -5px rgba(0,0,0,0.1); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-title { font-size: 18px; font-weight: 700; }
-    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .close-btn { background: #F1F5F9; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
 
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
-    .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; transition: border-color 0.2s; }
-    .form-control:focus { outline: none; border-color: var(--text-main); background: white; }
-    .form-control.is-invalid { border-color: #EF4444; background-color: #FEF2F2; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; background: #F8FAFC; transition: all 0.2s; color: var(--text-main); }
+    .form-control:focus { outline: none; border-color: #0F172A; background: white; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); }
 
+    /* CHOIX DES ENFANTS - BADGES */
     .child-selector { display: flex; flex-wrap: wrap; gap: 8px; }
-    .child-chip { padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-muted); cursor: pointer; transition: 0.2s; user-select: none; }
-    .child-chip.selected { color: white; border-color: transparent; }
+    .child-chip { padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: #F1F5F9; color: #475569; cursor: pointer; transition: all 0.2s ease; user-select: none; }
+    .child-chip.selected { color: #FFFFFF !important; border-color: transparent !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-    .recurrence-box { background: #F1F5F9; border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
+    /* RECURRENCE TOGGLE SWITCH */
+    .recurrence-box { background: #F8FAFC; border-radius: 12px; padding: 14px; margin-bottom: 16px; border: 1px solid var(--border); }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-    .toggle-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .toggle-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
 
-    .serie-options { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 12px; }
-    .error-msg { color: #EF4444; font-size: 12px; font-weight: 600; margin-top: 5px; display: none; align-items: center; gap: 4px; }
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E1; transition: .25s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .25s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    input:checked + .slider { background-color: #0F172A; }
+    input:checked + .slider:before { transform: translateX(20px); }
 
-    .btn-submit { width: 100%; padding: 14px; background: #0F172A; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .serie-options { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 10px; padding: 12px; margin-top: 10px; font-size: 12px; color: #78350F; }
+    .error-msg { color: #EF4444; font-size: 12px; font-weight: 600; margin-top: 6px; display: none; align-items: center; gap: 4px; }
+
+    .btn-submit { width: 100%; padding: 14px; background: #0F172A; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; transition: background 0.2s; }
+    .btn-submit:hover { background: #1E293B; }
     .btn-submit:disabled { background: #94A3B8; cursor: not-allowed; }
 
-    .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; display: none; }
+    .btn-delete { width: 100%; padding: 12px; background: transparent; color: #EF4444; border: none; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 6px; display: none; }
 
-    .spin { animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-  
     .context-line { font-size: 11px; color: #64748B; font-weight: 600; margin: 2px 0 4px 2px; }
     .focus-anchor { scroll-margin-top: 88px; }
     .conflict-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 7px; border-radius:9px; font-size:10px; font-weight:800; }
@@ -169,7 +168,7 @@
     </div>
   </header>
 
-  <!-- TIMELINE ET CONTENU PRINCIPAL DE L'APPLICATION -->
+  <!-- TIMELINE ET CONTENU PRINCIPAL -->
   <div class="timeline-container">
     <div id="loader" style="text-align:center; padding: 40px; color: #64748B;">Chargement du planning...</div>
     <div id="timeline"></div>
@@ -189,13 +188,13 @@
       <input type="hidden" id="formIdSerie">
 
       <div class="form-group">
-        <span class="filter-label" style="display:block; margin-bottom:6px;">1. CONCERNE L'ENFANT / LES ENFANTS *</span>
+        <label style="display:block; margin-bottom:8px;">Enfant(s) concerné(s) *</label>
         <div class="child-selector" id="formEnfantSelector"></div>
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label for="formTypeSelect">2. TYPE *</label>
+          <label for="formTypeSelect">Type *</label>
           <select id="formTypeSelect" class="form-control" onchange="gererTypeSelect()">
             <option value="">-- Choisir --</option>
             <option value="NOUVEAU">+ Ajouter un type...</option>
@@ -204,7 +203,7 @@
         </div>
 
         <div class="form-group" style="flex: 1;">
-          <label for="formResponsableSelect">3. RESPONSABLE *</label>
+          <label for="formResponsableSelect">Responsable *</label>
           <select id="formResponsableSelect" class="form-control" onchange="gererResponsableSelect()">
             <option value="">-- Choisir --</option>
             <option value="NOUVEAU">+ Ajouter...</option>
@@ -214,17 +213,17 @@
       </div>
 
       <div class="form-group">
-        <label for="formTitre">4. TITRE / ACTIVITÉ (OPTIONNEL)</label>
+        <label for="formTitre">Titre / Activité</label>
         <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Oréliance...">
       </div>
 
       <div style="display: flex; gap: 10px;">
         <div class="form-group" style="flex: 1;">
-          <label for="formDebut">5. DÉBUT *</label>
+          <label for="formDebut">Début *</label>
           <input type="datetime-local" id="formDebut" class="form-control" onchange="surChangementDebut()">
         </div>
         <div class="form-group" style="flex: 1;">
-          <label for="formFin">FIN *</label>
+          <label for="formFin">Fin *</label>
           <input type="datetime-local" id="formFin" class="form-control" onchange="validerControleDates()">
         </div>
       </div>
@@ -236,35 +235,37 @@
       <input type="hidden" id="formDate">
 
       <div class="form-group">
-        <label for="formLieu">6. LIEU</label>
+        <label for="formLieu">Lieu</label>
         <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
       </div>
 
       <div class="form-group">
-        <label for="formDetails">7. DÉTAILS / NOTES</label>
+        <label for="formDetails">Détails / Notes</label>
         <input type="text" id="formDetails" class="form-control" placeholder="Infos complémentaires...">
       </div>
 
       <div class="form-group">
-        <label for="formPeriodeSelect">PÉRIODE / VACANCES</label>
+        <label for="formPeriodeSelect">Période / Vacances</label>
         <select id="formPeriodeSelect" class="form-control">
           <option value="">-- Hors vacances --</option>
         </select>
       </div>
 
-      <!-- Fonctions 9 & 10 : Récurrence & Option de Série -->
       <div class="recurrence-box" id="secRecurrence">
-        <div class="toggle-row" onclick="toggleRecurrenceOpt()">
+        <div class="toggle-row" onclick="toggleRecurrenceOpt(event)">
           <div class="toggle-title">
-            <span class="material-symbols-outlined" style="font-size: 18px;">repeat</span>
-            8. Répéter cet événement
+            <span class="material-symbols-outlined" style="font-size: 20px;">repeat</span>
+            Répéter cet événement
           </div>
-          <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence" style="cursor:pointer; width:16px; height:16px;">
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="chkRecurent" onchange="toggleRecurrenceOpt(event)" aria-label="Activer la récurrence">
+            <span class="slider"></span>
+          </label>
         </div>
 
-        <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+        <div id="recurrenceFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;">
           <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-            <label for="formRecurIntervalle" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Toutes les :</label>
+            <label for="formRecurIntervalle" style="font-size: 12px; font-weight: 600; margin-bottom:0; min-width:70px;">Toutes les :</label>
             <input type="number" id="formRecurIntervalle" class="form-control" value="1" min="1" max="30" style="width: 70px;">
             <select id="formRecurUnite" class="form-control" style="flex: 1;" aria-label="Unité de fréquence">
               <option value="Jours">Jours</option>
@@ -274,7 +275,7 @@
           </div>
 
           <div style="display: flex; gap: 10px; align-items: center;">
-            <label for="formRecurFin" style="font-size: 12px; font-weight: 600; margin-bottom:0;">Jusqu'au :</label>
+            <label for="formRecurFin" style="font-size: 12px; font-weight: 600; margin-bottom:0; min-width:70px;">Jusqu'au :</label>
             <input type="date" id="formRecurFin" class="form-control" style="flex: 1;">
           </div>
         </div>
@@ -294,22 +295,22 @@
     </div>
   </div>
 
-  <!-- Fonctions 11 & 12 : Modale Conflit & Avertissement -->
+  <!-- MODALE CONFLIT / AVERTISSEMENT -->
   <div class="modal-overlay" id="modalConflit" style="z-index: 1100;">
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
-        <div class="modal-title" id="conflitTitle">Attention aux chevauchements</div>
+        <div class="modal-title" id="conflitTitle">Avertissement</div>
         <button class="close-btn" onclick="fermerModalConflit()" aria-label="Fermer la fenêtre">×</button>
       </div>
       <div id="conflitMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5;"></div>
       <div style="display: flex; gap: 10px; flex-direction: column;">
-        <button class="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Valider</button>
+        <button class="btn-submit" id="btnConflitAction" onclick="confirmerConflitEtEnregistrer()">Enregistrer quand même</button>
         <button class="btn-delete" onclick="fermerModalConflit()" style="display: block;">Annuler</button>
       </div>
     </div>
   </div>
 
-  <!-- Fonction 10 : Modale Suppression de série -->
+  <!-- MODALE SUPPRESSION -->
   <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;">
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
@@ -397,7 +398,6 @@ function formatRange(a,b) {
   return sameDay ? `${formatHeure(a)} → ${formatHeure(b)}` : `${formatHeure(a)} → ${b.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})} ${formatHeure(b)}`;
 }
 function dateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-function isOverlap(a,b,c,d) { return a < d && c < b; }
 
 function apiJsonp(action, params={}, timeout=20000) {
   return new Promise((resolve,reject) => {
@@ -470,8 +470,6 @@ function setChildFilter(v){filtreEnfant=v;sauvegarderFiltres();genererFiltres();
 function setIntervenantFilter(v){filtreIntervenant=v;sauvegarderFiltres();genererFiltres();afficherTimeline();}
 function setPeriodeFilter(v){filtrePeriode=v;sauvegarderFiltres();genererFiltres();afficherTimeline();}
 function reinitialiserFiltres(){filtreEnfant='Tous';filtreIntervenant='Tous';filtrePeriode='Tous';sauvegarderFiltres();genererFiltres();afficherTimeline();}
-function setTimeFilter(){ /* conservé pour compatibilité : la vue unique ne change plus */ }
-function naviguerSemaine(){ /* supprimé de l’UX */ }
 
 async function chargerDonnees(instantane=false) {
   const loader=document.getElementById('loader');
@@ -532,7 +530,6 @@ function afficherTimeline(){
       const info=e.idsIntervenants?.length?mapIntervenantIdToNom[e.idsIntervenants[0]]:e.responsable; const children=e.enfantsPrenoms||[];
       const color=children.length===1?(enfantsInfo[children[0]]?.color||'#64748B'):'#64748B';
       const badge=e.current?'<span class="badge-encours">En cours</span>':e===upcoming?'<span class="badge-upcoming">Prochain</span>':'';
-      const multi=e.dEnd&&e.dStart.toDateString()!==e.dEnd.toDateString()?`<div class="multi-day-note">📅 Se termine ${formatDateFR(e.dEnd)} à ${formatHeure(e.dEnd)}</div>`:'';
       card.innerHTML=`<div class="event-color-bar" style="background:${color}"></div><div class="event-content"><div class="event-header"><div class="event-resp">👤 ${esc(info||'Responsable non renseigné')}</div><div style="display:flex;gap:5px;align-items:center"><span class="event-type-badge">${esc(e.type||'Autre')}</span>${badge}</div></div><div class="action-links-container">${telLiens(e.idsIntervenants?.[0]||e.idIntervenant)}</div><div class="sub-slot-item" onclick="editerEvenement('${esc(e.id)}')"><div class="sub-slot-header"><span class="event-time-pill">schedule ${esc(formatRange(e.dStart,e.dEnd))}</span>${enfantsBadges(children)}</div><div class="sub-slot-body">${e.titre?`<div class="sub-slot-title">${esc(e.titre)}</div>`:''}${e.lieu?`<div class="sub-slot-location">📍 ${esc(e.lieu)}</div>`:''}</div><div class="sub-slot-footer"><div style="font-size:12px;color:#64748B">${e.details?esc(e.details):''}</div><span class="edit-icon-btn">✎</span></div></div>${statusBadges(e)}</div>`;
       c.appendChild(card);
     });
@@ -546,7 +543,25 @@ function genererSelectorEnfantsModal(){
   refs.enfants.filter(e=>e.actif!==false&&e.actif!=='Non').forEach(e=>{const b=document.createElement('div');b.className='child-chip';b.dataset.prenom=e.prenom;b.innerText=`${e.emoji||'👤'} ${e.prenom}`;b.onclick=()=>toggleFormEnfant(e.prenom);c.appendChild(b)}); majRenduPucesModal();
 }
 function toggleFormEnfant(n){if(enfantsModalSelectionnes.includes(n)) enfantsModalSelectionnes=enfantsModalSelectionnes.filter(x=>x!==n); else enfantsModalSelectionnes.push(n);majRenduPucesModal();}
-function majRenduPucesModal(){document.querySelectorAll('#formEnfantSelector .child-chip').forEach(b=>{const n=b.dataset.prenom;b.classList.toggle('selected',n&&enfantsModalSelectionnes.includes(n)); if(n){const x=enfantsInfo[n];if(x)b.style.background=x.color;b.style.color=n&&enfantsModalSelectionnes.includes(n)?'#fff':'';}})}
+function majRenduPucesModal(){
+  document.querySelectorAll('#formEnfantSelector .child-chip').forEach(b=>{
+    const n=b.dataset.prenom;
+    const isSelected = n && enfantsModalSelectionnes.includes(n);
+    b.classList.toggle('selected', isSelected);
+    if(n){
+      const x=enfantsInfo[n];
+      if(isSelected && x){
+        b.style.background=x.color;
+        b.style.color='#FFFFFF';
+        b.style.borderColor=x.color;
+      } else {
+        b.style.background='#F1F5F9';
+        b.style.color='#475569';
+        b.style.borderColor='#E2E8F0';
+      }
+    }
+  });
+}
 function majSelectsModal(){
   const t=document.getElementById('formTypeSelect'); if(t){t.innerHTML='<option value="">-- Choisir --</option>'+refs.types.map(x=>`<option value="${esc(typeof x==='string'?x:(x.nom||x.libelle||x.id))}">${esc(typeof x==='string'?x:(x.nom||x.libelle||x.id))}</option>`).join('')+'<option value="NOUVEAU">+ Ajouter un type...</option>';}
   const r=document.getElementById('formResponsableSelect'); if(r){r.innerHTML='<option value="">-- Choisir --</option>'+refs.intervenants.filter(x=>x.actif!==false&&x.actif!=='Non').map(x=>`<option value="${esc(x.nom)}" data-id="${esc(x.id)}">${esc(x.nom)}</option>`).join('')+'<option value="NOUVEAU">+ Ajouter...</option>';}
@@ -554,7 +569,11 @@ function majSelectsModal(){
 }
 function gererTypeSelect(){const v=document.getElementById('formTypeSelect').value;const i=document.getElementById('formTypeInput');i.style.display=v==='NOUVEAU'?'block':'none';if(v!=='NOUVEAU')i.value=v;}
 function gererResponsableSelect(){const v=document.getElementById('formResponsableSelect').value;const i=document.getElementById('formResponsableInput');i.style.display=v==='NOUVEAU'?'block':'none';if(v!=='NOUVEAU')i.value=v;}
-function toggleRecurrenceOpt(e){const chk=document.getElementById('chkRecurent');if(e&&e.target&&e.target!==chk&&e.currentTarget!==chk){chk.checked=!chk.checked}document.getElementById('recurrenceFields').style.display=chk.checked?'block':'none';}
+function toggleRecurrenceOpt(e){
+  const chk=document.getElementById('chkRecurent');
+  if(e && e.target !== chk){ chk.checked = !chk.checked; }
+  document.getElementById('recurrenceFields').style.display = chk.checked ? 'block' : 'none';
+}
 function surChangementDebut(){const s=document.getElementById('formDebut').value;if(s&&!document.getElementById('formId').value){const d=new Date(s);d.setHours(d.getHours()+1);document.getElementById('formFin').value=formatForInput(d)}validerControleDates()}
 function validerControleDates(){const a=parseDateSecurisee(document.getElementById('formDebut').value),b=parseDateSecurisee(document.getElementById('formFin').value),bad=!a||!b||b<=a;document.getElementById('dateError').style.display=bad?'flex':'none';return !bad;}
 
@@ -594,12 +613,56 @@ async function demanderAnalyseEtSauvegarde(confirmer){
     await executerEnregistrement(payloadEnAttente);
   }catch(e){alert('Erreur de contrôle : '+e.message)}
 }
+
+function rendreTexteLisible(txt) {
+  if (!txt) return '';
+  let s = String(txt);
+  Object.keys(mapIntervenantIdToNom).forEach(id => {
+    if (id && mapIntervenantIdToNom[id]) {
+      s = s.replace(new RegExp('\\b' + id + '\\b', 'g'), mapIntervenantIdToNom[id]);
+    }
+  });
+  Object.keys(mapIdToPrenom).forEach(id => {
+    if (id && mapIdToPrenom[id]) {
+      s = s.replace(new RegExp('\\b' + id + '\\b', 'g'), mapIdToPrenom[id]);
+    }
+  });
+  s = s.replace(/(?:l[’']|l')?événement\s+(\w+)/gi, (m, evId) => {
+    const ev = donneesBrutes.find(x => String(x.id) === String(evId));
+    if (ev) {
+      const desc = ev.titre || ev.type || 'Événement';
+      return `l'événement « ${desc} »`;
+    }
+    return m;
+  });
+  return s;
+}
+
 function ouvrirModalConflit(r){
-  document.getElementById('conflitTitle').innerText=r.analysis?.title||'Contrôle des occurrences';
-  const a=r.analysis||{}; let html=`<div>${esc(a.message||'Des chevauchements ont été détectés.')}</div>`;
-  if(a.conflits?.length) html+='<ul style="margin:10px 0 0 18px">'+a.conflits.map(x=>`<li><strong>${esc(x.libelle||x.type)}</strong> ${esc(x.detail||'')}</li>`).join('')+'</ul>';
-  if(a.plan?.length) html+='<div style="margin-top:12px"><strong>Réorganisation proposée :</strong><ul style="margin:6px 0 0 18px">'+a.plan.map(x=>`<li>${esc(x.actionTexte||'Ajustement')}</li>`).join('')+'</ul></div>';
-  document.getElementById('conflitMessage').innerHTML=html;document.getElementById('btnConflitAction').innerText=a.actionLabel||'Confirmer et enregistrer';document.getElementById('modalConflit').style.display='flex';
+  const a=r.analysis||{};
+  document.getElementById('conflitTitle').innerHTML = `<span class="material-symbols-outlined" style="color:#F59E0B; font-size:22px; vertical-align:sub; margin-right:6px;">warning</span> ${esc(a.title || 'Avertissement')}`;
+  
+  let html = `<div style="font-size:14px; margin-bottom:12px; color:#334155;">${esc(rendreTexteLisible(a.message || 'Des chevauchements existent mais peuvent être autorisés.'))}</div>`;
+  
+  if (a.conflits?.length) {
+    html += '<ul style="margin:10px 0 0 0; padding-left:18px; font-size:13px; color:#475569; display:flex; flex-direction:column; gap:6px;">';
+    a.conflits.forEach(x => {
+      html += `<li><strong>${esc(x.libelle || x.type)} :</strong> ${esc(rendreTexteLisible(x.detail || ''))}</li>`;
+    });
+    html += '</ul>';
+  }
+  
+  if (a.plan?.length) {
+    html += '<div style="margin-top:14px; padding:10px; background:#F8FAFC; border-radius:8px; border:1px solid #E2E8F0; font-size:12px;"><strong>Réorganisation proposée :</strong><ul style="margin:6px 0 0 16px;">';
+    a.plan.forEach(x => {
+      html += `<li>${esc(rendreTexteLisible(x.actionTexte || 'Ajustement'))}</li>`;
+    });
+    html += '</ul></div>';
+  }
+  
+  document.getElementById('conflitMessage').innerHTML = html;
+  document.getElementById('btnConflitAction').innerText = 'Enregistrer quand même';
+  document.getElementById('modalConflit').style.display = 'flex';
 }
 function fermerModalConflit(){document.getElementById('modalConflit').style.display='none';}
 async function confirmerConflitEtEnregistrer(){fermerModalConflit();payloadEnAttente.confirmerConflits=true;await demanderAnalyseEtSauvegarde(true);}
