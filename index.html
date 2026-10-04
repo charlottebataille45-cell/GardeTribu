@@ -499,7 +499,6 @@ function filtreOk(e){
 }
 
 function genererOccurrences(){
-  // Une occurrence = une ligne BDD_Evenements. Un événement multi-jours reste UNE carte.
   return donneesBrutes.filter(e=>e.debut && filtreOk(e)).map(e=>{
     const s=parseDateSecurisee(e.debut), f=parseDateSecurisee(e.fin)||s;
     const enfants=(e.enfantsIds||[]).map(id=>mapIdToPrenom[id]).filter(Boolean);
@@ -514,7 +513,7 @@ function statusBadges(e){
   (c.conflits||[]).forEach(x=>{ if(x.type==='ENFANT') out+='<span class="conflict-badge blocking">⚠ Enfant</span>'; else if(x.type==='INTERVENANT') out+='<span class="conflict-badge warning">⚠ Intervenant</span>'; else if(x.type==='DOUBLON') out+='<span class="conflict-badge blocking">⚠ Doublon</span>'; });
   return out?`<div class="status-line">${out}</div>`:'';
 }
-function enfantsBadges(enfants){return `<div class="enfants-badges-container">${(enfants||[]).map(n=>{const x=enfantsInfo[n]||{emoji:'👤',color:'#64748B'};return `<span class="badge-enfant" style="background:${x.color}15;color:${x.color};border:1px solid ${x.color}40">${x.emoji} ${esc(n)}</span>`}).join('')}</div>`;}
+function enfantsBadges(enfants){return `<div class="enfants-badges-container">${(enfants||[]).map(n=>{const x=enfantsInfo[n]||{emoji:'👤',color:'#64748B'};return `<span class="badge-enfant" style="background:${x.color}15;color:${x.color};border:1px solid${x.color}40">${x.emoji}${esc(n)}</span>`}).join('')}</div>`;}
 function telLiens(intervenantId){const x=refs.intervenants.find(i=>i.id===intervenantId); if(!x) return ''; const nums=[x.telephone,x.telephone2,x.tel,x.tel2].filter(Boolean); if(!nums.length)return ''; return nums.map((n,k)=>{const t=String(n).replace(/\s+/g,'');return `<a class="action-btn-phone" href="tel:${esc(t)}">📞 ${k?'Appel 2':'Appel'}</a><a class="action-btn-phone" href="sms:${esc(t)}">💬 ${k?'SMS 2':'SMS'}</a>`}).join('');}
 
 function afficherTimeline(){
