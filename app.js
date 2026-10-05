@@ -334,15 +334,23 @@ async function confirmerConflitEtEnregistrer(){fermerModalConflit();payloadEnAtt
 async function executerEnregistrement(p){const b=document.getElementById('btnSubmit');b.disabled=true;b.innerText='Enregistrement…';try{const r=await apiPost('sauvegarderEvenement',p);if(!r.success)throw new Error(r.message||'Enregistrement impossible');fermerModal();localStorage.removeItem(cacheKey);await chargerDonnees(false)}catch(e){alert('Erreur d’enregistrement : '+e.message)}finally{b.disabled=false;b.innerText='Enregistrer'}}
 
 function supprimer(){
-  const id=document.getElementById('formId').value;
-  const idSerie=document.getElementById('formIdSerie').value;
-  if(!id)return;
-  document.getElementById('supprModalMessage').innerHTML = idSerie ? 'Cet événement appartient à une série. Choisis ce que tu veux supprimer.' : 'Voulez-vous vraiment supprimer cet événement ?';
-  document.getElementById('supprSerieOptions').style.display = idSerie ? 'block' : 'none';
+  const id = document.getElementById('formId').value;
+  const idSerie = document.getElementById('formIdSerie').value;
+  if(!id) return;
+  
+  const msgEl = document.getElementById('supprModalMessage');
+  if(msgEl) {
+    msgEl.innerHTML = idSerie ? 'Cet événement appartient à une série. Choisis ce que tu veux supprimer.' : 'Voulez-vous vraiment supprimer cet événement ?';
+  }
+  
+  // Correction de l'ID pour correspondre au HTML (optionsSuppressionSerie)
+  const optionsSerie = document.getElementById('optionsSuppressionSerie');
+  if(optionsSerie) {
+    optionsSerie.style.display = (idSerie && String(idSerie).trim() !== '') ? 'flex' : 'none';
+  }
+  
   document.getElementById('modalSuppression').style.display = 'flex';
 }
-
-function fermerModalSuppression(){document.getElementById('modalSuppression').style.display='none';}
 
 async function confirmerSuppressionEffective() {
   const id = document.getElementById('formId').value;
@@ -350,7 +358,9 @@ async function confirmerSuppressionEffective() {
   let mode = 'UNIQUE';
   
   if (idSerie) {
-    mode = document.querySelector('input[name="optSupprSerie"]:checked')?.value || 'UNIQUE';
+    // Correction du nom des boutons radio pour correspondre au HTML (modeSuppr)
+    const radioSelectionne = document.querySelector('input[name="modeSuppr"]:checked');
+    mode = radioSelectionne ? radioSelectionne.value : 'UNIQUE';
   }
   
   fermerModalSuppression();
@@ -366,6 +376,10 @@ async function confirmerSuppressionEffective() {
     alert('Erreur de suppression : ' + e.message);
   }
 }
+
+function fermerModalSuppression(){document.getElementById('modalSuppression').style.display='none';}
+
+
 
 // --- LOGIQUE DE DÉFILEMENT (INFINITE SCROLL) ---
 window.addEventListener('scroll', async () => {
