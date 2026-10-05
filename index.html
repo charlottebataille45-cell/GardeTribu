@@ -6,8 +6,6 @@
   <title>🐢 La Tribu – Agenda familial</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-  
-  <!-- Feuille de style externe -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -96,7 +94,7 @@
 
       <div class="form-group">
         <label for="formTitre">Titre / Activité</label>
-        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Oréliance...">
+        <input type="text" id="formTitre" class="form-control" placeholder="Ex: Sortie Basket, RDV Médical...">
       </div>
 
       <div style="display: flex; gap: 10px;">
@@ -118,7 +116,7 @@
 
       <div class="form-group">
         <label for="formLieu">Lieu</label>
-        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, Chez Mamie Sylvie...">
+        <input type="text" id="formLieu" class="form-control" placeholder="Ex: Domicile, École...">
       </div>
 
       <div class="form-group">
@@ -192,23 +190,26 @@
     </div>
   </div>
 
-  <!-- MODALE SUPPRESSION -->
+  <!-- MODALE SUPPRESSION (SYNCHRONISÉE) -->
   <div class="modal-overlay" id="modalSuppression" style="z-index: 1150;">
     <div class="modal" style="max-width: 420px;">
       <div class="modal-header">
         <div class="modal-title" id="supprModalTitle">Confirmer la suppression</div>
         <button class="close-btn" onclick="fermerModalSuppression()" aria-label="Fermer la fenêtre">×</button>
       </div>
-      <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;"></div>
+      <div id="supprModalMessage" style="font-size: 13px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5;">
+        Que souhaitez-vous supprimer ?
+      </div>
       
-      <div id="supprSerieOptions" style="display:none; margin-bottom: 15px; background: #F1F5F9; border-radius: 8px; padding: 10px; font-size: 12px;">
+      <div id="optionsSuppressionSerie" style="display:none; margin-bottom: 15px; background: #F1F5F9; border-radius: 8px; padding: 10px; font-size: 12px;">
         <label style="display:block; margin-bottom: 8px; cursor:pointer;">
-          <input type="radio" name="optSupprSerie" value="UNIQUE" checked> Supprimer uniquement cette occurrence
+          <input type="radio" name="modeSuppr" value="UNIQUE" checked> Supprimer uniquement cette occurrence
+        </label>
+        <label style="display:block; margin-bottom: 8px; cursor:pointer;">
+          <input type="radio" name="modeSuppr" value="ETAPE"> Supprimer cette étape et les occurrences similaires
         </label>
         <label style="display:block; cursor:pointer;">
-          <input type="radio" name="optSupprSerie" value="ETAPE"> Supprimer toutes les occurrences de cette étape</label>
-        <label style="display:block; cursor:pointer; margin-top:8px;">
-          <input type="radio" name="optSupprSerie" value="SERIE"> Supprimer toute la série récurrente
+          <input type="radio" name="modeSuppr" value="SERIE"> Supprimer toute la série récurrente
         </label>
       </div>
 
@@ -219,7 +220,6 @@
     </div>
   </div>
 
-  <!-- Script JS externe -->
   <script src="app.js"></script>
 </body>
 </html>
