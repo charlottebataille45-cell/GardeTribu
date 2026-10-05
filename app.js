@@ -9,7 +9,6 @@ let mapLieuIdToNom = {};
 let enfantsModalSelectionnes = [];
 let evenementEnEdition = null;
 let payloadEnAttente = null;
-let analyseEnAttente = null;
 let cacheKey = 'tribu_planning_v6';
 let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
 let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
@@ -24,7 +23,7 @@ window.addEventListener('load', initialiser);
 function initialiser() {
   ['modalEvt', 'modalConflit', 'modalSuppression'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    if (el) el.classList.remove('active');
   });
   chargerReferences();
   chargerDonnees(true);
@@ -110,18 +109,14 @@ function normaliserReponsePlanning(r) {
       idEvenement: String(e.idEvenement ?? e.id ?? '').trim(),
       idSerie: String(e.idSerie ?? '').trim(),
       responsable: String(e.responsable ?? e.responsableTexte ?? '').trim(),
-      responsableTexte: String(e.responsableTexte ?? e.responsable ?? '').trim(),
       type: String(e.type ?? '').trim(), 
       titre: String(e.titre ?? '').trim(),
       lieu: String(e.lieu ?? e.lieuTexte ?? '').trim(), 
-      lieuTexte: String(e.lieuTexte ?? e.lieu ?? '').trim(),
       idIntervenant: String(e.idIntervenant ?? idsInt[0] ?? '').trim(),
       idsIntervenants: idsInt.map(String), 
-      intervenantsIds: idsInt.map(String),
       enfantsIds: enfants.map(String), 
       idPeriode: String(e.idPeriode ?? '').trim(), 
-      statut: String(e.statut ?? 'Confirmé'),
-      controleOccurrence: e.controleOccurrence || null
+      statut: String(e.statut ?? 'Confirmé')
     };
   }).filter(e => e.id || e.debut);
 }
@@ -225,21 +220,10 @@ function genererOccurrences() {
   }).filter(e => e.dStart).sort((a, b) => a.dStart - b.dStart);
 }
 
-function statusBadges(e) {
-  const c = e.controleOccurrence; if (!c) return '';
-  let out = '';
-  (c.conflits || []).forEach(x => { 
-    if (x.type === 'ENFANT') out += '<span class="conflict-badge blocking">⚠ Enfant</span>'; 
-    else if (x.type === 'INTERVENANT') out += '<span class="conflict-badge warning">⚠ Intervenant</span>'; 
-    else if (x.type === 'DOUBLON') out += '<span class="conflict-badge blocking">⚠ Doublon</span>'; 
-  });
-  return out ? `<div class="status-line">${out}</div>` : '';
-}
-
 function enfantsBadges(enfants) {
   return `<div class="enfants-badges-container">${(enfants || []).map(n => {
     const x = enfantsInfo[n] || { emoji: '👤', color: '#64748B' };
-    return `<span class="badge-enfant" style="background:${x.color}15;color:${x.color};border:1px solid${x.color}40">${x.emoji}${esc(n)}</span>`;
+    return `<span class="badge-enfant" style="background:${x.color}15;color:${x.color};border:1px solid ${x.color}40">${x.emoji}${esc(n)}</span>`;
   }).join('')}</div>`;
 }
 
@@ -299,7 +283,7 @@ function afficherTimeline() {
       const color = children.length === 1 ? (enfantsInfo[children[0]]?.color || '#64748B') : '#64748B';
       const badge = e.current ? '<span class="badge-encours">En cours</span>' : e === upcoming ? '<span class="badge-upcoming">Prochain</span>' : '';
 
-      card.innerHTML = `<div class="event-color-bar" style="background:${color}"></div><div class="event-content"><div class="event-header"><div class="event-resp">👤 ${esc(info || 'Responsable non renseigné')}</div><div style="display:flex;gap:5px;align-items:center"><span class="event-type-badge">${esc(e.type || 'Autre')}</span>${badge}</div></div><div class="action-links-container">${telLiens(e.idsIntervenants?.[0] || e.idIntervenant)}</div><div class="sub-slot-item" onclick="editerEvenement('${esc(e.id)}')"><div class="sub-slot-header"><span class="event-time-pill">schedule ${esc(formatRange(e.dStart, e.dEnd))}</span>${enfantsBadges(children)}</div><div class="sub-slot-body">${e.titre ? `<div class="sub-slot-title">${esc(e.titre)}</div>` : ''}${e.lieu ? `<div class="sub-slot-location">📍 ${esc(e.lieu)}</div>` : ''}</div><div class="sub-slot-footer"><div style="font-size:12px;color:#64748B">${e.details ? esc(e.details) : ''}</div><span class="edit-icon-btn">✎</span></div></div>${statusBadges(e)}</div>`;
+      card.innerHTML = `<div class="event-color-bar" style="background:${color}"></div><div class="event-content"><div class="event-header"><div class="event-resp">👤 ${esc(info || 'Responsable non renseigné')}</div><div style="display:flex;gap:5px;align-items:center"><span class="event-type-badge">${esc(e.type || 'Autre')}</span>${badge}</div></div><div class="action-links-container">${telLiens(e.idsIntervenants?.[0] || e.idIntervenant)}</div><div class="sub-slot-item" onclick="editerEvenement('${esc(e.id)}')"><div class="sub-slot-header"><span class="event-time-pill">schedule ${esc(formatRange(e.dStart, e.dEnd))}</span>${enfantsBadges(children)}</div><div class="sub-slot-body">${e.titre ? `<div class="sub-slot-title">${esc(e.titre)}</div>` : ''}${e.lieu ? `<div class="sub-slot-location">📍 ${esc(e.lieu)}</div>` : ''}</div><div class="sub-slot-footer"><div style="font-size:12px;color:#64748B">${e.details ? esc(e.details) : ''}</div><span class="edit-icon-btn">✎</span></div></div></div>`;
       c.appendChild(card);
     });
   });
@@ -440,12 +424,12 @@ function ouvrirModal() {
   enfantsModalSelectionnes = [];
   genererSelectorEnfantsModal();
   const modal = document.getElementById('modalEvt');
-  if (modal) modal.style.display = 'flex';
+  if (modal) modal.classList.add('active');
 }
 
 function fermerModal() {
   const modal = document.getElementById('modalEvt');
-  if (modal) modal.style.display = 'none';
+  if (modal) modal.classList.remove('active');
 }
 
 function editerEvenement(id) {
@@ -494,7 +478,7 @@ function editerEvenement(id) {
   
   validerControleDates();
   const modal = document.getElementById('modalEvt');
-  if (modal) modal.style.display = 'flex';
+  if (modal) modal.classList.add('active');
 }
 
 function collectPayload() {
@@ -520,13 +504,12 @@ function collectPayload() {
     debut: document.getElementById('formDebut')?.value || '',
     fin: document.getElementById('formFin')?.value || '',
     lieu: document.getElementById('formLieu')?.value.trim() || '',
-    idLieu: (evenementEnEdition?.idLieu || ''),
     details: document.getElementById('formDetails')?.value.trim() || '',
     idPeriode: document.getElementById('formPeriodeSelect')?.value || '',
     statut: 'Confirmé',
     isRecurent: document.getElementById('chkRecurent')?.checked || false,
     intervalleRecurrence: document.getElementById('formRecurIntervalle')?.value || '1',
-    uniteRecurrence: document.getElementById('formRecurUnite')?.value || 'SEMAINE',
+    uniteRecurrence: document.getElementById('formRecurUnite')?.value || 'Semaines',
     dateFinRecurrence: document.getElementById('formRecurFin')?.value || '',
     confirmerConflits: false
   };
@@ -544,7 +527,7 @@ async function soumettre() {
 async function demanderAnalyseEtSauvegarde(confirmer) {
   try {
     const r = await apiPost('analyserConflits', { ...payloadEnAttente, confirmerConflits: confirmer });
-    if (r.requiresConfirmation) { analyseEnAttente = r; ouvrirModalConflit(r); return; }
+    if (r.requiresConfirmation) { ouvrirModalConflit(r); return; }
     if (r.success === false) { alert(r.message || 'Erreur de validation'); return; }
     if (confirmer) payloadEnAttente.confirmerConflits = true;
     await executerEnregistrement(payloadEnAttente);
@@ -555,22 +538,10 @@ function rendreTexteLisible(txt) {
   if (!txt) return '';
   let s = String(txt);
   Object.keys(mapIntervenantIdToNom).forEach(id => {
-    if (id && mapIntervenantIdToNom[id]) {
-      s = s.replace(new RegExp('\\b' + id + '\\b', 'g'), mapIntervenantIdToNom[id]);
-    }
+    if (id && mapIntervenantIdToNom[id]) s = s.replace(new RegExp('\\b' + id + '\\b', 'g'), mapIntervenantIdToNom[id]);
   });
   Object.keys(mapIdToPrenom).forEach(id => {
-    if (id && mapIdToPrenom[id]) {
-      s = s.replace(new RegExp('\\b' + id + '\\b', 'g'), mapIdToPrenom[id]);
-    }
-  });
-  s = s.replace(/(?:l[’']|l')?événement\s+(\w+)/gi, (m, evId) => {
-    const ev = donneesBrutes.find(x => String(x.id) === String(evId));
-    if (ev) {
-      const desc = ev.titre || ev.type || 'Événement';
-      return `l'événement « ${desc} »`;
-    }
-    return m;
+    if (id && mapIdToPrenom[id]) s = s.replace(new RegExp('\\b' + id + '\\b', 'g'), mapIdToPrenom[id]);
   });
   return s;
 }
@@ -578,41 +549,25 @@ function rendreTexteLisible(txt) {
 function ouvrirModalConflit(r) {
   const a = r.analysis || {};
   const title = document.getElementById('conflitTitle');
-  if (title) {
-    title.innerHTML = `<span class="material-symbols-outlined" style="color:#F59E0B; font-size:22px; vertical-align:sub; margin-right:6px;">warning</span> ${esc(a.title || 'Avertissement')}`;
-  }
+  if (title) title.innerHTML = `<span class="material-symbols-outlined" style="color:#F59E0B; font-size:22px; vertical-align:sub; margin-right:6px;">warning</span> ${esc(a.title || 'Avertissement')}`;
   
-  let html = `<div style="font-size:14px; margin-bottom:12px; color:#334155;">${esc(rendreTexteLisible(a.message || 'Des chevauchements existent mais peuvent être autorisés.'))}</div>`;
-  
+  let html = `<div style="font-size:14px; margin-bottom:12px; color:#334155;">${esc(rendreTexteLisible(a.message || 'Des chevauchements existent.'))}</div>`;
   if (a.conflits?.length) {
     html += '<ul style="margin:10px 0 0 0; padding-left:18px; font-size:13px; color:#475569; display:flex; flex-direction:column; gap:6px;">';
-    a.conflits.forEach(x => {
-      html += `<li><strong>${esc(x.libelle || x.type)} :</strong> ${esc(rendreTexteLisible(x.detail || ''))}</li>`;
-    });
+    a.conflits.forEach(x => { html += `<li><strong>${esc(x.libelle || x.type)} :</strong> ${esc(rendreTexteLisible(x.detail || ''))}</li>`; });
     html += '</ul>';
-  }
-  
-  if (a.plan?.length) {
-    html += '<div style="margin-top:14px; padding:10px; background:#F8FAFC; border-radius:8px; border:1px solid #E2E8F0; font-size:12px;"><strong>Réorganisation proposée :</strong><ul style="margin:6px 0 0 16px;">';
-    a.plan.forEach(x => {
-      html += `<li>${esc(rendreTexteLisible(x.actionTexte || 'Ajustement'))}</li>`;
-    });
-    html += '</ul></div>';
   }
   
   const msg = document.getElementById('conflitMessage');
   if (msg) msg.innerHTML = html;
   
-  const btn = document.getElementById('btnConflitAction');
-  if (btn) btn.innerText = 'Enregistrer quand même';
-  
   const modal = document.getElementById('modalConflit');
-  if (modal) modal.style.display = 'flex';
+  if (modal) modal.classList.add('active');
 }
 
 function fermerModalConflit() {
   const modal = document.getElementById('modalConflit');
-  if (modal) modal.style.display = 'none';
+  if (modal) modal.classList.remove('active');
 }
 
 async function confirmerConflitEtEnregistrer() {
@@ -637,8 +592,6 @@ async function executerEnregistrement(p) {
   }
 }
 
-// --- SUPPRESSION SYNCHRONISÉE AVEC LE HTML ---
-
 function supprimer() {
   const id = document.getElementById('formId')?.value || evenementEnEdition?.id;
   const idSerie = document.getElementById('formIdSerie')?.value || evenementEnEdition?.idSerie;
@@ -646,19 +599,19 @@ function supprimer() {
   
   const optionsSerie = document.getElementById('optionsSuppressionSerie');
   if (optionsSerie) {
-    optionsSerie.style.display = (idSerie && String(idSerie).trim() !== '') ? 'flex' : 'none';
+    optionsSerie.style.display = (idSerie && String(idSerie).trim() !== '') ? 'block' : 'none';
   }
   
   const radioUnique = document.querySelector('input[name="modeSuppr"][value="UNIQUE"]');
   if (radioUnique) radioUnique.checked = true;
   
   const modal = document.getElementById('modalSuppression');
-  if (modal) modal.style.display = 'flex';
+  if (modal) modal.classList.add('active');
 }
 
 function fermerModalSuppression() {
   const modal = document.getElementById('modalSuppression');
-  if (modal) modal.style.display = 'none';
+  if (modal) modal.classList.remove('active');
 }
 
 async function confirmerSuppressionEffective() {
@@ -685,19 +638,11 @@ async function confirmerSuppressionEffective() {
   }
 }
 
-// --- DEFILEMENT INFINI ---
-
 window.addEventListener('scroll', async () => {
   if (chargementScrollEnCours || !datePlageDebut || !datePlageFin) return;
-  
-  const scrollY = window.scrollY;
-  const windowHeight = window.innerHeight;
-  const documentHeight = document.documentElement.scrollHeight;
-
-  if (scrollY + windowHeight >= documentHeight - 150) {
+  if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 150) {
     await chargerPlusDeDonnees('futur');
-  } 
-  else if (scrollY <= 0) {
+  } else if (window.scrollY <= 0) {
     await chargerPlusDeDonnees('passe');
   }
 });
@@ -726,17 +671,8 @@ async function chargerPlusDeDonnees(direction) {
       
       if (aAjouter.length > 0) {
         donneesBrutes = [...donneesBrutes, ...aAjouter];
-        donneesBrutes.sort((a, b) => new Date(a.debut || a.debutDate) - new Date(b.debut || b.debutDate));
-
-        const scrollAvant = window.scrollY; 
-        const hauteurAvant = document.documentElement.scrollHeight;
-        
+        donneesBrutes.sort((a, b) => new Date(a.debut) - new Date(b.debut));
         afficherTimeline(); 
-        
-        if (direction === 'passe') {
-          const hauteurApres = document.documentElement.scrollHeight;
-          window.scrollTo(0, scrollAvant + (hauteurApres - hauteurAvant)); 
-        }
       }
     }
     
@@ -744,7 +680,7 @@ async function chargerPlusDeDonnees(direction) {
     else datePlageDebut = from;
 
   } catch(e) { 
-    console.error("Erreur de défilement :", e); 
+    console.error("Erreur défilement :", e); 
   } finally {
     if (loader) loader.style.display = 'none';
     setTimeout(() => { chargementScrollEnCours = false; }, 800);
