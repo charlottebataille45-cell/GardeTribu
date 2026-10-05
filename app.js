@@ -332,8 +332,18 @@ function ouvrirModalConflit(r){
 function fermerModalConflit(){document.getElementById('modalConflit').style.display='none';}
 async function confirmerConflitEtEnregistrer(){fermerModalConflit();payloadEnAttente.confirmerConflits=true;await demanderAnalyseEtSauvegarde(true);}
 async function executerEnregistrement(p){const b=document.getElementById('btnSubmit');b.disabled=true;b.innerText='Enregistrement…';try{const r=await apiPost('sauvegarderEvenement',p);if(!r.success)throw new Error(r.message||'Enregistrement impossible');fermerModal();localStorage.removeItem(cacheKey);await chargerDonnees(false)}catch(e){alert('Erreur d’enregistrement : '+e.message)}finally{b.disabled=false;b.innerText='Enregistrer'}}
-function supprimer(){const id=document.getElementById('formId').value,idSerie=document.getElementById('formIdSerie').value;if(!id)return;document.getElementById('supprModalMessage').innerHTML=idSerie?'Cet événement appartient à une série. Choisis ce que tu veux supprimer.':'Voulez-vous vraiment supprimer cet événement ?';document.getElementById('supprSerieOptions').style.display=idSerie?'block':'none';document.getElementById('modalSuppression').style.display='flex';}
+
+function supprimer(){
+  const id=document.getElementById('formId').value;
+  const idSerie=document.getElementById('formIdSerie').value;
+  if(!id)return;
+  document.getElementById('supprModalMessage').innerHTML = idSerie ? 'Cet événement appartient à une série. Choisis ce que tu veux supprimer.' : 'Voulez-vous vraiment supprimer cet événement ?';
+  document.getElementById('supprSerieOptions').style.display = idSerie ? 'block' : 'none';
+  document.getElementById('modalSuppression').style.display = 'flex';
+}
+
 function fermerModalSuppression(){document.getElementById('modalSuppression').style.display='none';}
+
 async function confirmerSuppressionEffective() {
   const id = document.getElementById('formId').value;
   const idSerie = document.getElementById('formIdSerie').value;
@@ -351,7 +361,7 @@ async function confirmerSuppressionEffective() {
     
     fermerModal();
     localStorage.removeItem(cacheKey);
-    await chargerDonnees(false); // Recharge les données initiales
+    await chargerDonnees(false); 
   } catch(e) {
     alert('Erreur de suppression : ' + e.message);
   }
@@ -365,11 +375,9 @@ window.addEventListener('scroll', async () => {
   const windowHeight = window.innerHeight;
   const documentHeight = document.documentElement.scrollHeight;
 
-  // Déclenche le chargement futur près du bas de page
   if (scrollY + windowHeight >= documentHeight - 150) {
     await chargerPlusDeDonnees('futur');
   } 
-  // Déclenche le chargement passé tout en haut de page
   else if (scrollY <= 0) {
     await chargerPlusDeDonnees('passe');
   }
@@ -397,26 +405,21 @@ async function chargerPlusDeDonnees(direction) {
       const aAjouter = nouvellesDonnees.filter(e => !idsExistants.has(String(e.id)));
       
       if (aAjouter.length > 0) {
-        // Fusion des données
         donneesBrutes = [...donneesBrutes, ...aAjouter];
-        
-        // CRITIQUE : Retrier l'ensemble chronologiquement (pour que la timeline reste dans le bon ordre)
         donneesBrutes.sort((a, b) => new Date(a.debut || a.debutDate) - new Date(b.debut || b.debutDate));
 
-        const scrollAvant = window.scrollY; // Sauvegarde la position exacte du scroll
+        const scrollAvant = window.scrollY; 
         const hauteurAvant = document.documentElement.scrollHeight;
         
-        afficherTimeline(); // Rendu de l'UI
+        afficherTimeline(); 
         
         if (direction === 'passe') {
-          // Maintien transparent de la position de lecture lors de l'ajout d'éléments en haut
           const hauteurApres = document.documentElement.scrollHeight;
           window.scrollTo(0, scrollAvant + (hauteurApres - hauteurAvant)); 
         }
       }
     }
     
-    // Met à jour les limites de la plage chargée en mémoire
     if (direction === 'futur') datePlageFin = to;
     else datePlageDebut = from;
 
@@ -424,7 +427,6 @@ async function chargerPlusDeDonnees(direction) {
     console.error("Erreur de défilement :", e); 
   } finally {
     document.getElementById('loader').style.display = 'none';
-    // Temporisation pour éviter les déclenchements de scroll multiples
     setTimeout(() => { chargementScrollEnCours = false; }, 800);
   }
 }
