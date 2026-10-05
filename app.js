@@ -576,21 +576,7 @@ async function confirmerConflitEtEnregistrer() {
   await demanderAnalyseEtSauvegarde(true);
 }
 
-async function executerEnregistrement(p) {
-  const b = document.getElementById('btnSubmit');
-  if (b) { b.disabled = true; b.innerText = 'Enregistrement…'; }
-  try {
-    const r = await apiPost('sauvegarderEvenement', p);
-    if (!r.success) throw new Error(r.message || 'Enregistrement impossible');
-    fermerModal();
-    localStorage.removeItem(cacheKey);
-    await chargerDonnees(false);
-  } catch(e) {
-    alert('Erreur d’enregistrement : ' + e.message);
-  } finally {
-    if (b) { b.disabled = false; b.innerText = 'Enregistrer'; }
-  }
-}
+
 
 function supprimer() {
   const id = document.getElementById('formId')?.value || evenementEnEdition?.id;
@@ -614,6 +600,49 @@ function fermerModalSuppression() {
   if (modal) modal.classList.remove('active');
 }
 
+// Enregistrement rapide : mise à jour du state local et réaffichage instantané
+async function executerEnregistrement(p) {
+  const b = document.getElementById('btnSubmit');
+  if (b) { b.disabled = true; b.innerText = 'Enregistrement…'; }
+  try {
+    const r = await apiPost('sauvegarderEvenement', p);
+    if (!r.success) throw new Error(r.message || 'Enregistrement impossible');
+    
+    fermerModal();
+    localStorage.removeItem(cacheKey);
+
+    // Si c'est une modification simple, on met à jour la mémoire locale immédiatement
+    if (p.id && p.modeModifSerie === 'UNIQUE') {
+      const idx = donneesBrutes.findIndex(x => String(x.id) === String(p.id));
+      if (idx !== -1) {
+        donneesBrutes[idx] = {
+          ...donneesBrutes[idx],
+          type: p.type,
+          responsable: p.responsable,
+          titre: p.titre,
+          debut: p.debut,
+          fin: p.fin,
+          lieu: p.lieu,
+          details: p.details,
+          enfantsIds: p.enfantsIds,
+          idIntervenant: p.idIntervenant,
+          idsIntervenants: p.idsIntervenants,
+          idPeriode: p.idPeriode
+        };
+      }
+      afficherTimeline();
+    } else {
+      // Pour les séries ou créations complexes, rechargement arrière-plan
+      await chargerDonnees(false);
+    }
+  } catch(e) {
+    alert('Erreur d’enregistrement : ' + e.message);
+  } finally {
+    if (b) { b.disabled = false; b.innerText = 'Enregistrer'; }
+  }
+}
+
+// Suppression rapide : retrait direct du DOM / mémoire
 async function confirmerSuppressionEffective() {
   const id = document.getElementById('formId')?.value || evenementEnEdition?.id;
   const idSerie = document.getElementById('formIdSerie')?.value || evenementEnEdition?.idSerie;
@@ -632,21 +661,17 @@ async function confirmerSuppressionEffective() {
     
     fermerModal();
     localStorage.removeItem(cacheKey);
-    await chargerDonnees(false); 
+
+    if (mode === 'UNIQUE') {
+      donneesBrutes = donneesBrutes.filter(x => String(x.id) !== String(id));
+      afficherTimeline();
+    } else {
+      await chargerDonnees(false);
+    }
   } catch(e) {
     alert('Erreur de suppression : ' + e.message);
   }
 }
-
-window.addEventListener('scroll', async () => {
-  if (chargementScrollEnCours || !datePlageDebut || !datePlageFin) return;
-  if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 150) {
-    await chargerPlusDeDonnees('futur');
-  } else if (window.scrollY <= 0) {
-    await chargerPlusDeDonnees('passe');
-  }
-});
-
 async function chargerPlusDeDonnees(direction) {
   chargementScrollEnCours = true;
   const loader = document.getElementById('loader');
