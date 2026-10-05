@@ -15,6 +15,10 @@ let filtreEnfant = localStorage.getItem('tribu_filtreEnfant') || 'Tous';
 let filtreIntervenant = localStorage.getItem('tribu_filtreIntervenant') || 'Tous';
 let filtrePeriode = localStorage.getItem('tribu_filtrePeriode') || 'Tous';
 
+let datePlageDebut = null;
+let datePlageFin = null;
+let chargementScrollEnCours = false;
+
 window.addEventListener('load', initialiser);
 
 function initialiser() {
@@ -137,9 +141,11 @@ async function chargerDonnees(instantane=false) {
   }
   if (!donneesBrutes.length) loader.style.display='block';
   try {
-    const now=new Date(); const from=new Date(now); from.setDate(from.getDate()-45); from.setHours(0,0,0,0);
-    const to=new Date(now); to.setMonth(to.getMonth()+12); to.setHours(23,59,59,999);
-    const r=await apiGet('getPlanningData',{from:formatForInput(from),to:formatForInput(to),includeRefs:'0'});
+    const now=new Date(); 
+    datePlageDebut=new Date(now); datePlageDebut.setDate(datePlageDebut.getDate()-15); datePlageDebut.setHours(0,0,0,0);
+    datePlageFin=new Date(now); datePlageFin.setDate(datePlageFin.getDate()+60); datePlageFin.setHours(23,59,59,999);
+    
+    const r=await apiGet('getPlanningData',{from:formatForInput(datePlageDebut),to:formatForInput(datePlageFin),includeRefs:'0'});
     donneesBrutes=normaliserReponsePlanning(r); localStorage.setItem(cacheKey,JSON.stringify(donneesBrutes));
     loader.style.display='none'; afficherTimeline();
   } catch(e) {
@@ -328,4 +334,97 @@ async function confirmerConflitEtEnregistrer(){fermerModalConflit();payloadEnAtt
 async function executerEnregistrement(p){const b=document.getElementById('btnSubmit');b.disabled=true;b.innerText='Enregistrement…';try{const r=await apiPost('sauvegarderEvenement',p);if(!r.success)throw new Error(r.message||'Enregistrement impossible');fermerModal();localStorage.removeItem(cacheKey);await chargerDonnees(false)}catch(e){alert('Erreur d’enregistrement : '+e.message)}finally{b.disabled=false;b.innerText='Enregistrer'}}
 function supprimer(){const id=document.getElementById('formId').value,idSerie=document.getElementById('formIdSerie').value;if(!id)return;document.getElementById('supprModalMessage').innerHTML=idSerie?'Cet événement appartient à une série. Choisis ce que tu veux supprimer.':'Voulez-vous vraiment supprimer cet événement ?';document.getElementById('supprSerieOptions').style.display=idSerie?'block':'none';document.getElementById('modalSuppression').style.display='flex';}
 function fermerModalSuppression(){document.getElementById('modalSuppression').style.display='none';}
-async function confirmerSuppressionEffective(){const id=document.getElementById('formId').value;const idSerie=document.getElementById('formIdSerie').value;let mode='UNIQUE';if(idSerie){mode=document.querySelector('input[name="optSupprSerie"]:checked')?.value||'UNIQUE'}fermerModalSuppression();try{const r=await apiPost('supprimerLigne',{id,modeSupprSerie:mode});if(!r.success)throw new Error(r.message||'Suppression impossible');fermerModal();localStorage.removeItem(cacheKey);await chargerDonnees(false)}catch(e){alert('Erreur de suppression : '+e.message)}}
+async function confirmerSuppressionEffective() {
+  const id = document.getElementById('formId').value;
+  const idSerie = document.getElementById('formIdSerie').value;
+  let mode = 'UNIQUE';
+  
+  if (idSerie) {
+    mode = document.querySelector('input[name="optSupprSerie"]:checked')?.value || 'UNIQUE';
+  }
+  
+  fermerModalSuppression();
+  
+  try {
+    const r = await apiPost('supprimerLigne', { id, modeSupprSerie: mode });
+    if (!r.success) throw new Error(r.message || 'Suppression impossible');
+    
+    fermerModal();
+    localStorage.removeItem(cacheKey);
+    await chargerDonnees(false); // Recharge les données initiales
+  } catch(e) {
+    alert('Erreur de suppression : ' + e.message);
+  }
+}
+
+// --- LOGIQUE DE DÉFILEMENT (INFINITE SCROLL) ---
+window.addEventListener('scroll', async () => {
+  if (chargementScrollEnCours || !datePlageDebut || !datePlageFin) return;
+  
+  const scrollY = window.scrollY;
+  const windowHeight = window.innerHeight;
+  const documentHeight = document.documentElement.scrollHeight;
+
+  // Déclenche le chargement futur près du bas de page
+  if (scrollY + windowHeight >= documentHeight - 150) {
+    await chargerPlusDeDonnees('futur');
+  } 
+  // Déclenche le chargement passé tout en haut de page
+  else if (scrollY <= 0) {
+    await chargerPlusDeDonnees('passe');
+  }
+});
+
+async function chargerPlusDeDonnees(direction) {
+  chargementScrollEnCours = true;
+  document.getElementById('loader').style.display = 'block';
+  
+  try {
+    let from, to;
+    if (direction === 'futur') {
+      from = new Date(datePlageFin); from.setDate(from.getDate() + 1);
+      to = new Date(from); to.setDate(to.getDate() + 30); to.setHours(23, 59, 59, 999);
+    } else {
+      to = new Date(datePlageDebut); to.setDate(to.getDate() - 1);
+      from = new Date(to); from.setDate(from.getDate() - 30); from.setHours(0, 0, 0, 0);
+    }
+
+    const r = await apiGet('getPlanningData', { from: formatForInput(from), to: formatForInput(to), includeRefs: '0' });
+    const nouvellesDonnees = normaliserReponsePlanning(r);
+
+    if (nouvellesDonnees.length > 0) {
+      const idsExistants = new Set(donneesBrutes.map(e => String(e.id)));
+      const aAjouter = nouvellesDonnees.filter(e => !idsExistants.has(String(e.id)));
+      
+      if (aAjouter.length > 0) {
+        // Fusion des données
+        donneesBrutes = [...donneesBrutes, ...aAjouter];
+        
+        // CRITIQUE : Retrier l'ensemble chronologiquement (pour que la timeline reste dans le bon ordre)
+        donneesBrutes.sort((a, b) => new Date(a.debut || a.debutDate) - new Date(b.debut || b.debutDate));
+
+        const scrollAvant = window.scrollY; // Sauvegarde la position exacte du scroll
+        const hauteurAvant = document.documentElement.scrollHeight;
+        
+        afficherTimeline(); // Rendu de l'UI
+        
+        if (direction === 'passe') {
+          // Maintien transparent de la position de lecture lors de l'ajout d'éléments en haut
+          const hauteurApres = document.documentElement.scrollHeight;
+          window.scrollTo(0, scrollAvant + (hauteurApres - hauteurAvant)); 
+        }
+      }
+    }
+    
+    // Met à jour les limites de la plage chargée en mémoire
+    if (direction === 'futur') datePlageFin = to;
+    else datePlageDebut = from;
+
+  } catch(e) { 
+    console.error("Erreur de défilement :", e); 
+  } finally {
+    document.getElementById('loader').style.display = 'none';
+    // Temporisation pour éviter les déclenchements de scroll multiples
+    setTimeout(() => { chargementScrollEnCours = false; }, 800);
+  }
+}
